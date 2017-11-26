@@ -53,12 +53,12 @@ OBJS       = main.o \
              menu_input_volume.o
 
 
-TARGET     = rpx.out
-TARGET_MAP = rpx.map
+TARGET     = board.out
+TARGET_MAP = board.map
 
 CFLAGS = -v -O2 -Wall -c
 
-all                            : rpx.out
+all                            : board.out
 main.o                         : main.c
 sys.o                          : $(PATH_SYS)/sys.c
 hal_cmn.o                      : $(PATH_HAL)/hal_cmn.c
@@ -101,7 +101,7 @@ menu_input_switch.o            : $(PATH_APP_MENU)/menu_input_switch.c
 menu_input_volume.o            : $(PATH_APP_MENU)/menu_input_volume.c
 
 
-rpx.out: $(OBJS)
+board.out: $(OBJS)
 	gcc $(OBJS) -o $(TARGET) -I/usr/local/include -L/usr/local/lib -lrt -lwiringPi -Wl,-Map=$(TARGET_MAP)
 
 %.o: $(PATH_APP_IF_LCD)/%.c
