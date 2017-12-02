@@ -91,6 +91,7 @@ Sys_Init(
     HalSensorPm_Init();
 
     // SENSOR (I2C)
+    HalSensorBME280_Init();
     HalSensorGP2Y0E03_Init();
     HalSensorLPS25H_Init();
     HalSensorTSL2561_Init();
@@ -127,6 +128,7 @@ Sys_Fini(
     HalSensorPm_Fini();
 
     // SENSOR (I2C)
+    HalSensorBME280_Fini();
     HalSensorGP2Y0E03_Fini();
     HalSensorLPS25H_Fini();
     HalSensorTSL2561_Fini();

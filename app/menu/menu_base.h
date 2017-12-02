@@ -45,7 +45,7 @@
   #define NULL    (0)
 #endif
 
-#define MAX_CMD_NUM     (15)     ///< @def : コマンドの最大数
+#define MAX_CMD_NUM     (16)     ///< @def : コマンドの最大数
 
 #define SYS_MAX_CMD_NAME_LEN            (16)            ///< @def : コマンド名、オプション名の最大文字列数
 #define SYS_MAX_CMD_OPT_NUM             (5)             ///< @def : コマンド名 + オプションの個数の最大値
@@ -85,6 +85,7 @@ EAppMenuMsg_t   MenuCmd_Relay( void );          // リレーを ON / OFF する
 EAppMenuMsg_t   MenuCmd_SA_Acc( void );         // SENSOR (ADC) 加速度センサ
 EAppMenuMsg_t   MenuCmd_SA_Gyro( void );        // SENSOR (ADC) ジャイロセンサ
 EAppMenuMsg_t   MenuCmd_SA_Pm( void );          // SENSOR (ADC) ポテンショメータ
+EAppMenuMsg_t   MenuCmd_SI_Bme280( void );      // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
 EAppMenuMsg_t   MenuCmd_SI_Gp2y0e03( void );    // SENSOR (I2C) GP2Y0E03 ( 距離 )
 EAppMenuMsg_t   MenuCmd_SI_Lps25h( void );      // SENSOR (I2C) LPS25H   ( 気圧・温度 )
 EAppMenuMsg_t   MenuCmd_SI_Tsl2561( void );     // SENSOR (I2C) TSL2561  ( 照度 )

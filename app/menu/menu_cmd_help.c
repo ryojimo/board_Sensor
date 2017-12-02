@@ -59,6 +59,7 @@ MenuCmd_Help(
     AppIfPc_Printf( "\t sa_acc     : sensor(adc) display acceleration data. (X,Y,Z)  \n\r" );
     AppIfPc_Printf( "\t sa_gyro    : sensor(adc) display gyro data. (G1,G2)          \n\r" );
     AppIfPc_Printf( "\t sa_pm      : sensor(adc) display Potentiometer data.         \n\r" );
+    AppIfPc_Printf( "\t si_bme280  : sensor(i2c) display BME280 sensor data.         \n\r" );
     AppIfPc_Printf( "\t si_gp2y0e03: sensor(i2c) display distance sensor data.       \n\r" );
     AppIfPc_Printf( "\t si_lps25h  : sensor(i2c) display LPS25H data.                \n\r" );
     AppIfPc_Printf( "\t si_tsl2561 : sensor(i2c) display TSL2561 data.               \n\r" );

@@ -35,6 +35,7 @@
 #define I2C_SLAVE_HDC1000       (0x40)
 #define I2C_SLAVE_ADT7410       (0x48)
 #define I2C_SLAVE_LPS25H        (0x5C)
+#define I2C_SLAVE_BME280        (0x76)
 
 #define MCP3208_MAX_VALE        (0x0F60)
 

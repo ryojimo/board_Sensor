@@ -62,6 +62,7 @@ const SAppMenuCmd_t g_menuCmdTable[ MAX_CMD_NUM ] =
     { "sa_acc"      , MenuCmd_SA_Acc },
     { "sa_gyro"     , MenuCmd_SA_Gyro },
     { "sa_pm"       , MenuCmd_SA_Pm },
+    { "si_bme280"   , MenuCmd_SI_Bme280 },
     { "si_gp2y0e03" , MenuCmd_SI_Gp2y0e03 },
     { "si_lps25h"   , MenuCmd_SI_Lps25h },
     { "si_tsl2561"  , MenuCmd_SI_Tsl2561 },

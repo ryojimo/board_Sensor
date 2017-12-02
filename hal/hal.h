@@ -101,6 +101,15 @@ typedef enum tagEHalSensorGyro
 } EHalSensorGyro_t;
 
 
+// SENSOR (I2C) BME280 センサの区別に使用する型
+typedef enum tagEHalSensorBME280
+{
+    EN_SEN_BME280_ATMOS = 0,        ///< @var : 気圧センサ
+    EN_SEN_BME280_HUMI,             ///< @var : 湿度センサ
+    EN_SEN_BME280_TEMP              ///< @var : 温度センサ
+} EHalSensorBME280_t;
+
+
 // SENSOR (I2C) LPS25H センサの区別に使用する型
 typedef enum tagEHalSensorLPS25H
 {
@@ -188,6 +197,11 @@ SHalSensor_t*   HalSensorGyro_Get( EHalSensorGyro_t which );
 EHalBool_t      HalSensorPm_Init( void );
 void            HalSensorPm_Fini( void );
 SHalSensor_t*   HalSensorPm_Get( void );
+
+// SENSOR (I2C) BME280 API
+EHalBool_t      HalSensorBME280_Init( void );
+void            HalSensorBME280_Fini( void );
+SHalSensor_t*   HalSensorBME280_Get( EHalSensorBME280_t which );
 
 // SENSOR (I2C) GP2Y0E03 API
 EHalBool_t      HalSensorGP2Y0E03_Init( void );

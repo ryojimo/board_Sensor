@@ -6,6 +6,7 @@
 #--------------------------------------
 PATH_SYS         = ./sys
 PATH_HAL         = ./hal
+PATH_HAL_BME280  = ./hal/bme280
 PATH_HAL_TSL2561 = ./hal/tsl2561
 PATH_APP_IF_LCD  = ./app/if_lcd
 PATH_APP_IF_PC   = ./app/if_pc
@@ -26,10 +27,12 @@ OBJS       = main.o \
              hal_drv_sensor_adc_acc.o \
              hal_drv_sensor_adc_gyro.o \
              hal_drv_sensor_adc_pm.o \
+             hal_drv_sensor_i2c_bme280.o \
              hal_drv_sensor_i2c_gp2y0e03.o \
              hal_drv_sensor_i2c_lps25h.o \
              hal_drv_sensor_i2c_tsl2561.o \
              hal_drv_time.o \
+             bme280.o \
              TSL2561.o \
              if_lcd.o \
              if_pc.o \
@@ -44,6 +47,7 @@ OBJS       = main.o \
              menu_cmd_sensor_adc_acc.o \
              menu_cmd_sensor_adc_gyro.o \
              menu_cmd_sensor_adc_pm.o \
+             menu_cmd_sensor_i2c_bme280.o \
              menu_cmd_sensor_i2c_gp2y0e03.o \
              menu_cmd_sensor_i2c_lps25h.o \
              menu_cmd_sensor_i2c_tsl2561.o \
@@ -74,10 +78,12 @@ hal_drv_relay.o                : $(PATH_HAL)/hal_drv_relay.c
 hal_drv_sensor_adc_acc.o       : $(PATH_HAL)/hal_drv_sensor_adc_acc.c
 hal_drv_sensor_adc_gyro.o      : $(PATH_HAL)/hal_drv_sensor_adc_gyro.c
 hal_drv_sensor_adc_pm.o        : $(PATH_HAL)/hal_drv_sensor_adc_pm.c
+hal_drv_sensor_i2c_bme280.o    : $(PATH_HAL)/hal_drv_sensor_i2c_bme280.c
 hal_drv_sensor_i2c_gp2y0e03.o  : $(PATH_HAL)/hal_drv_sensor_i2c_gp2y0e03.c
 hal_drv_sensor_i2c_lps25h.o    : $(PATH_HAL)/hal_drv_sensor_i2c_lps25h.c
 hal_drv_sensor_i2c_tsl2561.o   : $(PATH_HAL)/hal_drv_sensor_i2c_tsl2561.c
 hal_drv_time.o                 : $(PATH_HAL)/hal_drv_time.c
+bme280.o                       : $(PATH_HAL_BME280)/bme280.c
 TSL2561.o                      : $(PATH_HAL_TSL2561)/TSL2561.c
 if_lcd.o                       : $(PATH_APP_IF_LCD)/if_lcd.c
 if_pc.o                        : $(PATH_APP_IF_PC)/if_pc.c
@@ -92,6 +98,7 @@ menu_cmd_relay.o               : $(PATH_APP_MENU)/menu_cmd_relay.c
 menu_cmd_sensor_adc_acc.o      : $(PATH_APP_MENU)/menu_cmd_sensor_adc_acc.c
 menu_cmd_sensor_adc_gyro.o     : $(PATH_APP_MENU)/menu_cmd_sensor_adc_gyro.c
 menu_cmd_sensor_adc_pm.o       : $(PATH_APP_MENU)/menu_cmd_sensor_adc_pm.c
+menu_cmd_sensor_i2c_bme280.o   : $(PATH_APP_MENU)/menu_cmd_sensor_i2c_bme280.c
 menu_cmd_sensor_i2c_gp2y0e03.o : $(PATH_APP_MENU)/menu_cmd_sensor_i2c_gp2y0e03.c
 menu_cmd_sensor_i2c_lps25h.o   : $(PATH_APP_MENU)/menu_cmd_sensor_i2c_lps25h.c
 menu_cmd_sensor_i2c_tsl2561.o  : $(PATH_APP_MENU)/menu_cmd_sensor_i2c_tsl2561.c
@@ -114,6 +121,9 @@ board.out: $(OBJS)
 	gcc $(CFLAGS) $< -o $@
 
 %.o: $(PATH_HAL)/%.c
+	gcc $(CFLAGS) $< -o $@
+
+%.o: $(PATH_HAL_BME280)/%.c
 	gcc $(CFLAGS) $< -o $@
 
 %.o: $(PATH_HAL_TSL2561)/%.c

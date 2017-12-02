@@ -61,11 +61,14 @@
 static void         Run_Menu( unsigned char* str );
 static void         Run_Help( void );
 static void         Run_Acc( char* dir );
+static void         Run_BME280_Atmosphere( void );
 static void         Run_LPS25H_Atmosphere( void );
 static void         Run_GP2Y0E03_Distance( void );
+static void         Run_BME280_Humidity( void );
 static void         Run_Gyro( char* dir );
 static void         Run_TSL2561_Illuminance( void );
 static void         Run_Relay( char* str );
+static void         Run_BME280_Temperature( void );
 static void         Run_LPS25H_Temperature( void );
 
 static void         Run_AllSensors( void );
@@ -129,6 +132,10 @@ Run_Help(
     printf( "                  on : ON  relay switch.                               \n\r" );
     printf( "                  off: OFF relay switch.                               \n\r" );
     printf( " temp          : Get the value of a LPS25H  temperaturre sensor.       \n\r" );
+    printf( "                                                                       \n\r" );
+    printf( " b_atmos       : Get the value of a BME280 atmosphere sensor.          \n\r" );
+    printf( " b_humi        : Get the value of a BME280 humidity sensor.            \n\r" );
+    printf( " b_temp        : Get the value of a BME280 temperaturre sensor.        \n\r" );
     printf( "\n\r" );
 
     return;
@@ -191,6 +198,33 @@ Run_LPS25H_Atmosphere(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f hPa", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     気圧センサ ( BME280 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_BME280_Atmosphere(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
 
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "%5.2f hPa", data->cur );
@@ -265,6 +299,33 @@ Run_Gyro(
 
 
 /**************************************************************************//*!
+ * @brief     温度センサ ( BME280 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_BME280_Humidity(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f %%", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     照度センサ ( TSL2561 ) を実行する
  * @attention なし。
  * @note      なし。
@@ -333,6 +394,33 @@ Run_LPS25H_Temperature(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f 'C", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     温度センサ ( BME280 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_BME280_Temperature(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
 
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "%5.2f 'C", data->cur );
@@ -482,6 +570,15 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "temp", strlen("temp") ) )
     {
         Run_LPS25H_Temperature();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "b_atmos", strlen("b_atmos") ) )
+    {
+        Run_BME280_Atmosphere();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "b_humi", strlen("b_humi") ) )
+    {
+        Run_BME280_Humidity();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "b_temp", strlen("b_temp") ) )
+    {
+        Run_BME280_Temperature();
     } else if( argc > 1 && 0 == strncmp( argv[1], "sensor", strlen("sensor") ) )
     {
         Run_AllSensors();
