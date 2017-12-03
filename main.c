@@ -120,7 +120,6 @@ Run_Help(
     printf( "                   x: X direction.                                     \n\r" );
     printf( "                   y: Y direction.                                     \n\r" );
     printf( "                   z: Z direction.                                     \n\r" );
-    printf( " atmos         : Get the value of a LPS25H atmosphere sensor.          \n\r" );
     printf( " dist          : Get the value of a GP2Y0E03 distance sensor.          \n\r" );
     printf( " gyro [dir]    : Get the value of a Gyro sensor.                       \n\r" );
     printf( "                   g1: G1 direction.                                   \n\r" );
@@ -131,11 +130,13 @@ Run_Help(
     printf( " relay [o/f]   : Control the Relay circuit.                            \n\r" );
     printf( "                  on : ON  relay switch.                               \n\r" );
     printf( "                  off: OFF relay switch.                               \n\r" );
-    printf( " temp          : Get the value of a LPS25H  temperaturre sensor.       \n\r" );
     printf( "                                                                       \n\r" );
     printf( " b_atmos       : Get the value of a BME280 atmosphere sensor.          \n\r" );
     printf( " b_humi        : Get the value of a BME280 humidity sensor.            \n\r" );
     printf( " b_temp        : Get the value of a BME280 temperaturre sensor.        \n\r" );
+    printf( "                                                                       \n\r" );
+    printf( " l_atmos       : Get the value of a LPS25H atmosphere sensor.          \n\r" );
+    printf( " l_temp        : Get the value of a LPS25H temperaturre sensor.        \n\r" );
     printf( "\n\r" );
 
     return;
@@ -182,87 +183,6 @@ Run_Acc(
 
 
 /**************************************************************************//*!
- * @brief     気圧センサ ( LPS25H ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_LPS25H_Atmosphere(
-    void  ///< [in] ナシ
-){
-    SHalSensor_t*   data;
-
-    DBG_PRINT_TRACE( "\n\r" );
-
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f hPa", data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     気圧センサ ( BME280 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_BME280_Atmosphere(
-    void  ///< [in] ナシ
-){
-    SHalSensor_t*   data;
-
-    DBG_PRINT_TRACE( "\n\r" );
-
-    data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f hPa", data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     距離センサ ( GP2Y0E03 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_GP2Y0E03_Distance(
-    void  ///< [in] ナシ
-){
-    SHalSensor_t*   data;
-
-    DBG_PRINT_TRACE( "\n\r" );
-
-    data = HalSensorGP2Y0E03_Get();
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f cm", data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     ジャイロセンサを実行する
  * @attention なし。
  * @note      なし。
@@ -299,7 +219,7 @@ Run_Gyro(
 
 
 /**************************************************************************//*!
- * @brief     温度センサ ( BME280 ) を実行する
+ * @brief     距離センサ ( GP2Y0E03 ) を実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -307,17 +227,17 @@ Run_Gyro(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_BME280_Humidity(
+Run_GP2Y0E03_Distance(
     void  ///< [in] ナシ
 ){
     SHalSensor_t*   data;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+    data = HalSensorGP2Y0E03_Get();
 
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f %%", data->cur );
+    AppIfLcd_Printf( "%5.2f cm", data->cur );
 
     // node.js サーバへデータを渡すための printf()
     printf( "%5.2f", data->cur );
@@ -378,7 +298,7 @@ Run_Relay(
 
 
 /**************************************************************************//*!
- * @brief     温度センサ ( LPS25H ) を実行する
+ * @brief     気圧センサ ( BME280 ) を実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -386,17 +306,44 @@ Run_Relay(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_LPS25H_Temperature(
+Run_BME280_Atmosphere(
     void  ///< [in] ナシ
 ){
     SHalSensor_t*   data;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+    data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
 
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f 'C", data->cur );
+    AppIfLcd_Printf( "%5.2f hPa", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     温度センサ ( BME280 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_BME280_Humidity(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f %%", data->cur );
 
     // node.js サーバへデータを渡すための printf()
     printf( "%5.2f", data->cur );
@@ -432,6 +379,60 @@ Run_BME280_Temperature(
 
 
 /**************************************************************************//*!
+ * @brief     気圧センサ ( LPS25H ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_LPS25H_Atmosphere(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f hPa", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     温度センサ ( LPS25H ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_LPS25H_Temperature(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f 'C", data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     すべてのセンサを実行する
  * @attention なし。
  * @note      なし。
@@ -446,45 +447,54 @@ Run_AllSensors(
     SHalSensor_t*   dataAccX;
     SHalSensor_t*   dataAccY;
     SHalSensor_t*   dataAccZ;
-    SHalSensor_t*   dataAtmos;
+    SHalSensor_t*   dataGyroG1;
+    SHalSensor_t*   dataGyroG2;
+
+    SHalSensor_t*   dataDist;
+    SHalSensor_t*   dataLux;
+
     SHalSensor_t*   dataBAtmos;
     SHalSensor_t*   dataBHumi;
     SHalSensor_t*   dataBTemp;
-    SHalSensor_t*   dataDist;
-    SHalSensor_t*   dataGyroG1;
-    SHalSensor_t*   dataGyroG2;
-    SHalSensor_t*   dataLux;
-    SHalSensor_t*   dataTemp;
+
+    SHalSensor_t*   dataLAtmos;
+    SHalSensor_t*   dataLTemp;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     dataAccX   = HalSensorAcc_Get( EN_SEN_ACC_X );
     dataAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
     dataAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
-    dataAtmos  = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    dataGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+    dataGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+
+    dataDist   = HalSensorGP2Y0E03_Get();
+    dataLux    = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+
     dataBAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
     dataBHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
     dataBTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
-    dataDist   = HalSensorGP2Y0E03_Get();
-    dataGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-    dataLux    = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
-    dataTemp   = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+    dataLAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    dataLTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
 
     // node.js サーバへデータを渡すための printf()
     printf( "{ " );
     printf( "\"acc_x\"  :%d,    ", (int)dataAccX->cur );
     printf( "\"acc_y\"  :%d,    ", (int)dataAccY->cur );
     printf( "\"acc_z\"  :%d,    ", (int)dataAccZ->cur );
-    printf( "\"atmos\"  :%5.2f, ", dataAtmos->cur );
+    printf( "\"gyro_g1\":%d,    ", (int)dataGyroG1->cur );
+    printf( "\"gyro_g2\":%d,    ", (int)dataGyroG2->cur );
+
+    printf( "\"dist\"   :%5.2f, ", dataDist->cur );
+    printf( "\"lux\"    :%5.2f, ", dataLux->cur );
+
     printf( "\"b_atmos\":%5.2f, ", dataBAtmos->cur );
     printf( "\"b_humi\" :%5.2f, ", dataBHumi->cur );
     printf( "\"b_temp\" :%5.2f, ", dataBTemp->cur );
-    printf( "\"dist\"   :%5.2f, ", dataDist->cur );
-    printf( "\"gyro_g1\":%d,    ", (int)dataGyroG1->cur );
-    printf( "\"gyro_g2\":%d,    ", (int)dataGyroG2->cur );
-    printf( "\"lux\"    :%5.2f, ", dataLux->cur );
-    printf( "\"temp\"   :%5.2f, ", dataTemp->cur );
+
+    printf( "\"l_atmos\":%5.2f, ", dataLAtmos->cur );
+    printf( "\"l_temp\" :%5.2f, ", dataLTemp->cur );
     printf( "}" );
     return;
 }
@@ -552,15 +562,12 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "acc", strlen("acc") ) )
     {
         Run_Acc( argv[2] );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "atmos", strlen("atmos") ) )
-    {
-        Run_LPS25H_Atmosphere();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "dist", strlen("dist") ) )
-    {
-        Run_GP2Y0E03_Distance();
     } else if( argc > 1 && 0 == strncmp( argv[1], "gyro", strlen("gyro") ) )
     {
         Run_Gyro( argv[2] );
+    } else if( argc > 1 && 0 == strncmp( argv[1], "dist", strlen("dist") ) )
+    {
+        Run_GP2Y0E03_Distance();
     } else if( argc > 1 && 0 == strncmp( argv[1], "led", strlen("led") ) )
     {
         HalLed_Set( 0x0F );
@@ -576,9 +583,6 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "relay", strlen("relay") ) )
     {
         Run_Relay( argv[2] );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "temp", strlen("temp") ) )
-    {
-        Run_LPS25H_Temperature();
     } else if( argc > 1 && 0 == strncmp( argv[1], "b_atmos", strlen("b_atmos") ) )
     {
         Run_BME280_Atmosphere();
@@ -588,6 +592,12 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "b_temp", strlen("b_temp") ) )
     {
         Run_BME280_Temperature();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "l_atmos", strlen("l_atmos") ) )
+    {
+        Run_LPS25H_Atmosphere();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "l_temp", strlen("l_temp") ) )
+    {
+        Run_LPS25H_Temperature();
     } else if( argc > 1 && 0 == strncmp( argv[1], "sensor", strlen("sensor") ) )
     {
         Run_AllSensors();
