@@ -447,6 +447,9 @@ Run_AllSensors(
     SHalSensor_t*   dataAccY;
     SHalSensor_t*   dataAccZ;
     SHalSensor_t*   dataAtmos;
+    SHalSensor_t*   dataBAtmos;
+    SHalSensor_t*   dataBHumi;
+    SHalSensor_t*   dataBTemp;
     SHalSensor_t*   dataDist;
     SHalSensor_t*   dataGyroG1;
     SHalSensor_t*   dataGyroG2;
@@ -459,6 +462,9 @@ Run_AllSensors(
     dataAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
     dataAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
     dataAtmos  = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    dataBAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
+    dataBHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+    dataBTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
     dataDist   = HalSensorGP2Y0E03_Get();
     dataGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
     dataGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
@@ -471,6 +477,9 @@ Run_AllSensors(
     printf( "\"acc_y\"  :%d,    ", (int)dataAccY->cur );
     printf( "\"acc_z\"  :%d,    ", (int)dataAccZ->cur );
     printf( "\"atmos\"  :%5.2f, ", dataAtmos->cur );
+    printf( "\"b_atmos\":%5.2f, ", dataBAtmos->cur );
+    printf( "\"b_humi\" :%5.2f, ", dataBHumi->cur );
+    printf( "\"b_temp\" :%5.2f, ", dataBTemp->cur );
     printf( "\"dist\"   :%5.2f, ", dataDist->cur );
     printf( "\"gyro_g1\":%d,    ", (int)dataGyroG1->cur );
     printf( "\"gyro_g2\":%d,    ", (int)dataGyroG2->cur );
