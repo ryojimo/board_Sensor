@@ -58,22 +58,80 @@
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void         Run_Menu( unsigned char* str );
 static void         Run_Help( void );
-static void         Run_Acc( char* dir );
-static void         Run_BME280_Atmosphere( void );
-static void         Run_LPS25H_Atmosphere( void );
-static void         Run_GP2Y0E03_Distance( void );
-static void         Run_BME280_Humidity( void );
-static void         Run_Gyro( char* dir );
-static void         Run_TSL2561_Illuminance( void );
+static void         Run_Menu( unsigned char* str );
+static void         Run_Sensors( void );
+
+static void         Run_Led( char* str );
+static void         Run_I2cLcd( char* str );
+static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
-static void         Run_BME280_Temperature( void );
-static void         Run_LPS25H_Temperature( void );
 
-static void         Run_AllSensors( void );
+static void         Run_Sa_Acc( char* str );
+static void         Run_Sa_Gyro( char* str );
+static void         Run_Sa_Pm( void );
+
+static void         Run_Si_BME280( char* str );
+static void         Run_Si_GP2Y0E03( void );
+static void         Run_Si_LPS25H( char* str );
+static void         Run_Si_TSL2561( char* str );
+
+static void         Run_Time( void );
 
 
+
+
+/**************************************************************************//*!
+ * @brief     HELP を表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Help(
+    void
+){
+    DBG_PRINT_TRACE( "\n\r" );
+
+    printf( " COMMAND             : DESCRIPTION                                    \n\r" );
+    printf( "======================================================================\n\r" );
+    printf( " help                : display the command option list.               \n\r" );
+    printf( " menu                : Go to menu mode.                               \n\r" );
+    printf( " sensors             : Get the value of all sensors.                  \n\r" );
+    printf( "                                                                      \n\r" );
+    printf( " led <value>         : Control the LED.                               \n\r" );
+    printf( " i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( " motorsv <value>     : Control the SAVO motor.                        \n\r" );
+    printf( " relay [OPTION]      : Control the Relay circuit.                     \n\r" );
+    printf( "                 on  : ON  relay switch.                              \n\r" );
+    printf( "                 off : OFF relay switch.                              \n\r" );
+    printf( " sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
+    printf( "                   x : X direction.                                   \n\r" );
+    printf( "                   y : Y direction.                                   \n\r" );
+    printf( "                   z : Z direction.                                   \n\r" );
+    printf( " sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
+    printf( "                  g1 : G1 direction.                                  \n\r" );
+    printf( "                  g2 : G2 direction.                                  \n\r" );
+    printf( " sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
+    printf( " si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
+    printf( "               atmos : atmosphere                                     \n\r" );
+    printf( "               humi  : humidity                                       \n\r" );
+    printf( "               temp  : temperature                                    \n\r" );
+    printf( " si_gp2y0e03         : Get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
+    printf( " si_lps25h [OPTION]  : Get the value of a sensor(I2C), LPS25H.        \n\r" );
+    printf( "               atmos : atmosphere                                     \n\r" );
+    printf( "               temp  : temperature                                    \n\r" );
+    printf( " si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
+    printf( "           broadband : ?                                              \n\r" );
+    printf( "           ir        : ?                                              \n\r" );
+    printf( "           lux       : lux                                            \n\r" );
+    printf( " time                : Get the time.                                  \n\r" );
+    printf( "\n\r" );
+
+    return;
+}
 
 
 /**************************************************************************//*!
@@ -97,7 +155,7 @@ Run_Menu(
 
 
 /**************************************************************************//*!
- * @brief     HELP を表示する。
+ * @brief     すべてのセンサを実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -105,148 +163,73 @@ Run_Menu(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_Help(
-    void
-){
-    DBG_PRINT_TRACE( "MenuCmd_Help() \n\r" );
-
-    printf( " OPTION        : DESCRIPTION                                           \n\r" );
-    printf( "=======================================================================\n\r" );
-    printf( " help          : display the command option list.                      \n\r" );
-    printf( " menu          : Go to menu mode.                                      \n\r" );
-    printf( " sensor        : Get the value of all sensors.                         \n\r" );
-    printf( "                                                                       \n\r" );
-    printf( " acc [dir]     : Get the value of a Acc sensor.                        \n\r" );
-    printf( "                   x: X direction.                                     \n\r" );
-    printf( "                   y: Y direction.                                     \n\r" );
-    printf( "                   z: Z direction.                                     \n\r" );
-    printf( " dist          : Get the value of a GP2Y0E03 distance sensor.          \n\r" );
-    printf( " gyro [dir]    : Get the value of a Gyro sensor.                       \n\r" );
-    printf( "                   g1: G1 direction.                                   \n\r" );
-    printf( "                   g2: G2 direction.                                   \n\r" );
-    printf( " led           : Control the LED.                                      \n\r" );
-    printf( " lux           : Get the value of a TSL2561 luminance sensor.          \n\r" );
-    printf( " motorsv       : Control the SAVO motor.                               \n\r" );
-    printf( " relay [o/f]   : Control the Relay circuit.                            \n\r" );
-    printf( "                  on : ON  relay switch.                               \n\r" );
-    printf( "                  off: OFF relay switch.                               \n\r" );
-    printf( "                                                                       \n\r" );
-    printf( " b_atmos       : Get the value of a BME280 atmosphere sensor.          \n\r" );
-    printf( " b_humi        : Get the value of a BME280 humidity sensor.            \n\r" );
-    printf( " b_temp        : Get the value of a BME280 temperaturre sensor.        \n\r" );
-    printf( "                                                                       \n\r" );
-    printf( " l_atmos       : Get the value of a LPS25H atmosphere sensor.          \n\r" );
-    printf( " l_temp        : Get the value of a LPS25H temperaturre sensor.        \n\r" );
-    printf( "\n\r" );
-
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     加速度センサを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Acc(
-    char*  str     ///< [in] 文字列
-){
-    EHalSensorAcc_t which = EN_SEN_ACC_X;
-    SHalSensor_t*   data;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "x", strlen("x") ) )
-    {
-        which = EN_SEN_ACC_X;
-    } else if( 0 == strncmp( str, "y", strlen("y") ) )
-    {
-        which = EN_SEN_ACC_Y;
-    } else if( 0 == strncmp( str, "z", strlen("z") ) )
-    {
-        which = EN_SEN_ACC_Z;
-    }
-
-    data = HalSensorAcc_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "0x%4X", (int)data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%d", (int)data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     ジャイロセンサを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Gyro(
-    char*  str     ///< [in] 文字列
-){
-    EHalSensorGyro_t    which = EN_SEN_ACC_X;
-    SHalSensor_t*       data;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "g1", strlen("g1") ) )
-    {
-        which = EN_SEN_GYRO_G1;
-    } else if( 0 == strncmp( str, "g2", strlen("g2") ) )
-    {
-        which = EN_SEN_GYRO_G2;
-    }
-
-    data = HalSensorGyro_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "0x%4X", (int)data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%d", (int)data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     距離センサ ( GP2Y0E03 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_GP2Y0E03_Distance(
+Run_Sensors(
     void  ///< [in] ナシ
 ){
-    SHalSensor_t*   data;
+    SHalSensor_t*   dataSaAccX;
+    SHalSensor_t*   dataSaAccY;
+    SHalSensor_t*   dataSaAccZ;
+
+    SHalSensor_t*   dataSaGyroG1;
+    SHalSensor_t*   dataSaGyroG2;
+
+    SHalSensor_t*   dataSiBme280Atmos;
+    SHalSensor_t*   dataSiBme280Humi;
+    SHalSensor_t*   dataSiBme280Temp;
+
+    SHalSensor_t*   dataSiGp2y0e03;
+
+    SHalSensor_t*   dataSiLps25hAtmos;
+    SHalSensor_t*   dataSiLps25hTemp;
+
+    SHalSensor_t*   dataSiTsl2561;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalSensorGP2Y0E03_Get();
+    dataSaAccX   = HalSensorAcc_Get( EN_SEN_ACC_X );
+    dataSaAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
+    dataSaAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
 
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f cm", data->cur );
+    dataSaGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+    dataSaGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+
+    dataSiBme280Atmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
+    dataSiBme280Humi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+    dataSiBme280Temp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+
+    dataSiGp2y0e03    = HalSensorGP2Y0E03_Get();
+
+    dataSiLps25hAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    dataSiLps25hTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+    dataSiTsl2561     = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
 
     // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
+    printf( "{ " );
+    printf( "\"sa_acc_x\"       :%d,    ", (int)dataSaAccX->cur );
+    printf( "\"sa_acc_y\"       :%d,    ", (int)dataSaAccY->cur );
+    printf( "\"sa_acc_z\"       :%d,    ", (int)dataSaAccZ->cur );
+
+    printf( "\"sa_gyro_g1\"     :%d,    ", (int)dataSaGyroG1->cur );
+    printf( "\"sa_gyro_g2\"     :%d,    ", (int)dataSaGyroG2->cur );
+
+    printf( "\"si_bme280_atmos\":%5.2f, ", dataSiBme280Atmos->cur );
+    printf( "\"si_bme280_humi\" :%5.2f, ", dataSiBme280Humi->cur );
+    printf( "\"si_bme280_temp\" :%5.2f, ", dataSiBme280Temp->cur );
+
+    printf( "\"si_gp2y0e03\"    :%5.2f, ", dataSiGp2y0e03->cur );
+
+    printf( "\"si_lps25h_atmos\":%5.2f, ", dataSiLps25hAtmos->cur );
+    printf( "\"si_lps25h_temp\" :%5.2f, ", dataSiLps25hTemp->cur );
+
+    printf( "\"si_tsl2561_lux\" :%5.2f, ", dataSiTsl2561->cur );
+    printf( "}" );
     return;
 }
 
 
 /**************************************************************************//*!
- * @brief     照度センサ ( TSL2561 ) を実行する
+ * @brief     LED を実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -254,20 +237,63 @@ Run_GP2Y0E03_Distance(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_TSL2561_Illuminance(
-    void  ///< [in] ナシ
+Run_Led(
+    char*           str     ///< [in] 文字列
 ){
-    SHalSensor_t*   data;
+    unsigned int    num;
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    DBG_PRINT_TRACE( "\n\r" );
+    sscanf( str, "%X", &num );
+    HalLed_Set( num );
 
-    data = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+    return;
+}
 
+
+/**************************************************************************//*!
+ * @brief     I2C LCD を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_I2cLcd(
+    char*  str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( str );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f lux", data->cur );
+    AppIfLcd_Printf( "                " );
 
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     SERVO MOTOR を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_MotorSV(
+    char*   str     ///< [in] 文字列
+){
+    int     data = 0;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    data = atoi( (const char*)str );
+    DBG_PRINT_TRACE( "data = %d \n", data );
+    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
+//  usleep( 1000 * 1000 );  // 2s 待つ
+
     return;
 }
 
@@ -292,13 +318,16 @@ Run_Relay(
     } else if( 0 == strncmp( str, "off", strlen("off") ) )
     {
         HalRelay_Set( EN_LOW );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
     }
     return;
 }
 
 
 /**************************************************************************//*!
- * @brief     気圧センサ ( BME280 ) を実行する
+ * @brief     加速度センサを実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -306,17 +335,181 @@ Run_Relay(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_BME280_Atmosphere(
+Run_Sa_Acc(
+    char*           str     ///< [in] 文字列
+){
+    EHalSensorAcc_t which = EN_SEN_ACC_X;
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "x", strlen("x") ) )
+    {
+        which = EN_SEN_ACC_X;
+    } else if( 0 == strncmp( str, "y", strlen("y") ) )
+    {
+        which = EN_SEN_ACC_Y;
+    } else if( 0 == strncmp( str, "z", strlen("z") ) )
+    {
+        which = EN_SEN_ACC_Z;
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+    data = HalSensorAcc_Get( which );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%d", (int)data->cur );
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     ジャイロセンサを実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Sa_Gyro(
+    char*               str     ///< [in] 文字列
+){
+    EHalSensorGyro_t    which = EN_SEN_GYRO_G1;
+    SHalSensor_t*       data;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "g1", strlen("g1") ) )
+    {
+        which = EN_SEN_GYRO_G1;
+    } else if( 0 == strncmp( str, "g2", strlen("g2") ) )
+    {
+        which = EN_SEN_GYRO_G2;
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+    data = HalSensorGyro_Get( which );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "0x%4X", (int)data->cur );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%d", (int)data->cur );
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     ポテンショメーターを実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Sa_Pm(
     void  ///< [in] ナシ
 ){
     SHalSensor_t*   data;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
+    data = HalSensorPm_Get();
 
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f hPa", data->cur );
+    AppIfLcd_Printf( "%3d %%", data->cur_rate );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%3d", data->cur_rate );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     BME280 センサを実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Si_BME280(
+    char*               str     ///< [in] 文字列
+){
+    EHalSensorBME280_t  which = EN_SEN_BME280_ATMOS;
+    char                unit[4];
+    SHalSensor_t*       data;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    memset( unit, '\0', sizeof(unit) );
+
+    if( 0 == strncmp( str, "atmos", strlen("atmos") ) )
+    {
+        which = EN_SEN_BME280_ATMOS;
+        strncpy( unit, "hPa", strlen("hPa") );
+    } else if( 0 == strncmp( str, "humi", strlen("humi") ) )
+    {
+        which = EN_SEN_BME280_HUMI;
+        strncpy( unit, "%", strlen("%") );
+    } else if( 0 == strncmp( str, "temp", strlen("temp") ) )
+    {
+        which = EN_SEN_BME280_TEMP;
+        strncpy( unit, "'C", strlen("'C") );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+    data = HalSensorBME280_Get( which );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
+
+    // node.js サーバへデータを渡すための printf()
+    printf( "%5.2f", data->cur );
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     距離センサ ( GP2Y0E03 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Si_GP2Y0E03(
+    void  ///< [in] ナシ
+){
+    SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    data = HalSensorGP2Y0E03_Get();
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f cm", data->cur );
 
     // node.js サーバへデータを渡すための printf()
     printf( "%5.2f", data->cur );
@@ -325,7 +518,7 @@ Run_BME280_Atmosphere(
 
 
 /**************************************************************************//*!
- * @brief     温度センサ ( BME280 ) を実行する
+ * @brief     LPS25H センサを実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -333,26 +526,45 @@ Run_BME280_Atmosphere(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_BME280_Humidity(
-    void  ///< [in] ナシ
+Run_Si_LPS25H(
+    char*               str     ///< [in] 文字列
 ){
-    SHalSensor_t*   data;
+    EHalSensorLPS25H_t  which = EN_SEN_LPS25H_ATMOS;
+    char                unit[4];
+    SHalSensor_t*       data;
 
-    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    memset( unit, '\0', sizeof(unit) );
 
-    data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+    if( 0 == strncmp( str, "atmos", strlen("atmos") ) )
+    {
+        which = EN_SEN_LPS25H_ATMOS;
+        strncpy( unit, "hPa", strlen("hPa") );
+    } else if( 0 == strncmp( str, "temp", strlen("temp") ) )
+    {
+        which = EN_SEN_LPS25H_TEMP;
+        strncpy( unit, "'C", strlen("'C") );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+    data = HalSensorLPS25H_Get( which );
 
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f %%", data->cur );
+    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
 
     // node.js サーバへデータを渡すための printf()
     printf( "%5.2f", data->cur );
+
+err :
     return;
 }
 
 
 /**************************************************************************//*!
- * @brief     温度センサ ( BME280 ) を実行する
+ * @brief     照度センサ ( TSL2561 ) を実行する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -360,26 +572,49 @@ Run_BME280_Humidity(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_BME280_Temperature(
-    void  ///< [in] ナシ
+Run_Si_TSL2561(
+    char*               str     ///< [in] 文字列
 ){
-    SHalSensor_t*   data;
+    EHalSensorTSL2561_t which = EN_SEN_TSL2561_BROADBAND;
+    char                unit[4];
+    SHalSensor_t*       data;
 
-    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    memset( unit, '\0', sizeof(unit) );
 
-    data = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+    if( 0 == strncmp( str, "broadband", strlen("broadband") ) )
+    {
+        which = EN_SEN_TSL2561_BROADBAND;
+        strncpy( unit, "BB", strlen("BB") );
+    } else if( 0 == strncmp( str, "ir", strlen("ir") ) )
+    {
+        which = EN_SEN_TSL2561_IR;
+        strncpy( unit, "IR", strlen("IR") );
+    } else if( 0 == strncmp( str, "lux", strlen("lux") ) )
+    {
+        which = EN_SEN_TSL2561_LUX;
+        strncpy( unit, "LUX", strlen("LUX") );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+    data = HalSensorTSL2561_Get( which );
 
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f 'C", data->cur );
+    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
 
     // node.js サーバへデータを渡すための printf()
     printf( "%5.2f", data->cur );
+
+err :
     return;
 }
 
 
 /**************************************************************************//*!
- * @brief     気圧センサ ( LPS25H ) を実行する
+ * @brief     時間情報を表示する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -387,115 +622,25 @@ Run_BME280_Temperature(
  * @return    なし。
  *************************************************************************** */
 static void
-Run_LPS25H_Atmosphere(
+Run_Time(
     void  ///< [in] ナシ
 ){
-    SHalSensor_t*   data;
+    SHalTime_t*     data;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    data = HalTime_GetLocaltime();
 
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f hPa", data->cur );
+    AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
 
     // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     温度センサ ( LPS25H ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_LPS25H_Temperature(
-    void  ///< [in] ナシ
-){
-    SHalSensor_t*   data;
-
-    DBG_PRINT_TRACE( "\n\r" );
-
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f 'C", data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     すべてのセンサを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_AllSensors(
-    void  ///< [in] ナシ
-){
-    SHalSensor_t*   dataAccX;
-    SHalSensor_t*   dataAccY;
-    SHalSensor_t*   dataAccZ;
-    SHalSensor_t*   dataGyroG1;
-    SHalSensor_t*   dataGyroG2;
-
-    SHalSensor_t*   dataDist;
-    SHalSensor_t*   dataLux;
-
-    SHalSensor_t*   dataBAtmos;
-    SHalSensor_t*   dataBHumi;
-    SHalSensor_t*   dataBTemp;
-
-    SHalSensor_t*   dataLAtmos;
-    SHalSensor_t*   dataLTemp;
-
-    DBG_PRINT_TRACE( "\n\r" );
-
-    dataAccX   = HalSensorAcc_Get( EN_SEN_ACC_X );
-    dataAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    dataAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
-    dataGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-
-    dataDist   = HalSensorGP2Y0E03_Get();
-    dataLux    = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
-
-    dataBAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
-    dataBHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
-    dataBTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
-
-    dataLAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
-    dataLTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "{ " );
-    printf( "\"acc_x\"  :%d,    ", (int)dataAccX->cur );
-    printf( "\"acc_y\"  :%d,    ", (int)dataAccY->cur );
-    printf( "\"acc_z\"  :%d,    ", (int)dataAccZ->cur );
-    printf( "\"gyro_g1\":%d,    ", (int)dataGyroG1->cur );
-    printf( "\"gyro_g2\":%d,    ", (int)dataGyroG2->cur );
-
-    printf( "\"dist\"   :%5.2f, ", dataDist->cur );
-    printf( "\"lux\"    :%5.2f, ", dataLux->cur );
-
-    printf( "\"b_atmos\":%5.2f, ", dataBAtmos->cur );
-    printf( "\"b_humi\" :%5.2f, ", dataBHumi->cur );
-    printf( "\"b_temp\" :%5.2f, ", dataBTemp->cur );
-
-    printf( "\"l_atmos\":%5.2f, ", dataLAtmos->cur );
-    printf( "\"l_temp\" :%5.2f, ", dataLTemp->cur );
-    printf( "}" );
+    printf( "%4d/%02d/%02d %02d:%02d:%02d",
+            data->year, data->month, data->day,
+            data->hour, data->min, data->sec
+          );
     return;
 }
 
@@ -511,7 +656,6 @@ Run_AllSensors(
 int main(int argc, char *argv[ ])
 {
     int             i = 0;
-    int             data = 0;
     unsigned char   str[256];
     unsigned char*  pt;
 
@@ -559,51 +703,48 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "help", strlen("help") ) )
     {
         Run_Help();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "acc", strlen("acc") ) )
+    } else if( argc > 1 && 0 == strncmp( argv[1], "sensors", strlen("sensors") ) )
     {
-        Run_Acc( argv[2] );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "gyro", strlen("gyro") ) )
+        Run_Sensors();
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "led", strlen("led") ) )
     {
-        Run_Gyro( argv[2] );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "dist", strlen("dist") ) )
+        Run_Led( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "i2clcd", strlen("i2clcd") ) )
     {
-        Run_GP2Y0E03_Distance();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "led", strlen("led") ) )
+        Run_I2cLcd( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "motorsv", strlen("motorsv") ) )
     {
-        HalLed_Set( 0x0F );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "lux", strlen("lux") ) )
-    {
-        Run_TSL2561_Illuminance();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "motorsv", strlen("motorsv") ) )
-    {
-        data = atoi( (const char*)argv[2] );
-        DBG_PRINT_TRACE( "data = %d \n", data );
-        HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
-//        usleep( 1000 * 1000 );  // 2s 待つ
-    } else if( argc > 1 && 0 == strncmp( argv[1], "relay", strlen("relay") ) )
+        Run_MotorSV( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "relay", strlen("relay") ) )
     {
         Run_Relay( argv[2] );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "b_atmos", strlen("b_atmos") ) )
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "sa_acc", strlen("sa_acc") ) )
     {
-        Run_BME280_Atmosphere();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "b_humi", strlen("b_humi") ) )
+        Run_Sa_Acc( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "sa_gyro", strlen("sa_gyro") ) )
     {
-        Run_BME280_Humidity();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "b_temp", strlen("b_temp") ) )
+        Run_Sa_Gyro( argv[2] );
+    } else if( argc > 1 &&                    0 == strncmp( argv[1], "sa_pm", strlen("sa_pm") ) )
     {
-        Run_BME280_Temperature();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "l_atmos", strlen("l_atmos") ) )
+        Run_Sa_Pm();
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_bme280", strlen("si_bme280") ) )
     {
-        Run_LPS25H_Atmosphere();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "l_temp", strlen("l_temp") ) )
+        Run_Si_BME280( argv[2] );
+    } else if( argc > 1 &&                    0 == strncmp( argv[1], "si_gp2y0e03", strlen("si_gp2y0e03") ) )
     {
-        Run_LPS25H_Temperature();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "sensor", strlen("sensor") ) )
+        Run_Si_GP2Y0E03();
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_lps25h", strlen("si_lps25h") ) )
     {
-        Run_AllSensors();
+        Run_Si_LPS25H( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_tsl2561", strlen("si_tsl2561") ) )
+    {
+        Run_Si_TSL2561( argv[2] );
+    } else if( argc > 1 &&                    0 == strncmp( argv[1], "time", strlen("time") ) )
+    {
+        Run_Time();
     } else
     {
-        DBG_PRINT_ERROR( "\"%s\" is a invalid command. \n", argv[1] );
+        DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
         Run_Help();
     }
 
