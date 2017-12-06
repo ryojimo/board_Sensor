@@ -62,8 +62,8 @@ static void         Run_Help( void );
 static void         Run_Menu( unsigned char* str );
 static void         Run_Sensors( void );
 
-static void         Run_Led( char* str );
 static void         Run_I2cLcd( char* str );
+static void         Run_Led( char* str );
 static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
 
@@ -101,8 +101,8 @@ Run_Help(
     printf( " menu                : Go to menu mode.                               \n\r" );
     printf( " sensors             : Get the value of all sensors.                  \n\r" );
     printf( "                                                                      \n\r" );
-    printf( " led <value>         : Control the LED.                               \n\r" );
     printf( " i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( " led <value>         : Control the LED.                               \n\r" );
     printf( " motorsv <value>     : Control the SAVO motor.                        \n\r" );
     printf( " relay [OPTION]      : Control the Relay circuit.                     \n\r" );
     printf( "                 on  : ON  relay switch.                              \n\r" );
@@ -229,28 +229,6 @@ Run_Sensors(
 
 
 /**************************************************************************//*!
- * @brief     LED を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Led(
-    char*           str     ///< [in] 文字列
-){
-    unsigned int    num;
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    sscanf( str, "%X", &num );
-    HalLed_Set( num );
-
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     I2C LCD を実行する
  * @attention なし。
  * @note      なし。
@@ -268,6 +246,28 @@ Run_I2cLcd(
     AppIfLcd_Printf( str );
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "                " );
+
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LED を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Led(
+    char*           str     ///< [in] 文字列
+){
+    unsigned int    num;
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    sscanf( str, "%X", &num );
+    HalLed_Set( num );
 
     return;
 }
@@ -706,12 +706,12 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 && 0 == strncmp( argv[1], "sensors", strlen("sensors") ) )
     {
         Run_Sensors();
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "led", strlen("led") ) )
-    {
-        Run_Led( argv[2] );
     } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "i2clcd", strlen("i2clcd") ) )
     {
         Run_I2cLcd( argv[2] );
+    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "led", strlen("led") ) )
+    {
+        Run_Led( argv[2] );
     } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "motorsv", strlen("motorsv") ) )
     {
         Run_MotorSV( argv[2] );
