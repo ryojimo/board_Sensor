@@ -122,7 +122,7 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorPm_Get();
-    g_data.ofs = data->ofs;
+    g_data.ofs = data->cur;
 
     return;
 }

@@ -164,10 +164,10 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
-    g_dataAtmos.ofs = data->ofs;
+    g_dataAtmos.ofs = data->cur;
 
     data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
-    g_dataTemp.ofs = data->ofs;
+    g_dataTemp.ofs = data->cur;
 
     return;
 }

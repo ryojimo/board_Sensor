@@ -129,10 +129,10 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    g_dataG1.ofs = data->ofs;
+    g_dataG1.ofs = data->cur;
 
     data = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-    g_dataG2.ofs = data->ofs;
+    g_dataG2.ofs = data->cur;
 
     return;
 }

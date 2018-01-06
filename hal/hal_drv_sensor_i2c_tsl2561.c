@@ -142,13 +142,13 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
-    g_dataBroadband.ofs = data->ofs;
+    g_dataBroadband.ofs = data->cur;
 
     data = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
-    g_dataIr.ofs = data->ofs;
+    g_dataIr.ofs = data->cur;
 
     data = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
-    g_dataLux.ofs = data->ofs;
+    g_dataLux.ofs = data->cur;
 
     return;
 }

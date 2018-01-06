@@ -138,13 +138,13 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorAcc_Get( EN_SEN_ACC_X );
-    g_dataX.ofs = data->ofs;
+    g_dataX.ofs = data->cur;
 
     data = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    g_dataY.ofs = data->ofs;
+    g_dataY.ofs = data->cur;
 
     data = HalSensorAcc_Get( EN_SEN_ACC_Z );
-    g_dataZ.ofs = data->ofs;
+    g_dataZ.ofs = data->cur;
 
     return;
 }

@@ -339,13 +339,13 @@ SetOffset(
     DBG_PRINT_TRACE( "\n\r" );
 
     data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
-    g_dataAtmos.ofs = data->ofs;
+    g_dataAtmos.ofs = data->cur;
 
     data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
-    g_dataHumi.ofs = data->ofs;
+    g_dataHumi.ofs = data->cur;
 
     data = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
-    g_dataTemp.ofs = data->ofs;
+    g_dataTemp.ofs = data->cur;
 
     return;
 }
