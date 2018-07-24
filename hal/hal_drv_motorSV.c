@@ -123,7 +123,7 @@ HalMotorSV_Init(
     ret = InitReg();
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "Unable to initialize GPIO port." );
+        DBG_PRINT_ERROR( "Unable to initialize GPIO port. \n\r" );
         return ret;
     }
 

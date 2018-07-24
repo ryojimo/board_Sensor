@@ -321,7 +321,7 @@ AppIfLcd_Printf(
     len = strlen( format );
     if( len > 64 )
     {
-        DBG_PRINT_ERROR( "length of format is over 24." );
+        DBG_PRINT_ERROR( "length of format is over 24. \n\r" );
         return -1;
     }
 

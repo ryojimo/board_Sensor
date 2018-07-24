@@ -196,7 +196,7 @@ HalSensorLPS25H_Init(
     ret = InitReg();
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "Unable to initialize I2C port." );
+        DBG_PRINT_ERROR( "Unable to initialize I2C port. \n\r" );
         return ret;
     }
 
@@ -250,14 +250,14 @@ GetAtmos(
     ret = HalCmnI2c_Write( &regAddr, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write PRESS_POUT_XL to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write PRESS_POUT_XL to i2c slave. \n\r" );
         return ret;
     }
 
     ret = HalCmnI2c_Read( &data01, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         return ret;
     }
 
@@ -266,14 +266,14 @@ GetAtmos(
     ret = HalCmnI2c_Write( &regAddr, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write PRESS_OUT_L to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write PRESS_OUT_L to i2c slave. \n\r" );
         return ret;
     }
 
     ret = HalCmnI2c_Read( &data02, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         return ret;
     }
 
@@ -282,14 +282,14 @@ GetAtmos(
     ret = HalCmnI2c_Write( &regAddr, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write PRESS_OUT_H to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write PRESS_OUT_H to i2c slave. \n\r" );
         return ret;
     }
 
     ret = HalCmnI2c_Read( &data03, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         return ret;
     }
 
@@ -335,14 +335,14 @@ GetTemp(
     ret = HalCmnI2c_Write( &regAddr, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write TEMP_OUT_L to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write TEMP_OUT_L to i2c slave. \n\r" );
         return ret;
     }
 
     ret = HalCmnI2c_Read( &data01, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         return ret;
     }
 
@@ -351,14 +351,14 @@ GetTemp(
     ret = HalCmnI2c_Write( &regAddr, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write PRESS_OUT_L to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write PRESS_OUT_L to i2c slave. \n\r" );
         return ret;
     }
 
     ret = HalCmnI2c_Read( &data02, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         return ret;
     }
 
@@ -405,21 +405,21 @@ HalSensorLPS25H_Get(
     ret = HalCmnI2c_Write( buff, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write WHO_AM_I to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write WHO_AM_I to i2c slave. \n\r" );
         goto err;
     }
 
     ret = HalCmnI2c_Read( buff, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
         goto err;
     }
 
     if( buff[0] != 0xBD )
     {
-        DBG_PRINT_ERROR( "WHO_AM_I error." );
-        DBG_PRINT_ERROR( "data = 0x%02X", buff[0] );
+        DBG_PRINT_ERROR( "WHO_AM_I error. \n\r" );
+        DBG_PRINT_ERROR( "data = 0x%02X \n\r", buff[0] );
         goto err;
     }
 
@@ -429,7 +429,7 @@ HalSensorLPS25H_Get(
     ret = HalCmnI2c_Write( buff, 2 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write CTRL_REG1 to i2c slave." );
+        DBG_PRINT_ERROR( "fail to write CTRL_REG1 to i2c slave. \n\r" );
         goto err;
     }
 
@@ -442,7 +442,7 @@ HalSensorLPS25H_Get(
 
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to get data from i2c slave." );
+        DBG_PRINT_ERROR( "fail to get data from i2c slave. \n\r" );
         goto err;
     }
 
