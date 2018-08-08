@@ -79,6 +79,7 @@ Sys_Init(
     HalCmnI2c_Init();
     HalCmnSpi_Init();
 
+    HalI2cCmd_Init();
     HalI2cLcd_Init();
     HalLed_Init();
     HalMotorSV_Init();
@@ -116,6 +117,7 @@ Sys_Fini(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
+    HalI2cCmd_Fini();
     HalI2cLcd_Fini();
     HalLed_Fini();
     HalMotorSV_Fini();

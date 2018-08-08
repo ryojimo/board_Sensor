@@ -82,6 +82,20 @@ typedef enum tagEHalMotorState
 
 
 //*************************************
+// PIC コマンドのための型
+//*************************************
+// I2C Slave デバイスへ送信する I2C コマンドの型
+// I2C Slave デバイスのソースコードと合わせる必要あり
+typedef enum tagEHalI2cCmd
+{
+    EN_I2C_CMD_NONE = 0,
+    EN_I2C_CMD_LED,
+    EN_I2C_CMD_MOTOR,
+    EN_I2C_CMD_USB_KEYBOARD
+} EHalI2cCmd_t;
+
+
+//*************************************
 // デバイスを区別するための型
 //*************************************
 // SENSOR (ADC) 加速度計センサの区別に使用する型
@@ -158,6 +172,12 @@ typedef struct tagSHalTime
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
+// I2C 通信 Command API
+EHalBool_t      HalI2cCmd_Init( void );
+void            HalI2cCmd_Fini( void );
+EHalBool_t      HalI2cCmd_Set( EHalI2cCmd_t cmd, unsigned char data );
+EHalBool_t      HalI2cCmd_SetKeycode( unsigned char keycode );
+
 // I2C LCD API
 EHalBool_t      HalI2cLcd_Init( void );
 void            HalI2cLcd_Fini( void );

@@ -656,6 +656,8 @@ Run_Time(
 int main(int argc, char *argv[ ])
 {
     int             i = 0;
+    int             cmd = 0;
+    int             data = 0;
     unsigned char   str[256];
     unsigned char*  pt;
 
@@ -742,6 +744,29 @@ int main(int argc, char *argv[ ])
     } else if( argc > 1 &&                    0 == strncmp( argv[1], "time", strlen("time") ) )
     {
         Run_Time();
+    } else if( argc > 1 && 0 == strncmp( argv[1], "pic", strlen("pic") ) )
+    {
+        if( argv[2] != NULL )
+        {
+            cmd  = strtol( (const char*)argv[2], (char**)&pt, 10 );
+        }
+        if( argv[3] != NULL )
+        {
+            data = strtol( (const char*)argv[3], (char**)&pt, 10 );
+        }
+
+        DBG_PRINT_TRACE( "cmd  = 0x%02X(H) : %02d(d) \n", cmd,  cmd  );
+        DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
+        HalI2cCmd_Set( cmd, data );
+    } else if( argc > 1 && 0 == strncmp( argv[1], "usbkey", strlen("usbkey") ) )
+    {
+        if( argv[2] != NULL )
+        {
+            data  = strtol( (const char*)argv[2], (char**)&pt, 16 );
+        }
+
+        DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
+        HalI2cCmd_SetKeycode( data );
     } else
     {
         DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
