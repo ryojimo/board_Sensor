@@ -19,6 +19,8 @@
 //********************************************************
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <getopt.h>
 
 #include "./app/if_lcd/if_lcd.h"
 #include "./app/menu/menu.h"
@@ -52,7 +54,9 @@
 //********************************************************
 /* モジュールグローバル変数                              */
 //********************************************************
-// なし
+// getopt() で使用
+extern char *optarg;
+extern int  optind, opterr, optopt;
 
 
 //********************************************************
@@ -95,39 +99,39 @@ Run_Help(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    printf( " COMMAND             : DESCRIPTION                                    \n\r" );
-    printf( "======================================================================\n\r" );
-    printf( " help                : display the command option list.               \n\r" );
-    printf( " menu                : Go to menu mode.                               \n\r" );
-    printf( " sensors             : Get the value of all sensors.                  \n\r" );
-    printf( "                                                                      \n\r" );
-    printf( " i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
-    printf( " led <value>         : Control the LED.                               \n\r" );
-    printf( " motorsv <value>     : Control the SAVO motor.                        \n\r" );
-    printf( " relay [OPTION]      : Control the Relay circuit.                     \n\r" );
-    printf( "                 on  : ON  relay switch.                              \n\r" );
-    printf( "                 off : OFF relay switch.                              \n\r" );
-    printf( " sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
-    printf( "                   x : X direction.                                   \n\r" );
-    printf( "                   y : Y direction.                                   \n\r" );
-    printf( "                   z : Z direction.                                   \n\r" );
-    printf( " sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
-    printf( "                  g1 : G1 direction.                                  \n\r" );
-    printf( "                  g2 : G2 direction.                                  \n\r" );
-    printf( " sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
-    printf( " si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
-    printf( "               atmos : atmosphere                                     \n\r" );
-    printf( "               humi  : humidity                                       \n\r" );
-    printf( "               temp  : temperature                                    \n\r" );
-    printf( " si_gp2y0e03         : Get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
-    printf( " si_lps25h [OPTION]  : Get the value of a sensor(I2C), LPS25H.        \n\r" );
-    printf( "               atmos : atmosphere                                     \n\r" );
-    printf( "               temp  : temperature                                    \n\r" );
-    printf( " si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
-    printf( "           broadband : ?                                              \n\r" );
-    printf( "           ir        : ?                                              \n\r" );
-    printf( "           lux       : lux                                            \n\r" );
-    printf( " time                : Get the time.                                  \n\r" );
+    printf( " COMMAND                   : DESCRIPTION                                    \n\r" );
+    printf( "============================================================================\n\r" );
+    printf( " -m, --menu                : Go to menu mode.                               \n\r" );
+    printf( " -h, --help                : display the command option list.               \n\r" );
+    printf( " -s, --sensors             : Get the value of all sensors.                  \n\r" );
+    printf( "                                                                            \n\r" );
+    printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( " -l, --led <value>         : Control the LED.                               \n\r" );
+    printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
+    printf( " -r, --relay [OPTION]      : Control the Relay circuit.                     \n\r" );
+    printf( "                       on  : ON  relay switch.                              \n\r" );
+    printf( "                       off : OFF relay switch.                              \n\r" );
+    printf( " -a, --sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
+    printf( "                         x : X direction.                                   \n\r" );
+    printf( "                         y : Y direction.                                   \n\r" );
+    printf( "                         z : Z direction.                                   \n\r" );
+    printf( " -g, --sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
+    printf( "                        g1 : G1 direction.                                  \n\r" );
+    printf( "                        g2 : G2 direction.                                  \n\r" );
+    printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
+    printf( " -w, --si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
+    printf( "                     atmos : atmosphere                                     \n\r" );
+    printf( "                     humi  : humidity                                       \n\r" );
+    printf( "                     temp  : temperature                                    \n\r" );
+    printf( " -x, --si_gp2y0e03         : Get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
+    printf( " -y, --si_lps25h [OPTION]  : Get the value of a sensor(I2C), LPS25H.        \n\r" );
+    printf( "                     atmos : atmosphere                                     \n\r" );
+    printf( "                     temp  : temperature                                    \n\r" );
+    printf( " -x, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
+    printf( "                 broadband : ?                                              \n\r" );
+    printf( "                 ir        : ?                                              \n\r" );
+    printf( "                 lux       : lux                                            \n\r" );
+    printf( " -t, --time                : Get the time.                                  \n\r" );
     printf( "\n\r" );
 
     return;
@@ -661,6 +665,31 @@ int main(int argc, char *argv[ ])
     unsigned char   str[256];
     unsigned char*  pt;
 
+    int             opt = 0;
+    const char      optstring[] = "mhsc:l:o:r:a:g:pw:x:y:z:ti:u:";
+    const struct    option longopts[] = {
+      //{ *name,         has_arg,           *flag, val }, // 説明
+        { "menu",        no_argument,       NULL,  'm' },
+        { "help",        no_argument,       NULL,  'h' },
+        { "sensors",     no_argument,       NULL,  's' },
+        { "i2clcd",      required_argument, NULL,  'c' },
+        { "led",         required_argument, NULL,  'l' },
+        { "motorsv",     required_argument, NULL,  'o' },
+        { "relay",       required_argument, NULL,  'r' },
+        { "sa_acc",      required_argument, NULL,  'a' },
+        { "sa_gyro",     required_argument, NULL,  'g' },
+        { "sa_pm",       no_argument,       NULL,  'p' },
+        { "si_bme280",   required_argument, NULL,  'w' },
+        { "si_gp2y0e03", no_argument,       NULL,  'x' },
+        { "si_lps25h",   required_argument, NULL,  'y' },
+        { "si_tsl2561",  required_argument, NULL,  'z' },
+        { "time",        no_argument,       NULL,  't' },
+        { "pic",         required_argument, NULL,  'i' },
+        { "usbkey",      required_argument, NULL,  'u' },
+        { 0,             0,                 NULL,   0  }, // termination
+    };
+    int longindex = 0;
+
     Sys_Init();
 
 #if 0
@@ -668,109 +697,96 @@ int main(int argc, char *argv[ ])
     DBG_PRINT_WARN(  "test warn  \n\r" );
     DBG_PRINT_TRACE( "test trace \n\r" );
     DBG_PRINT_DEBUG( "test debug \n\r" );
-#endif
 
     DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
     DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
     DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
     DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
     DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
+#endif
 
     AppIfLcd_Clear();
     AppIfLcd_Ctrl( 1, 0, 0 );
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( "cmd:%s", argv[1] );
 
-    if( argc == 1 )
+    while( 1 )
     {
-        Run_Help();
-    }
+        opt = getopt_long( argc, argv, optstring, longopts, &longindex );
+//      opt = getopt( argc, argv, optstring );
+        DBG_PRINT_TRACE( "opt = %c \n\r", opt );
 
-    if( argc > 1 && 0 == strncmp( argv[1], "menu", strlen("menu") ) )
-    {
-        memset( str, '\0', sizeof(str) );
-        pt = (unsigned char*)str;
-
-        // 引数部分を取り出す
-        for( i = 2; i < argc; i++ )
+        if( opt == -1 )   // 処理するオプションが無くなった場合
         {
-            DBG_PRINT_TRACE( "argv[%d] = %s \n\r", i, argv[i] );
-            strncat( (char*)pt, argv[i], strlen( argv[i] ) );
-            pt += strlen( argv[i] );
-            strncat( (char*)pt, " ", strlen( " " ) );
-            pt += strlen( " " );
+            break;
         }
 
-        Run_Menu( str );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "help", strlen("help") ) )
-    {
-        Run_Help();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "sensors", strlen("sensors") ) )
-    {
-        Run_Sensors();
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "i2clcd", strlen("i2clcd") ) )
-    {
-        Run_I2cLcd( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "led", strlen("led") ) )
-    {
-        Run_Led( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "motorsv", strlen("motorsv") ) )
-    {
-        Run_MotorSV( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "relay", strlen("relay") ) )
-    {
-        Run_Relay( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "sa_acc", strlen("sa_acc") ) )
-    {
-        Run_Sa_Acc( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "sa_gyro", strlen("sa_gyro") ) )
-    {
-        Run_Sa_Gyro( argv[2] );
-    } else if( argc > 1 &&                    0 == strncmp( argv[1], "sa_pm", strlen("sa_pm") ) )
-    {
-        Run_Sa_Pm();
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_bme280", strlen("si_bme280") ) )
-    {
-        Run_Si_BME280( argv[2] );
-    } else if( argc > 1 &&                    0 == strncmp( argv[1], "si_gp2y0e03", strlen("si_gp2y0e03") ) )
-    {
-        Run_Si_GP2Y0E03();
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_lps25h", strlen("si_lps25h") ) )
-    {
-        Run_Si_LPS25H( argv[2] );
-    } else if( argc > 1 && argv[2] != NULL && 0 == strncmp( argv[1], "si_tsl2561", strlen("si_tsl2561") ) )
-    {
-        Run_Si_TSL2561( argv[2] );
-    } else if( argc > 1 &&                    0 == strncmp( argv[1], "time", strlen("time") ) )
-    {
-        Run_Time();
-    } else if( argc > 1 && 0 == strncmp( argv[1], "pic", strlen("pic") ) )
-    {
-        if( argv[2] != NULL )
+        if( opt == '?' )  // optstring で指定していない引数が見つかった場合
         {
-            cmd  = strtol( (const char*)argv[2], (char**)&pt, 10 );
-        }
-        if( argv[3] != NULL )
-        {
-            data = strtol( (const char*)argv[3], (char**)&pt, 10 );
+            DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
+            break;
         }
 
-        DBG_PRINT_TRACE( "cmd  = 0x%02X(H) : %02d(d) \n", cmd,  cmd  );
-        DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
-        HalI2cCmd_Set( cmd, data );
-    } else if( argc > 1 && 0 == strncmp( argv[1], "usbkey", strlen("usbkey") ) )
-    {
-        if( argv[2] != NULL )
+        switch( opt )
         {
-            data  = strtol( (const char*)argv[2], (char**)&pt, 16 );
-        }
+        case 'm':
+            memset( str, '\0', sizeof(str) );
+            pt = (unsigned char*)str;
 
-        DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
-        HalI2cCmd_SetKeycode( data );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
-        Run_Help();
+            // 引数部分を取り出す
+            for( i = 2; i < argc; i++ )
+            {
+                DBG_PRINT_TRACE( "argv[%d] = %s \n\r", i, argv[i] );
+                strncat( (char*)pt, argv[i], strlen( argv[i] ) );
+                pt += strlen( argv[i] );
+                strncat( (char*)pt, " ", strlen( " " ) );
+                pt += strlen( " " );
+            }
+
+            Run_Menu( str );
+        break;
+        case 'h': Run_Help(); break;
+        case 's': Run_Sensors(); break;
+        case 'c': Run_I2cLcd( optarg ); break;
+        case 'l': Run_Led( optarg ); break;
+        case 'o': Run_MotorSV( optarg ); break;
+        case 'r': Run_Relay( optarg ); break;
+        case 'a': Run_Sa_Acc( optarg ); break;
+        case 'g': Run_Sa_Gyro( optarg ); break;
+        case 'p': Run_Sa_Pm(); break;
+        case 'w': Run_Si_BME280( optarg ); break;
+        case 'x': Run_Si_GP2Y0E03(); break;
+        case 'y': Run_Si_LPS25H( optarg ); break;
+        case 'z': Run_Si_TSL2561( optarg ); break;
+        case 't': Run_Time(); break;
+        case 'i': 
+            if( argv[2] != NULL )
+            {
+                cmd  = strtol( (const char*)argv[2], (char**)&pt, 10 );
+            }
+            if( argv[3] != NULL )
+            {
+                data = strtol( (const char*)argv[3], (char**)&pt, 10 );
+            }
+
+            DBG_PRINT_TRACE( "cmd  = 0x%02X(H) : %02d(d) \n", cmd,  cmd  );
+            DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
+            HalI2cCmd_Set( cmd, data );
+        break;
+        case 'u': 
+            if( optarg != NULL )
+            {
+                data  = strtol( (const char*)optarg, (char**)&pt, 16 );
+            }
+
+            DBG_PRINT_TRACE( "data = 0x%02X(H) : %02d(d) \n", data, data );
+            HalI2cCmd_SetKeycode( data );
+        break;
+        default:
+            DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
+            Run_Help();
+        break;
+        }
     }
 
     Sys_Fini();
