@@ -42,15 +42,15 @@
 
 #ifdef DBG_PRINT /*DBG_PRINT----------------*/
 
-    #define DBG_PRINT_ERROR(fmt, arg...) printf( "["MY_NAME"]" DBG_COLOR_RED    "[ERR]  " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
-    #define DBG_PRINT_WARN(fmt, arg...)  printf( "["MY_NAME"]" DBG_COLOR_BLUE   "[WARN] " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
-    #define DBG_PRINT_TRACE(fmt, arg...) printf( "["MY_NAME"]" DBG_COLOR_YELLOW "[TRACE]" DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
-    #define DBG_PRINT_DEBUG(fmt, arg...) printf( "["MY_NAME"]" DBG_COLOR_PURPLE "[DEBUG]" DBG_COLOR_WHITE " "                                                     fmt, ##arg )
+    #define DBG_PRINT_ERROR(fmt, arg...) fprintf( stderr, "["MY_NAME"]" DBG_COLOR_RED    "[ERR]  " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
+    #define DBG_PRINT_WARN(fmt, arg...)  fprintf( stderr, "["MY_NAME"]" DBG_COLOR_BLUE   "[WARN] " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
+    #define DBG_PRINT_TRACE(fmt, arg...) fprintf( stdout, "["MY_NAME"]" DBG_COLOR_YELLOW "[TRACE]" DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
+    #define DBG_PRINT_DEBUG(fmt, arg...) fprintf( stdout, "["MY_NAME"]" DBG_COLOR_PURPLE "[DEBUG]" DBG_COLOR_WHITE " "                                                     fmt, ##arg )
 
 #else /*NO DBG_PRINT------------------------*/
 
-    #define DBG_PRINT_ERROR(fmt, arg...) printf( "["MY_NAME"]" DBG_COLOR_RED    "[ERR]  " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
-    #define DBG_PRINT_WARN(fmt, arg...)  printf( "["MY_NAME"]" DBG_COLOR_BLUE   "[WARN] " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
+    #define DBG_PRINT_ERROR(fmt, arg...) fprintf( stderr, "["MY_NAME"]" DBG_COLOR_RED    "[ERR]  " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
+    #define DBG_PRINT_WARN(fmt, arg...)  fprintf( stderr, "["MY_NAME"]" DBG_COLOR_BLUE   "[WARN] " DBG_COLOR_WHITE " [%s:%d][" DBG_COLOR_GREEN "%s()" DBG_COLOR_WHITE "] " fmt, __FILE__, __LINE__, __FUNCTION__, ##arg )
     #define DBG_PRINT_TRACE(fmt, arg...)
     #define DBG_PRINT_DEBUG(fmt, arg...)
 
