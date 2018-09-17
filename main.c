@@ -73,14 +73,14 @@ static void         Run_Relay( char* str );
 
 static void         Run_Sa_Acc( char* str );
 static void         Run_Sa_Gyro( char* str );
-static void         Run_Sa_Pm( void );
+static void         Run_Sa_Pm( char* str );
 
 static void         Run_Si_BME280( char* str );
-static void         Run_Si_GP2Y0E03( void );
+static void         Run_Si_GP2Y0E03( char* str );
 static void         Run_Si_LPS25H( char* str );
 static void         Run_Si_TSL2561( char* str );
 
-static void         Run_Time( void );
+static void         Run_Time( char* str );
 
 
 
@@ -109,29 +109,37 @@ Run_Help(
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
     printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
     printf( " -r, --relay [OPTION]      : Control the Relay circuit.                     \n\r" );
-    printf( "                       on  : ON  relay switch.                              \n\r" );
+    printf( "                        on : ON  relay switch.                              \n\r" );
     printf( "                       off : OFF relay switch.                              \n\r" );
     printf( " -a, --sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
     printf( "                         x : X direction.                                   \n\r" );
     printf( "                         y : Y direction.                                   \n\r" );
     printf( "                         z : Z direction.                                   \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -g, --sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
     printf( "                        g1 : G1 direction.                                  \n\r" );
     printf( "                        g2 : G2 direction.                                  \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
+    printf( "                      json : value of json format.                          \n\r" );
     printf( " -w, --si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
     printf( "                     atmos : atmosphere                                     \n\r" );
-    printf( "                     humi  : humidity                                       \n\r" );
-    printf( "                     temp  : temperature                                    \n\r" );
+    printf( "                      humi : humidity                                       \n\r" );
+    printf( "                      temp : temperature                                    \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -x, --si_gp2y0e03         : Get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
+    printf( "                      json : value of json format.                          \n\r" );
     printf( " -y, --si_lps25h [OPTION]  : Get the value of a sensor(I2C), LPS25H.        \n\r" );
     printf( "                     atmos : atmosphere                                     \n\r" );
-    printf( "                     temp  : temperature                                    \n\r" );
+    printf( "                      temp : temperature                                    \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -x, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
     printf( "                 broadband : ?                                              \n\r" );
-    printf( "                 ir        : ?                                              \n\r" );
-    printf( "                 lux       : lux                                            \n\r" );
+    printf( "                        ir : ?                                              \n\r" );
+    printf( "                       lux : lux                                            \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -t, --time                : Get the time.                                  \n\r" );
+    printf( "                      json : value of json format.                          \n\r" );
     printf( "\n\r" );
 
     return;
@@ -342,33 +350,53 @@ static void
 Run_Sa_Acc(
     char*           str     ///< [in] 文字列
 ){
-    EHalSensorAcc_t which = EN_SEN_ACC_X;
     SHalSensor_t*   data;
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
     if( 0 == strncmp( str, "x", strlen("x") ) )
     {
-        which = EN_SEN_ACC_X;
+        data = HalSensorAcc_Get( EN_SEN_ACC_X );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%d", (int)data->cur );
     } else if( 0 == strncmp( str, "y", strlen("y") ) )
     {
-        which = EN_SEN_ACC_Y;
+        data = HalSensorAcc_Get( EN_SEN_ACC_Y );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%d", (int)data->cur );
     } else if( 0 == strncmp( str, "z", strlen("z") ) )
     {
-        which = EN_SEN_ACC_Z;
+        data = HalSensorAcc_Get( EN_SEN_ACC_Z );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%d", (int)data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
+        dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
+        dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"sa_acc\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"x\": %d,", (int)dataX->cur );
+        printf( "    \"y\": %d,", (int)dataY->cur );
+        printf( "    \"z\": %d ", (int)dataZ->cur );
+        printf( "  }" );
+        printf( "}" );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
         goto err;
     }
-
-    data = HalSensorAcc_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%d", (int)data->cur );
 
 err :
     return;
@@ -387,30 +415,44 @@ static void
 Run_Sa_Gyro(
     char*               str     ///< [in] 文字列
 ){
-    EHalSensorGyro_t    which = EN_SEN_GYRO_G1;
     SHalSensor_t*       data;
+    SHalSensor_t*       dataG1;
+    SHalSensor_t*       dataG2;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
     if( 0 == strncmp( str, "g1", strlen("g1") ) )
     {
-        which = EN_SEN_GYRO_G1;
+        data = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%4X", (int)data->cur );
+        printf( "%d", (int)data->cur );
     } else if( 0 == strncmp( str, "g2", strlen("g2") ) )
     {
-        which = EN_SEN_GYRO_G2;
+        data = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%4X", (int)data->cur );
+        printf( "%d", (int)data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+        dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"sa_gyro\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"g1\": %d,", (int)dataG1->cur );
+        printf( "    \"g2\": %d ", (int)dataG2->cur );
+        printf( "  }" );
+        printf( "}" );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
         goto err;
     }
-
-    data = HalSensorGyro_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "0x%4X", (int)data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%d", (int)data->cur );
 
 err :
     return;
@@ -427,19 +469,36 @@ err :
  *************************************************************************** */
 static void
 Run_Sa_Pm(
-    void  ///< [in] ナシ
+    char*           str     ///< [in] 文字列
 ){
     SHalSensor_t*   data;
 
-    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    data = HalSensorPm_Get();
+    if( str == NULL )
+    {
+        data = HalSensorPm_Get();
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%3d %%", data->cur_rate );
+        printf( "%3d", data->cur_rate );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        data = HalSensorPm_Get();
 
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3d %%", data->cur_rate );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%3d %%", data->cur_rate );
 
-    // node.js サーバへデータを渡すための printf()
-    printf( "%3d", data->cur_rate );
+        printf( "{ " );
+        printf( "  \"sensor\": \"sa_pm\"," );
+        printf( "  \"value\": %3d,", data->cur_rate );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+err :
     return;
 }
 
@@ -456,38 +515,53 @@ static void
 Run_Si_BME280(
     char*               str     ///< [in] 文字列
 ){
-    EHalSensorBME280_t  which = EN_SEN_BME280_ATMOS;
-    char                unit[4];
     SHalSensor_t*       data;
+    SHalSensor_t*       dataAtmos;
+    SHalSensor_t*       dataHumi;
+    SHalSensor_t*       dataTemp;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
-    memset( unit, '\0', sizeof(unit) );
 
     if( 0 == strncmp( str, "atmos", strlen("atmos") ) )
     {
-        which = EN_SEN_BME280_ATMOS;
-        strncpy( unit, "hPa", strlen("hPa") );
+        data = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f (hPa)", data->cur );
+        printf( "%5.2f", data->cur );
     } else if( 0 == strncmp( str, "humi", strlen("humi") ) )
     {
-        which = EN_SEN_BME280_HUMI;
-        strncpy( unit, "%", strlen("%") );
+        data = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f (%%)", data->cur );
+        printf( "%5.2f", data->cur );
     } else if( 0 == strncmp( str, "temp", strlen("temp") ) )
     {
-        which = EN_SEN_BME280_TEMP;
-        strncpy( unit, "'C", strlen("'C") );
+        data = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f ('C)", data->cur );
+        printf( "%5.2f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
+        dataHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
+        dataTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataAtmos->cur, dataHumi->cur, dataTemp->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_bme280\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"atmos\": %5.2f,", dataAtmos->cur );
+        printf( "    \"humi\": %5.2f,", dataHumi->cur );
+        printf( "    \"temp\": %5.2f ", dataTemp->cur );
+        printf( "  }" );
+        printf( "}" );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
         goto err;
     }
-
-    data = HalSensorBME280_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
 
 err :
     return;
@@ -504,19 +578,34 @@ err :
  *************************************************************************** */
 static void
 Run_Si_GP2Y0E03(
-    void  ///< [in] ナシ
+    char*           str     ///< [in] 文字列
 ){
     SHalSensor_t*   data;
 
-    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    data = HalSensorGP2Y0E03_Get();
+    if( str == NULL )
+    {
+        data = HalSensorGP2Y0E03_Get();
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f cm", data->cur );
+        printf( "%5.2f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        data = HalSensorGP2Y0E03_Get();
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f cm", data->cur );
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_gp2y0e03\"," );
+        printf( "  \"value\": %5.2f,", data->cur );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
 
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f cm", data->cur );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
+err :
     return;
 }
 
@@ -533,34 +622,44 @@ static void
 Run_Si_LPS25H(
     char*               str     ///< [in] 文字列
 ){
-    EHalSensorLPS25H_t  which = EN_SEN_LPS25H_ATMOS;
-    char                unit[4];
     SHalSensor_t*       data;
+    SHalSensor_t*       dataAtmos;
+    SHalSensor_t*       dataTemp;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
-    memset( unit, '\0', sizeof(unit) );
 
     if( 0 == strncmp( str, "atmos", strlen("atmos") ) )
     {
-        which = EN_SEN_LPS25H_ATMOS;
-        strncpy( unit, "hPa", strlen("hPa") );
+        data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f (hPa)", data->cur );
+        printf( "%5.2f", data->cur );
     } else if( 0 == strncmp( str, "temp", strlen("temp") ) )
     {
-        which = EN_SEN_LPS25H_TEMP;
-        strncpy( unit, "'C", strlen("'C") );
+        data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f ('C)", data->cur );
+        printf( "%5.2f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+        dataTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f, %5.2f", dataAtmos->cur, dataTemp->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_lps25h\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"atmos\": %5.2f,", dataAtmos->cur );
+        printf( "    \"temp\": %5.2f ", dataTemp->cur );
+        printf( "  }" );
+        printf( "}" );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
         goto err;
     }
-
-    data = HalSensorLPS25H_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
 
 err :
     return;
@@ -579,38 +678,53 @@ static void
 Run_Si_TSL2561(
     char*               str     ///< [in] 文字列
 ){
-    EHalSensorTSL2561_t which = EN_SEN_TSL2561_BROADBAND;
-    char                unit[4];
     SHalSensor_t*       data;
+    SHalSensor_t*       dataBB;
+    SHalSensor_t*       dataIR;
+    SHalSensor_t*       dataLUX;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
-    memset( unit, '\0', sizeof(unit) );
 
     if( 0 == strncmp( str, "broadband", strlen("broadband") ) )
     {
-        which = EN_SEN_TSL2561_BROADBAND;
-        strncpy( unit, "BB", strlen("BB") );
+        data = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f BB", data->cur );
+        printf( "%5.2f", data->cur );
     } else if( 0 == strncmp( str, "ir", strlen("ir") ) )
     {
-        which = EN_SEN_TSL2561_IR;
-        strncpy( unit, "IR", strlen("IR") );
+        data = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f IR", data->cur );
+        printf( "%5.2f", data->cur );
     } else if( 0 == strncmp( str, "lux", strlen("lux") ) )
     {
-        which = EN_SEN_TSL2561_LUX;
-        strncpy( unit, "LUX", strlen("LUX") );
+        data = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f LUX", data->cur );
+        printf( "%5.2f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+        dataIR  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+        dataLUX = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataBB->cur, dataIR->cur, dataLUX->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_tsl2561\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"broadband\": %5.2f,", dataBB->cur );
+        printf( "    \"ir\": %5.2f,",        dataIR->cur );
+        printf( "    \"lux\": %5.2f ",       dataLUX->cur );
+        printf( "  }" );
+        printf( "}" );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
         goto err;
     }
-
-    data = HalSensorTSL2561_Get( which );
-
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f %s", data->cur, unit );
-
-    // node.js サーバへデータを渡すための printf()
-    printf( "%5.2f", data->cur );
 
 err :
     return;
@@ -627,24 +741,51 @@ err :
  *************************************************************************** */
 static void
 Run_Time(
-    void  ///< [in] ナシ
+    char*           str     ///< [in] 文字列
 ){
     SHalTime_t*     data;
 
-    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    data = HalTime_GetLocaltime();
+    if( str == NULL )
+    {
+        data = HalTime_GetLocaltime();
 
-    AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
 
-    // node.js サーバへデータを渡すための printf()
-    printf( "%4d/%02d/%02d %02d:%02d:%02d",
-            data->year, data->month, data->day,
-            data->hour, data->min, data->sec
-          );
+        printf( "%4d/%02d/%02d %02d:%02d:%02d",
+                data->year, data->month, data->day,
+                data->hour, data->min, data->sec
+              );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        data = HalTime_GetLocaltime();
+
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
+
+        printf( "{ " );
+        printf( "  \"time\": {" );
+        printf( "    \"year\" : %4d,",  data->year );
+        printf( "    \"month\": %02d,", data->month );
+        printf( "    \"day\"  : %02d,", data->day );
+        printf( "    \"hour\" : %02d,", data->hour );
+        printf( "    \"min\"  : %02d,", data->min );
+        printf( "    \"sec\"  : %02d,", data->sec );
+        printf( "  }" );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+err :
     return;
 }
 
@@ -666,7 +807,7 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "mhsc:l:o:r:a:g:pw:x:y:z:ti:u:";
+    const char      optstring[] = "mhsc:l:o:r:a:g:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "menu",        no_argument,       NULL,  'm' },
@@ -678,12 +819,12 @@ int main(int argc, char *argv[ ])
         { "relay",       required_argument, NULL,  'r' },
         { "sa_acc",      required_argument, NULL,  'a' },
         { "sa_gyro",     required_argument, NULL,  'g' },
-        { "sa_pm",       no_argument,       NULL,  'p' },
+        { "sa_pm",       optional_argument, NULL,  'p' },
         { "si_bme280",   required_argument, NULL,  'w' },
-        { "si_gp2y0e03", no_argument,       NULL,  'x' },
+        { "si_gp2y0e03", optional_argument, NULL,  'x' },
         { "si_lps25h",   required_argument, NULL,  'y' },
         { "si_tsl2561",  required_argument, NULL,  'z' },
-        { "time",        no_argument,       NULL,  't' },
+        { "time",        optional_argument, NULL,  't' },
         { "pic",         required_argument, NULL,  'i' },
         { "usbkey",      required_argument, NULL,  'u' },
         { 0,             0,                 NULL,   0  }, // termination
@@ -753,12 +894,12 @@ int main(int argc, char *argv[ ])
         case 'r': Run_Relay( optarg ); break;
         case 'a': Run_Sa_Acc( optarg ); break;
         case 'g': Run_Sa_Gyro( optarg ); break;
-        case 'p': Run_Sa_Pm(); break;
+        case 'p': Run_Sa_Pm( optarg ); break;
         case 'w': Run_Si_BME280( optarg ); break;
-        case 'x': Run_Si_GP2Y0E03(); break;
+        case 'x': Run_Si_GP2Y0E03( optarg ); break;
         case 'y': Run_Si_LPS25H( optarg ); break;
         case 'z': Run_Si_TSL2561( optarg ); break;
-        case 't': Run_Time(); break;
+        case 't': Run_Time( optarg ); break;
         case 'i': 
             if( argv[2] != NULL )
             {
