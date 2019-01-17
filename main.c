@@ -29,7 +29,7 @@
 #include "./sys/sys.h"
 
 
-//#define DBG_PRINT
+#define DBG_PRINT
 #define MY_NAME "MAI"
 #include "./app/log/log.h"
 
@@ -68,7 +68,7 @@ static void         Run_Menu( unsigned char* str );
 static void         Run_Sensors( void );
 
 static void         Run_I2cLcd( char* str );
-static void         Run_I2cPca9685( char* str );
+static void         Run_I2cPca9685( char* str_ch, char* str_rate );
 static void         Run_Led( char* str );
 static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
@@ -272,64 +272,27 @@ Run_I2cLcd(
  *************************************************************************** */
 static void
 Run_I2cPca9685(
-    char*           str     ///< [in] 文字列
+    char*           str_ch,   ///< [in] 対象の ch ( 文字列 )
+    char*           str_rate  ///< [in] duty 比 ( 文字列 )
 ){
     int             ch = 0;
-    int             data = 0;
-    SHalSensor_t*   value;
+    int             rate = 0;
 
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    DBG_PRINT_TRACE( "str_ch   = %s \n\r", str_ch );
+    DBG_PRINT_TRACE( "str_rate = %s \n\r", str_rate );
 
-    if( 0 == strncmp( str, "standby", strlen("standby") ) )
+    ch   = atoi( (const char*)str_ch );
+    rate = atoi( (const char*)str_rate );
+
+    DBG_PRINT_TRACE( "ch   = %d \n", ch );
+    DBG_PRINT_TRACE( "rate = %d \n", rate );
+
+    if( 0 <= ch && ch <= 15 )
     {
-        for( ch = 0; ch < 16; ch++ )
-        {
-            HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STANDBY, 0 );
-        }
-    } else if( 0 == strncmp( str, "all", strlen("all") ) )
-    {
-        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
-        {
-            value = HalSensorPm_Get();
-            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
-
-            // 指定する値 ( PWM の duty 比 ) は「3% ~ 12%」まで。( サーボモータの仕様 )
-            // https://www.tohuandkonsome.site/entry/2017/08/24/101259
-            data = ( 11 - 3 ) * value->cur_rate / 100;
-            data = 3 + data;
-
-            for( ch = 0; ch < 16; ch++ )
-            {
-                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
-            }
-        }
-    } else if( 0 != isdigit( str[0] ) )
-    {
-        ch = atoi( (const char*)str );
-        DBG_PRINT_TRACE( "ch = %d \n", ch );
-
-        if( 0 <= ch && ch <= 15 )
-        {
-            while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
-            {
-                value = HalSensorPm_Get();
-                DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
-
-                // 指定する値 ( PWM の duty 比 ) は「3% ~ 12%」まで。( サーボモータの仕様 )
-                // https://www.tohuandkonsome.site/entry/2017/08/24/101259
-                data = ( 11 - 3 ) * value->cur_rate / 100;
-                data = 3 + data;
-
-                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
-            }
-        } else
-        {
-            DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
-            goto err;
-        }
+        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
     } else
     {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
         goto err;
     }
 
@@ -924,6 +887,7 @@ int main(int argc, char *argv[ ])
     DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
 #endif
 
+
     AppIfLcd_Clear();
     AppIfLcd_Ctrl( 1, 0, 0 );
     AppIfLcd_CursorSet( 0, 0 );
@@ -967,7 +931,7 @@ int main(int argc, char *argv[ ])
         case 'h': Run_Help(); break;
         case 's': Run_Sensors(); break;
         case 'c': Run_I2cLcd( optarg ); break;
-        case 'v': Run_I2cPca9685( optarg ); break;
+        case 'v': Run_I2cPca9685( optarg, argv[3] ); break;
         case 'l': Run_Led( optarg ); break;
         case 'o': Run_MotorSV( optarg ); break;
         case 'r': Run_Relay( optarg ); break;
