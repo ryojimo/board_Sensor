@@ -45,7 +45,7 @@
   #define NULL    (0)
 #endif
 
-#define MAX_CMD_NUM     (16)     ///< @def : コマンドの最大数
+#define MAX_CMD_NUM     (17)     ///< @def : コマンドの最大数
 
 #define SYS_MAX_CMD_NAME_LEN            (16)            ///< @def : コマンド名、オプション名の最大文字列数
 #define SYS_MAX_CMD_OPT_NUM             (5)             ///< @def : コマンド名 + オプションの個数の最大値
@@ -78,6 +78,7 @@ EAppMenuMsg_t   SelectCmd( void );
 
 EAppMenuMsg_t   MenuCmd_Help( void );           // コマンド一覧を表示
 EAppMenuMsg_t   MenuCmd_I2cLcd( void );         // LCD を表示する
+EAppMenuMsg_t   MenuCmd_I2cPca9685( void );     // PCA9685 を制御する
 EAppMenuMsg_t   MenuCmd_Led( void );            // LED を点灯する
 EAppMenuMsg_t   MenuCmd_MotorSV( void );        // SERVO MOTOR を回す
 EAppMenuMsg_t   MenuCmd_PushSw( void );         // PUSH SWITCH の押された回数を表示

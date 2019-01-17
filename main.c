@@ -17,6 +17,7 @@
 //********************************************************
 /* include                                               */
 //********************************************************
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -67,6 +68,7 @@ static void         Run_Menu( unsigned char* str );
 static void         Run_Sensors( void );
 
 static void         Run_I2cLcd( char* str );
+static void         Run_I2cPca9685( char* str );
 static void         Run_Led( char* str );
 static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
@@ -106,6 +108,8 @@ Run_Help(
     printf( " -s, --sensors             : Get the value of all sensors.                  \n\r" );
     printf( "                                                                            \n\r" );
     printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( " -v, --i2cpca9685 <value>  : Control the (I2C) PCA9685.                     \n\r" );
+    printf( "                                                                            \n\r" );
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
     printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
     printf( " -r, --relay [OPTION]      : Control the Relay circuit.                     \n\r" );
@@ -133,7 +137,7 @@ Run_Help(
     printf( "                     atmos : atmosphere                                     \n\r" );
     printf( "                      temp : temperature                                    \n\r" );
     printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -x, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
+    printf( " -z, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
     printf( "                 broadband : ?                                              \n\r" );
     printf( "                        ir : ?                                              \n\r" );
     printf( "                       lux : lux                                            \n\r" );
@@ -259,6 +263,79 @@ Run_I2cLcd(
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "                " );
 
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     I2C PCA9685 を実行する
+ *************************************************************************** */
+static void
+Run_I2cPca9685(
+    char*           str     ///< [in] 文字列
+){
+    int             ch = 0;
+    int             data = 0;
+    SHalSensor_t*   value;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "standby", strlen("standby") ) )
+    {
+        for( ch = 0; ch < 16; ch++ )
+        {
+            HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STANDBY, 0 );
+        }
+    } else if( 0 == strncmp( str, "all", strlen("all") ) )
+    {
+        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+        {
+            value = HalSensorPm_Get();
+            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
+
+            // 指定する値 ( PWM の duty 比 ) は「3% ~ 12%」まで。( サーボモータの仕様 )
+            // https://www.tohuandkonsome.site/entry/2017/08/24/101259
+            data = ( 11 - 3 ) * value->cur_rate / 100;
+            data = 3 + data;
+
+            for( ch = 0; ch < 16; ch++ )
+            {
+                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
+            }
+        }
+    } else if( 0 != isdigit( str[0] ) )
+    {
+        ch = atoi( (const char*)str );
+        DBG_PRINT_TRACE( "ch = %d \n", ch );
+
+        if( 0 <= ch && ch <= 15 )
+        {
+            while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+            {
+                value = HalSensorPm_Get();
+                DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
+
+                // 指定する値 ( PWM の duty 比 ) は「3% ~ 12%」まで。( サーボモータの仕様 )
+                // https://www.tohuandkonsome.site/entry/2017/08/24/101259
+                data = ( 11 - 3 ) * value->cur_rate / 100;
+                data = 3 + data;
+
+                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
+            }
+        } else
+        {
+            DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
+            goto err;
+        }
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+//  usleep( 1000 * 1000 );  // 2s 待つ
+
+err :
     return;
 }
 
@@ -807,13 +884,14 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "mhsc:l:o:r:a:g:p::w:x::y:z:t::i:u:";
+    const char      optstring[] = "mhsc:v:l:o:r:a:g:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "menu",        no_argument,       NULL,  'm' },
         { "help",        no_argument,       NULL,  'h' },
         { "sensors",     no_argument,       NULL,  's' },
         { "i2clcd",      required_argument, NULL,  'c' },
+        { "i2cpca9685",  required_argument, NULL,  'v' },
         { "led",         required_argument, NULL,  'l' },
         { "motorsv",     required_argument, NULL,  'o' },
         { "relay",       required_argument, NULL,  'r' },
@@ -889,6 +967,7 @@ int main(int argc, char *argv[ ])
         case 'h': Run_Help(); break;
         case 's': Run_Sensors(); break;
         case 'c': Run_I2cLcd( optarg ); break;
+        case 'v': Run_I2cPca9685( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'o': Run_MotorSV( optarg ); break;
         case 'r': Run_Relay( optarg ); break;

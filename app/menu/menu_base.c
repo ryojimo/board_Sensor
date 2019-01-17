@@ -55,6 +55,7 @@ const SAppMenuCmd_t g_menuCmdTable[ MAX_CMD_NUM ] =
     { ""            , MenuCmd_Help },
     { "help"        , MenuCmd_Help },
     { "i2clcd"      , MenuCmd_I2cLcd },
+    { "i2cpca9685"  , MenuCmd_I2cPca9685 },
     { "led"         , MenuCmd_Led },
     { "motorsv"     , MenuCmd_MotorSV },
     { "pushsw"      , MenuCmd_PushSw },

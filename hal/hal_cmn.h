@@ -31,6 +31,7 @@
 #define I2C_SLAVE_PIC18F14K50   (0x17)
 #define I2C_SLAVE_TSL2561       (0x39)
 #define I2C_SLAVE_LCD           (0x3C)
+#define I2C_SLAVE_PCA9685       (0x40)
 #define I2C_SLAVE_GP2Y0E03      (0x40)
 #define I2C_SLAVE_HDC1000       (0x40)
 #define I2C_SLAVE_ADT7410       (0x48)
