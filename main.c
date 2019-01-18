@@ -67,10 +67,10 @@ static void         Run_Help( void );
 static void         Run_Menu( unsigned char* str );
 static void         Run_Sensors( void );
 
-static void         Run_I2cLcd( char* str );
-static void         Run_I2cPca9685( char* str_ch, char* str_rate );
+static void         Run_I2cLcd( int argc, char *argv[ ] );
+
+static void         Run_I2cPca9685( int argc, char *argv[ ] );
 static void         Run_Led( char* str );
-static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
 
 static void         Run_Sa_Acc( char* str );
@@ -101,49 +101,93 @@ Run_Help(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    printf( " COMMAND                   : DESCRIPTION                                    \n\r" );
-    printf( "============================================================================\n\r" );
-    printf( " -m, --menu                : Go to menu mode.                               \n\r" );
-    printf( " -h, --help                : display the command option list.               \n\r" );
-    printf( " -s, --sensors             : Get the value of all sensors.                  \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
-    printf( " -v, --i2cpca9685 <value>  : Control the (I2C) PCA9685.                     \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -l, --led <value>         : Control the LED.                               \n\r" );
-    printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
-    printf( " -r, --relay [OPTION]      : Control the Relay circuit.                     \n\r" );
-    printf( "                        on : ON  relay switch.                              \n\r" );
-    printf( "                       off : OFF relay switch.                              \n\r" );
-    printf( " -a, --sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
-    printf( "                         x : X direction.                                   \n\r" );
-    printf( "                         y : Y direction.                                   \n\r" );
-    printf( "                         z : Z direction.                                   \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -g, --sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
-    printf( "                        g1 : G1 direction.                                  \n\r" );
-    printf( "                        g2 : G2 direction.                                  \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
-    printf( "                      json : value of json format.                          \n\r" );
-    printf( " -w, --si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
-    printf( "                     atmos : atmosphere                                     \n\r" );
-    printf( "                      humi : humidity                                       \n\r" );
-    printf( "                      temp : temperature                                    \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -x, --si_gp2y0e03         : Get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
-    printf( "                      json : value of json format.                          \n\r" );
-    printf( " -y, --si_lps25h [OPTION]  : Get the value of a sensor(I2C), LPS25H.        \n\r" );
-    printf( "                     atmos : atmosphere                                     \n\r" );
-    printf( "                      temp : temperature                                    \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -z, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
-    printf( "                 broadband : ?                                              \n\r" );
-    printf( "                        ir : ?                                              \n\r" );
-    printf( "                       lux : lux                                            \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -t, --time                : Get the time.                                  \n\r" );
-    printf( "                      json : value of json format.                          \n\r" );
+    printf( " DESCRIPTION               : COMMAND                                                \n\r" );
+    printf( "====================================================================================\n\r" );
+    printf( " Go to menu mode.                                                                   \n\r" );
+    printf( "                           : --menu                                                 \n\r" );
+    printf( "                           : -m                                                     \n\r" );
+    printf( " Display the command option list.                                                   \n\r" );
+    printf( "                           : --help                                                 \n\r" );
+    printf( "                           : -h                                                     \n\r" );
+    printf( " Get the value of all sensors.                                                      \n\r" );
+    printf( "                           : --sensors                                              \n\r" );
+    printf( "                           : -s                                                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Control the (I2C) LCD.                                                             \n\r" );
+    printf( "                           : --i2clcd  --dir_x=<number>  --dir_y=<number>  <string> \n\r" );
+    printf( "                           : -c        -x      <number>  -y      <number>  <string> \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Control the (I2C) PCA9685.                                                         \n\r" );
+    printf( "                           : --i2cpca9685  --ch=<number>  --rate=<number>           \n\r" );
+    printf( "                           : -v            -c   <number>  -r     <number>           \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Control the LED.                                                                   \n\r" );
+    printf( "                           : --led=<number>                                         \n\r" );
+    printf( "                           : -l    <number>                                         \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Control the Relay circuit.                                                         \n\r" );
+    printf( "                           : --relay=<string>                                       \n\r" );
+    printf( "                           : -r      <string>                                       \n\r" );
+    printf( "                        on : turn on the relay circuit.                             \n\r" );
+    printf( "                       off : turn off the relay circuit.                            \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(A/D), Acc.                                               \n\r" );
+    printf( "                           : --sa_acc=<string>                                      \n\r" );
+    printf( "                           : -a       <string>                                      \n\r" );
+    printf( "                         x : get the value of X direction.                          \n\r" );
+    printf( "                         y : get the value of Y direction.                          \n\r" );
+    printf( "                         z : get the value of Z direction.                          \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(A/D), Gyro.                                              \n\r" );
+    printf( "                           : --sa_gyro=<string>                                     \n\r" );
+    printf( "                           : -g        <string>                                     \n\r" );
+    printf( "                        g1 : get the value of G1 direction.                         \n\r" );
+    printf( "                        g2 : get the value of G2 direction.                         \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(A/D), Potentiometer.                                     \n\r" );
+    printf( "                           : --sa_pm                                                \n\r" );
+    printf( "                           : -p                                                     \n\r" );
+    printf( "                           : --sa_pm=<string>                                       \n\r" );
+    printf( "                           : -p      <string>                                       \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(I2C), BME280.                                            \n\r" );
+    printf( "                           : --si_bme280=<string>                                   \n\r" );
+    printf( "                           : -w          <string>                                   \n\r" );
+    printf( "                     atmos : atmosphere                                             \n\r" );
+    printf( "                      humi : humidity                                               \n\r" );
+    printf( "                      temp : temperature                                            \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(I2C), GP2Y0E03.                                          \n\r" );
+    printf( "                           : --si_gp2y0e03                                          \n\r" );
+    printf( "                           : -x                                                     \n\r" );
+    printf( "                           : --si_gp2y0e03=<string>                                 \n\r" );
+    printf( "                           : -x            <string>                                 \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(I2C), LPS25H.                                            \n\r" );
+    printf( "                           : --si_lps25h=<string>                                   \n\r" );
+    printf( "                           : -y          <string>                                   \n\r" );
+    printf( "                     atmos : atmosphere                                             \n\r" );
+    printf( "                      temp : temperature                                            \n\r" );
+    printf( "                      json : get the all values of json format.                     \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the value of a sensor(I2C), TSL2561.                                           \n\r" );
+    printf( "                           : --si_tsl2561=<string>                                  \n\r" );
+    printf( "                           : -z           <string>                                  \n\r" );
+    printf( "                 broadband : ?                                                      \n\r" );
+    printf( "                        ir : ?                                                      \n\r" );
+    printf( "                       lux : lux                                                    \n\r" );
+    printf( "                      json : all values of json format.                             \n\r" );
+    printf( "                                                                                    \n\r" );
+    printf( " Get the time.                                                                      \n\r" );
+    printf( "                           : --time                                                 \n\r" );
+    printf( "                           : -t                                                     \n\r" );
+    printf( "                      json : value of json format.                                  \n\r" );
     printf( "\n\r" );
 
     return;
@@ -254,14 +298,61 @@ Run_Sensors(
  *************************************************************************** */
 static void
 Run_I2cLcd(
-    char*  str     ///< [in] 文字列
+    int   argc,
+    char  *argv[ ]
 ){
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    int             opt = 0;
+    const char      optstring[] = "x:y:";
+    const struct    option longopts[] = {
+      //{ *name, has_arg,           *flag, val }, // 説明
+        { "dir_x",   required_argument, NULL,  'x' },
+        { "dir_y",   required_argument, NULL,  'y' },
+        { 0,         0,                 NULL,   0  }, // termination
+    };
+    int             longindex = 0;
+    int             x = 0;
+    int             y = 0;
 
+    DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
+    DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
+    DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
+    DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
+    DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
+
+    while( 1 )
+    {
+        opt = getopt_long( argc, argv, optstring, longopts, &longindex );
+        DBG_PRINT_TRACE( "optind = %d \n\r", optind );
+        DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
+
+        if( opt == -1 )   // 処理するオプションが無くなった場合
+        {
+            break;
+        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
+        {
+            DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
+            break;
+        }
+
+        switch( opt )
+        {
+        case 'x': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); x = strtol( (const char*)optarg, NULL, 10 ); break;
+        case 'y': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); y = strtol( (const char*)optarg, NULL, 10 ); break;
+        default:
+            DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
+            Run_Help();
+        break;
+        }
+    }
+
+    DBG_PRINT_TRACE( "(x, y) = (%d, %d) \n\r", x, y );
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( str );
+    AppIfLcd_Printf( "                " );
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "                " );
+
+    AppIfLcd_CursorSet( x, y );
+    AppIfLcd_Printf( argv[3] );
 
     return;
 }
@@ -272,20 +363,55 @@ Run_I2cLcd(
  *************************************************************************** */
 static void
 Run_I2cPca9685(
-    char*           str_ch,   ///< [in] 対象の ch ( 文字列 )
-    char*           str_rate  ///< [in] duty 比 ( 文字列 )
+    int   argc,
+    char  *argv[ ]
 ){
+    int             opt = 0;
+    const char      optstring[] = "c:r:";
+    const struct    option longopts[] = {
+      //{ *name,  has_arg,           *flag, val }, // 説明
+        { "ch",   required_argument, NULL,  'c' },
+        { "rate", required_argument, NULL,  'r' },
+        { 0,      0,                 NULL,   0  }, // termination
+    };
+    int             longindex = 0;
     int             ch = 0;
     int             rate = 0;
 
-    DBG_PRINT_TRACE( "str_ch   = %s \n\r", str_ch );
-    DBG_PRINT_TRACE( "str_rate = %s \n\r", str_rate );
+    DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
+    DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
+    DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
+    DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
+    DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
+    DBG_PRINT_TRACE( "argv[4] = %s \n\r", argv[4] );
 
-    ch   = atoi( (const char*)str_ch );
-    rate = atoi( (const char*)str_rate );
+    while( 1 )
+    {
+        opt = getopt_long( argc, argv, optstring, longopts, &longindex );
+        DBG_PRINT_TRACE( "optind = %d \n\r", optind );
+        DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-    DBG_PRINT_TRACE( "ch   = %d \n", ch );
-    DBG_PRINT_TRACE( "rate = %d \n", rate );
+        if( opt == -1 )   // 処理するオプションが無くなった場合
+        {
+            break;
+        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
+        {
+            DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
+            break;
+        }
+
+        switch( opt )
+        {
+        case 'c': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); ch   = strtol( (const char*)optarg, NULL, 10 ); break;
+        case 'r': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); rate = strtol( (const char*)optarg, NULL, 10 ); break;
+        default:
+            DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
+            Run_Help();
+        break;
+        }
+    }
+
+    DBG_PRINT_TRACE( "(ch, rate) = (%d, %d) \n\r", ch, rate );
 
     if( 0 <= ch && ch <= 15 )
     {
@@ -297,7 +423,6 @@ Run_I2cPca9685(
     }
 
 //  usleep( 1000 * 1000 );  // 2s 待つ
-
 err :
     return;
 }
@@ -320,31 +445,6 @@ Run_Led(
 
     sscanf( str, "%X", &num );
     HalLed_Set( num );
-
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     SERVO MOTOR を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_MotorSV(
-    char*   str     ///< [in] 文字列
-){
-    int     data = 0;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    data = atoi( (const char*)str );
-    DBG_PRINT_TRACE( "data = %d \n", data );
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
-//  usleep( 1000 * 1000 );  // 2s 待つ
 
     return;
 }
@@ -847,7 +947,7 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "mhsc:v:l:o:r:a:g:p::w:x::y:z:t::i:u:";
+    const char      optstring[] = "mhsc:v:l:r:a:g:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "menu",        no_argument,       NULL,  'm' },
@@ -856,7 +956,6 @@ int main(int argc, char *argv[ ])
         { "i2clcd",      required_argument, NULL,  'c' },
         { "i2cpca9685",  required_argument, NULL,  'v' },
         { "led",         required_argument, NULL,  'l' },
-        { "motorsv",     required_argument, NULL,  'o' },
         { "relay",       required_argument, NULL,  'r' },
         { "sa_acc",      required_argument, NULL,  'a' },
         { "sa_gyro",     required_argument, NULL,  'g' },
@@ -879,13 +978,13 @@ int main(int argc, char *argv[ ])
     DBG_PRINT_WARN(  "test warn  \n\r" );
     DBG_PRINT_TRACE( "test trace \n\r" );
     DBG_PRINT_DEBUG( "test debug \n\r" );
+#endif
 
     DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
     DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
     DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
     DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
     DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
-#endif
 
 
     AppIfLcd_Clear();
@@ -897,22 +996,18 @@ int main(int argc, char *argv[ ])
     {
         opt = getopt_long( argc, argv, optstring, longopts, &longindex );
 //      opt = getopt( argc, argv, optstring );
-        DBG_PRINT_TRACE( "opt = %c \n\r", opt );
+        DBG_PRINT_TRACE( "optind = %d \n\r", optind );
+        DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
         if( opt == -1 )   // 処理するオプションが無くなった場合
         {
             break;
-        }
-
-        if( opt == '?' )  // optstring で指定していない引数が見つかった場合
+        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
         {
             DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
             break;
-        }
-
-        switch( opt )
+        } else if( opt == 'm' )
         {
-        case 'm':
             memset( str, '\0', sizeof(str) );
             pt = (unsigned char*)str;
 
@@ -927,13 +1022,27 @@ int main(int argc, char *argv[ ])
             }
 
             Run_Menu( str );
-        break;
+        } else if( opt == 'c' )
+        {
+            optind = 1;
+            argc = argc - optind;
+            argv = argv + optind;
+            Run_I2cLcd( argc, argv );
+            break;
+        } else if( opt == 'v' )
+        {
+            optind = 1;
+            argc = argc - optind;
+            argv = argv + optind;
+            Run_I2cPca9685( argc, argv );
+            break;
+        }
+
+        switch( opt )
+        {
         case 'h': Run_Help(); break;
         case 's': Run_Sensors(); break;
-        case 'c': Run_I2cLcd( optarg ); break;
-        case 'v': Run_I2cPca9685( optarg, argv[3] ); break;
         case 'l': Run_Led( optarg ); break;
-        case 'o': Run_MotorSV( optarg ); break;
         case 'r': Run_Relay( optarg ); break;
         case 'a': Run_Sa_Acc( optarg ); break;
         case 'g': Run_Sa_Gyro( optarg ); break;
