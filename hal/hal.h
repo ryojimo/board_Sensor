@@ -186,7 +186,7 @@ EHalBool_t      HalI2cLcd_Write( EHalLcdMode_t rs, unsigned char code );
 // I2C PCA9685 API
 EHalBool_t      HalI2cPca9685_Init( void );
 void            HalI2cPca9685_Fini( void );
-EHalBool_t      HalI2cPca9685_SetPwmDuty( unsigned char ch, EHalMotorState_t status, int rate );
+EHalBool_t      HalI2cPca9685_SetPwmDuty( unsigned char ch, EHalMotorState_t status, double rate );
 
 // LED API
 EHalBool_t      HalLed_Init( void );

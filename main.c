@@ -376,7 +376,8 @@ Run_I2cPca9685(
     };
     int             longindex = 0;
     int             ch = 0;
-    int             rate = 0;
+    double          rate = 0;
+    char*           endptr;
 
     DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
     DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
@@ -403,7 +404,7 @@ Run_I2cPca9685(
         switch( opt )
         {
         case 'c': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); ch   = strtol( (const char*)optarg, NULL, 10 ); break;
-        case 'r': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); rate = strtol( (const char*)optarg, NULL, 10 ); break;
+        case 'r': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); rate = strtod( (const char*)optarg, &endptr ); break;
         default:
             DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
             Run_Help();
@@ -411,7 +412,8 @@ Run_I2cPca9685(
         }
     }
 
-    DBG_PRINT_TRACE( "(ch, rate) = (%d, %d) \n\r", ch, rate );
+    DBG_PRINT_TRACE( "(ch, rate) = (%d, %2.4f) \n\r", ch, rate );
+    DBG_PRINT_TRACE( "endptr     = %s \n\r", endptr );
 
     if( 0 <= ch && ch <= 15 )
     {

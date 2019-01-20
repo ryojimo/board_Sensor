@@ -338,7 +338,7 @@ EHalBool_t
 HalI2cPca9685_SetPwmDuty(
     unsigned char       ch,     ///< [in] 対象の ch ( 0 ～ 15 )
     EHalMotorState_t    status, ///< [in] モータの状態
-    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    double              rate    ///< [in] デューティ比 : 0.0% ～ 100.0% まで
 ){
     EHalBool_t      ret = EN_FALSE;
     unsigned int    on = 0;

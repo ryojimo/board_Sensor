@@ -91,7 +91,7 @@ PrintFormat(
     AppIfPc_Printf( "                 : ccw   : turn ccw.                       \n\r" );
     AppIfPc_Printf( "                 : vol   : change speed by volume control. \n\r" );
     AppIfPc_Printf( "        OPTION02 : <ch>  : target channel.                 \n\r" );
-    AppIfPc_Printf( "        OPTION03 : <rate>: duty rate ( 3% ~ 12% ).         \n\r" );
+    AppIfPc_Printf( "        OPTION03 : <rate>: duty rate ( 3.0% ~ 12.0% ).     \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( "    Ex.)                                       \n\r" );
     AppIfPc_Printf( "        >i2cpca9685 s   0  5                   \n\r" );
@@ -115,12 +115,13 @@ Stop(
     void
 ){
     int             ch;
-    int             rate;
+    double          rate;
+    char*           endptr;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     ch   = atoi( (const char*)&g_menuCmd[2][0] );
-    rate = atoi( (const char*)&g_menuCmd[3][0] );
+    rate = strtod( (const char*)&g_menuCmd[3][0], &endptr );
 
     // MOTOR を停止
     HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STOP, rate );
@@ -141,12 +142,13 @@ Cw(
     void
 ){
     int             ch;
-    int             rate;
+    double          rate;
+    char*           endptr;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     ch   = atoi( (const char*)&g_menuCmd[2][0] );
-    rate = atoi( (const char*)&g_menuCmd[3][0] );
+    rate = strtod( (const char*)&g_menuCmd[3][0], &endptr );
 
     HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
     return EN_MENU_MSG_DONE;
@@ -166,12 +168,13 @@ Ccw(
     void
 ){
     int             ch;
-    int             rate;
+    double          rate;
+    char*           endptr;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     ch   = atoi( (const char*)&g_menuCmd[2][0] );
-    rate = atoi( (const char*)&g_menuCmd[3][0] );
+    rate = strtod( (const char*)&g_menuCmd[3][0], &endptr );
 
     HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CCW, rate );
     return EN_MENU_MSG_DONE;
