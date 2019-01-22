@@ -28,12 +28,12 @@
 //**************************************************
 #define DBG_COLOR_WHITE  "\x1b[0;23m"
 #define DBG_COLOR_RED    "\x1b[1;31m"
-#define DBG_COLOR_GREEN  "\x1b[1;32m"
-#define DBG_COLOR_YELLOW "\x1b[1;33m"
+#define DBG_COLOR_GREEN  "\x1b[0;32m"
+#define DBG_COLOR_YELLOW "\x1b[0;33m"
 #define DBG_COLOR_BLUE   "\x1b[1;34m"
-#define DBG_COLOR_PURPLE "\x1b[1;35m"
-#define DBG_COLOR_AQUA   "\x1b[1;36m"
-#define DBG_COLOR_GRARY  "\x1b[1;37m"
+#define DBG_COLOR_PURPLE "\x1b[0;35m"
+#define DBG_COLOR_AQUA   "\x1b[0;36m"
+#define DBG_COLOR_GRARY  "\x1b[0;37m"
 
 // Debug Print Log
 #ifndef MY_NAME

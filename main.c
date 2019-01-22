@@ -1029,6 +1029,7 @@ int main(int argc, char *argv[ ])
             }
 
             Run_Menu( str );
+            break;
         } else if( opt == 'c' )
         {
             optind = 1;

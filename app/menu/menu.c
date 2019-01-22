@@ -80,6 +80,7 @@ AppMenu_Main(
     EAppMenuMsg_t   ret = EN_MENU_MSG_ERR_FATAL;    // 戻り値
 
     DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
 
     // 初期化
     MenuCmd_Init();
