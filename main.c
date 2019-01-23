@@ -68,10 +68,10 @@ static void         Run_Version( void );
 static void         Run_Menu( unsigned char* str );
 static void         Run_Sensors( void );
 
-static void         Run_I2cLcd( int argc, char *argv[ ] );
-
-static void         Run_I2cPca9685( int argc, char *argv[ ] );
+static void         Run_I2cLcd( int argc, char *argv[] );
+static void         Run_I2cPca9685( int argc, char *argv[] );
 static void         Run_Led( char* str );
+static void         Run_MotorSV( char* str );
 static void         Run_Relay( char* str );
 
 static void         Run_Sa_Acc( char* str );
@@ -127,6 +127,7 @@ Run_Help(
     printf( "                              Ex) -e           -c   <number>  -r     <float-number> \n\r" );
     printf( "                                  --i2cpca9685 --ch=<number>  --rate=<float-number> \n\r" );
     printf("\x1b[39m");
+    printf( "  -o number, --motorsv=number control the SAVO motor.           \n\r" );
     printf( "                                                                \n\r" );
     printf( "  -l number, --led=number     control the LED.                  \n\r" );
     printf( "  -r {on|off}, --relay={on|off}                                 \n\r" );
@@ -299,7 +300,7 @@ Run_Sensors(
 static void
 Run_I2cLcd(
     int   argc,
-    char  *argv[ ]
+    char  *argv[]
 ){
     int             opt = 0;
     const char      optstring[] = "s:x:y:";
@@ -368,7 +369,7 @@ Run_I2cLcd(
 static void
 Run_I2cPca9685(
     int   argc,
-    char  *argv[ ]
+    char  *argv[]
 ){
     int             opt = 0;
     const char      optstring[] = "c:r:";
@@ -451,6 +452,31 @@ Run_Led(
 
     sscanf( str, "%X", &num );
     HalLed_Set( num );
+
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     SERVO MOTOR を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_MotorSV(
+    char*   str     ///< [in] 文字列
+){
+    int     data = 0;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    data = atoi( (const char*)str );
+    DBG_PRINT_TRACE( "data = %d \n", data );
+    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
+//  usleep( 1000 * 1000 );  // 2s 待つ
 
     return;
 }
@@ -944,7 +970,7 @@ err :
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-int main(int argc, char *argv[ ])
+int main(int argc, char *argv[])
 {
     int             i = 0;
     int             cmd = 0;
@@ -953,7 +979,7 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "hvmsc:e:l:r:a:g:p::w:x::y:z:t::i:u:";
+    const char      optstring[] = "hvmsc:e:o:l:r:a:g:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "help",        no_argument,       NULL,  'h' },
@@ -962,6 +988,7 @@ int main(int argc, char *argv[ ])
         { "sensors",     no_argument,       NULL,  's' },
         { "i2clcd",      required_argument, NULL,  'c' },
         { "i2cpca9685",  required_argument, NULL,  'e' },
+        { "motorsv",     required_argument, NULL,  'o' },
         { "led",         required_argument, NULL,  'l' },
         { "relay",       required_argument, NULL,  'r' },
         { "sa_acc",      required_argument, NULL,  'a' },
@@ -1052,6 +1079,7 @@ int main(int argc, char *argv[ ])
         case 'v': Run_Version(); break;
         case 's': Run_Sensors(); break;
         case 'l': Run_Led( optarg ); break;
+        case 'o': Run_MotorSV( optarg ); break;
         case 'r': Run_Relay( optarg ); break;
         case 'a': Run_Sa_Acc( optarg ); break;
         case 'g': Run_Sa_Gyro( optarg ); break;
