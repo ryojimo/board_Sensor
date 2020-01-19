@@ -65,7 +65,6 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void         Run_Menu( unsigned char* str );
-
 static void         Run_MotorSV( char* str );
 
 
