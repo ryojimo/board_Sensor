@@ -70,26 +70,6 @@ static void         Run_Menu( unsigned char* str );
 
 
 /**************************************************************************//*!
- * @brief     HELP を表示する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Help(
-    void
-){
-    DBG_PRINT_TRACE( "\n\r" );
-    printf( "  -m, --menu                  : go to the menu mode.    \n\r" );
-    printf( "  -o number, --motorsv=number : control the SAVO motor. \n\r" );
-    printf( "\n\r" );
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     メニューを実行する
  * @attention なし。
  * @note      なし。

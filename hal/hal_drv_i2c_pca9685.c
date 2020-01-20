@@ -302,7 +302,7 @@ SetPwm(
     EHalBool_t      ret = EN_FALSE;
     unsigned char   buff[5];
 
-//    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "\n\r" );
 
     // I2C スレーブデバイスを PCA9685 に変える
     HalCmnI2c_SetSlave( I2C_SLAVE_PCA9685 );
@@ -344,7 +344,10 @@ HalI2cPca9685_SetPwmDuty(
     unsigned int    on = 0;
     unsigned int    off = 0;
 
-//    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "ch     = %d    \n\r", ch );
+    DBG_PRINT_TRACE( "status = %d    \n\r", status );
+    DBG_PRINT_TRACE( "rate   = %2.4f \n\r", rate );
 
     on = 0;
     off = 0xFFF * rate / 100;
