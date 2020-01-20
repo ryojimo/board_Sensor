@@ -44,9 +44,11 @@
 //********************************************************
 void  Opt_Help( void );                           // オプション一覧を表示する
 void  Opt_Version( void );                        // Version を表示する
+
 void  Opt_I2cLcd( int argc, char *argv[] );       // LCD を実行する
 void  Opt_I2cPca9685( int argc, char *argv[] );   // PCA9685 を制御する
 void  Opt_Led( int argc, char *argv[] );          // LED を点灯する
+void  Opt_MotorSV( int argc, char *argv[] );      // サーボモータを制御する
 void  Opt_Relay( int argc, char *argv[] );        // リレーを ON / OFF する
 
 void  Opt_Sensors( void );                        // すべてのセンサの値を取得する

@@ -65,7 +65,6 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void         Run_Menu( unsigned char* str );
-static void         Run_MotorSV( char* str );
 
 
 
@@ -106,31 +105,6 @@ Run_Menu(
 
     Sys_ShowInfo();
     AppMenu_Main( str );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     SERVO MOTOR を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_MotorSV(
-    char*   str     ///< [in] 文字列
-){
-    int     data = 0;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    data = atoi( (const char*)str );
-    DBG_PRINT_TRACE( "data = %d \n", data );
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
-//  usleep( 1000 * 1000 );  // 2s 待つ
-
     return;
 }
 
@@ -244,6 +218,7 @@ int main(int argc, char *argv[])
         case 'g': Opt_Sa_Gyro( argc, argv ); break;
         case 'h': Opt_Help(); break;
         case 'l': Opt_Led( argc, argv ); break;
+        case 'o': Opt_MotorSV( argc, argv ); break;
         case 'p': Opt_Sa_Pm( argc, argv ); break;
         case 'r': Opt_Relay( argc, argv ); break;
         case 's': Opt_Sensors(); break;
@@ -254,7 +229,6 @@ int main(int argc, char *argv[])
         case 'y': Opt_Si_Lps25h( argc, argv ); break;
         case 'z': Opt_Si_Tsl2561( argc, argv ); break;
 
-        case 'o': Run_MotorSV( optarg ); break;
         case 'i': 
             if( argv[2] != NULL )
             {
