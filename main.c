@@ -24,11 +24,9 @@
 #include <getopt.h>
 
 #include "./app/if_lcd/if_lcd.h"
-#include "./app/menu/menu.h"
 #include "./app/options/options.h"
 #include "./hal/hal.h"
 #include "./sys/sys.h"
-
 
 //#define DBG_PRINT
 #define MY_NAME "MAI"
@@ -64,29 +62,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void         Run_Menu( unsigned char* str );
+// なし
 
 
-
-
-/**************************************************************************//*!
- * @brief     メニューを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Menu(
-    unsigned char*  str     ///< [in] 文字列
-){
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    Sys_ShowInfo();
-    AppMenu_Main( str );
-    return;
-}
 
 
 /**************************************************************************//*!
@@ -99,35 +77,33 @@ Run_Menu(
  *************************************************************************** */
 int main(int argc, char *argv[])
 {
-    int             i = 0;
     int             cmd = 0;
     int             data = 0;
-    unsigned char   str[256];
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "hvmsc:e:o:l:r:a:g:p:w:x:y:z:t:i:u:";
+    const char      optstring[] = "a:c:e:g:hi:l:m:o:p:r:st:u:vw:x:y:z:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
-        { "help",        no_argument,       NULL,  'h' },
-        { "version",     no_argument,       NULL,  'v' },
-        { "menu",        no_argument,       NULL,  'm' },
-        { "sensors",     no_argument,       NULL,  's' },
+        { "sa_acc",      required_argument, NULL,  'a' },
         { "i2clcd",      required_argument, NULL,  'c' },
         { "i2cpca9685",  required_argument, NULL,  'e' },
-        { "motorsv",     required_argument, NULL,  'o' },
-        { "led",         required_argument, NULL,  'l' },
-        { "relay",       required_argument, NULL,  'r' },
-        { "sa_acc",      required_argument, NULL,  'a' },
         { "sa_gyro",     required_argument, NULL,  'g' },
+        { "help",        no_argument,       NULL,  'h' },
+        { "pic",         required_argument, NULL,  'i' },
+        { "led",         required_argument, NULL,  'l' },
+        { "menu",        required_argument, NULL,  'm' },
+        { "motorsv",     required_argument, NULL,  'o' },
         { "sa_pm",       required_argument, NULL,  'p' },
+        { "relay",       required_argument, NULL,  'r' },
+        { "sensors",     no_argument,       NULL,  's' },
+        { "time",        required_argument, NULL,  't' },
+        { "usbkey",      required_argument, NULL,  'u' },
+        { "version",     no_argument,       NULL,  'v' },
         { "si_bme280",   required_argument, NULL,  'w' },
         { "si_gp2y0e03", required_argument, NULL,  'x' },
         { "si_lps25h",   required_argument, NULL,  'y' },
         { "si_tsl2561",  required_argument, NULL,  'z' },
-        { "time",        required_argument, NULL,  't' },
-        { "pic",         required_argument, NULL,  'i' },
-        { "usbkey",      required_argument, NULL,  'u' },
         { 0,             0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
@@ -153,6 +129,8 @@ int main(int argc, char *argv[])
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( "cmd:%s", argv[1] );
 
+    Sys_ShowInfo();
+
     while( 1 )
     {
         opt = getopt_long( argc, argv, optstring, longopts, &longindex );
@@ -166,23 +144,6 @@ int main(int argc, char *argv[])
         } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
         {
             DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
-            break;
-        } else if( opt == 'm' )
-        {
-            memset( str, '\0', sizeof(str) );
-            pt = (unsigned char*)str;
-
-            // 引数部分を取り出す
-            for( i = 2; i < argc; i++ )
-            {
-                DBG_PRINT_TRACE( "argv[%d] = %s \n\r", i, argv[i] );
-                strncat( (char*)pt, argv[i], strlen( argv[i] ) );
-                pt += strlen( argv[i] );
-                strncat( (char*)pt, " ", strlen( " " ) );
-                pt += strlen( " " );
-            }
-
-            Run_Menu( str );
             break;
         }
 
@@ -198,6 +159,7 @@ int main(int argc, char *argv[])
         case 'g': Opt_Sa_Gyro( argc, argv ); break;
         case 'h': Opt_Help(); break;
         case 'l': Opt_Led( argc, argv ); break;
+        case 'm': Opt_Menu( argc, argv ); break;
         case 'o': Opt_MotorSV( argc, argv ); break;
         case 'p': Opt_Sa_Pm( argc, argv ); break;
         case 'r': Opt_Relay( argc, argv ); break;

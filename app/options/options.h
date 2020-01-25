@@ -44,6 +44,7 @@
 //********************************************************
 void  Opt_Help( void );                           // オプション一覧を表示する
 void  Opt_Version( void );                        // Version を表示する
+void  Opt_Menu( int argc, char *argv[] );         // Menu モードへ移動する
 
 void  Opt_I2cLcd( int argc, char *argv[] );       // LCD を実行する
 void  Opt_I2cPca9685( int argc, char *argv[] );   // PCA9685 を制御する
