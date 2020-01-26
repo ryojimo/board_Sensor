@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_motorSV.c
+ *  @file           opt_pushsw.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -40,7 +40,8 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void Help( void );
+static void       Help( void );
+static void       Test( void );
 
 
 /**************************************************************************//*!
@@ -58,17 +59,82 @@ Help(
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( " Main option)                                \n\r" );
-    AppIfPc_Printf( "     -o, --motorsv : control the SAVO motor. \n\r" );
+    AppIfPc_Printf( "     -s, --switch : control the push switch. \n\r" );
     AppIfPc_Printf( "                                             \n\r" );
-    AppIfPc_Printf( " Sub option)                             \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -d, --duty : duty ratio.            \n\r" );
+    AppIfPc_Printf( " Sub option)                                 \n\r" );
+    AppIfPc_Printf( "     -h, --help         : display the help menu. \n\r" );
+    AppIfPc_Printf( "     -t, --test         : test the push switch.  \n\r" );
     AppIfPc_Printf( "                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                     \n\r" );
-    AppIfPc_Printf( "     -o         -d  5    \n\r" );
-    AppIfPc_Printf( "     --motorsv  --duty=5 \n\r" );
+    AppIfPc_Printf( " Ex)                  \n\r" );
+    AppIfPc_Printf( "     -s        -t     \n\r" );
+    AppIfPc_Printf( "     --switch  --test \n\r" );
     AppIfPc_Printf("\x1b[39m");
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     テストする。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Test(
+    void
+){
+    EHalBool_t      status = EN_FALSE;
+    unsigned int    data0 = 0;  ///< PUSH SWITCH の押された回数
+    unsigned int    data1 = 0;  ///< PUSH SWITCH の押された回数
+    unsigned int    data2 = 0;  ///< PUSH SWITCH の押された回数
+
+    SHalSensor_t*   data;       ///< センサデータの構造体 : ポテンショメーター
+    int             start = 0;  ///< 開始時のポテンショメーターの値 ( % )
+    int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
+
+    DBG_PRINT_TRACE( "Test() \n\r" );
+
+    AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // ポテンショメーターのデータを取得
+    data = HalSensorPm_Get();
+    start = data->cur_rate / 10;
+    stop  = data->cur_rate / 10;
+
+    // ポテンショメーターが動かされるまでループ
+    while( start - 1 <= stop && stop <= start + 1 )
+    {
+        // PUSH SWITCH の押された回数を取得
+        status = HalPushSw_Get( EN_PUSH_SW_0 );
+        if( status == EN_TRUE ){ data0++; }
+
+        status = HalPushSw_Get( EN_PUSH_SW_1 );
+        if( status == EN_TRUE ){ data1++; }
+
+        status = HalPushSw_Get( EN_PUSH_SW_2 );
+        if( status == EN_TRUE ){ data2++; }
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "Push SW : SW0=%02d , SW1=%02d , SW2=%02d \r", data0, data1, data2 );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%4d %4d %4d", data0, data1, data2 );
+
+        // LED 表示
+        HalLed_Set( ( data2 % 2 ) << 2 | ( data1 % 2 ) << 1 | ( data0 % 2 ) << 0 );
+
+        // ポテンショメーターの値を取得
+        data = HalSensorPm_Get();
+        stop = data->cur_rate / 10;
+    }
+
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -83,22 +149,21 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_MotorSV(
+Opt_PushSwitch(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hd:";
+    const char      optstring[] = "ht";
     const struct    option longopts[] = {
       //{ *name,  has_arg,           *flag, val }, // 説明
         { "help", no_argument,       NULL,  'h' },
-        { "duty", required_argument, NULL,  'd' },
+        { "test", no_argument,       NULL,  't' },
         { 0,      0,                 NULL,   0  }, // termination
     };
     int             longindex = 0;
-    unsigned int    data;
 
-    DBG_PRINT_TRACE( "Opt_MotorSV() \n\r" );
+    DBG_PRINT_TRACE( "Opt_PushSwitch() \n\r" );
 
     while( 1 )
     {
@@ -120,13 +185,9 @@ Opt_MotorSV(
             Help();
             goto err;
             break;
-        } else if( opt == 'd' )
+        } else if( opt == 't' )
         {
-            DBG_PRINT_TRACE( "optarg = %s \n\r", optarg );
-            data = atoi( (const char*)optarg );
-            DBG_PRINT_TRACE( "data = %d \n\r", data );
-            HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
-//          usleep( 1000 * 1000 );  // 2s 待つ
+            Test();
             break;
         }
     }

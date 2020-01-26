@@ -41,6 +41,8 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void Help( void );
+static EHalBool_t IsEnterSw( void );
+static void       Loop( void );
 
 
 /**************************************************************************//*!
@@ -61,12 +63,13 @@ Help(
     AppIfPc_Printf( "     -a, --sa_acc : get the value of a sensor(A/D), Acc. \n\r" );
     AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf( " Sub option)                                             \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.             \n\r" );
-    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.           \n\r" );
-    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.           \n\r" );
-    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.           \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format. \n\r" );
-    AppIfPc_Printf( "                                                     \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                         \n\r" );
+    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.                       \n\r" );
+    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.                       \n\r" );
+    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.                       \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.             \n\r" );
+    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                  \n\r" );
     AppIfPc_Printf( "     -a        -x     \n\r" );
@@ -74,6 +77,74 @@ Help(
     AppIfPc_Printf( "     -a        -h     \n\r" );
     AppIfPc_Printf( "     --sa_acc  --help \n\r" );
     AppIfPc_Printf("\x1b[39m");
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
+
+
+/**************************************************************************//*!
+ * @brief     実行する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Loop(
+    void
+){
+    SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
+    SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
+    SHalSensor_t*   z;  ///< センサデータの構造体 : 加速度センサ Z 方向
+
+    DBG_PRINT_TRACE( "Loop() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.\n\r" );
+    AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == IsEnterSw() )
+    {
+        // センサデータを取得
+        x = HalSensorAcc_Get( EN_SEN_ACC_X );
+        y = HalSensorAcc_Get( EN_SEN_ACC_Y );
+        z = HalSensorAcc_Get( EN_SEN_ACC_Z );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "acc (x, y, z)=(0x%04X, 0x%04X, 0x%04X)=(%04d, %04d, %04d)=(%3d%%, %3d%%, %3d%%) \r",
+                        (int)x->cur, (int)y->cur, (int)z->cur,
+                        (int)x->cur, (int)y->cur, (int)z->cur,
+                        x->cur_rate, y->cur_rate, z->cur_rate
+                      );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "x%04X y%04X z%04X", (int)x->cur, (int)y->cur, (int)z->cur );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%3d%%  ", x->cur_rate );
+        AppIfLcd_Printf( "%3d%%  ", y->cur_rate );
+        AppIfLcd_Printf( "%3d%%",   z->cur_rate );
+    }
+
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -93,12 +164,13 @@ Opt_Sa_Acc(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjxyz";
+    const char      optstring[] = "hjlxyz";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
+        { "loop", no_argument, NULL,  'l' },
         { "x",    no_argument, NULL,  'x' },
         { "y",    no_argument, NULL,  'y' },
         { "z",    no_argument, NULL,  'z' },
@@ -145,6 +217,11 @@ Opt_Sa_Acc(
                             (int)dataY->cur,
                             (int)dataZ->cur );
             AppIfPc_Printf( "\n\r" );
+            break;
+        } else if( opt == 'l' )
+        {
+            Loop();
+            break;
         }
 
         switch( opt )

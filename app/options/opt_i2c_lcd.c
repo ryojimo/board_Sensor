@@ -41,6 +41,44 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void Help( void );
+static void Clear( void );
+static void Init( void );
+
+
+/**************************************************************************//*!
+ * @brief     LCD をクリアする。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Clear(
+    void
+){
+    DBG_PRINT_TRACE( "Clear() \n\r" );
+    AppIfLcd_Clear();
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD を初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Init(
+    void
+){
+    DBG_PRINT_TRACE( "Init() \n\r" );
+    HalI2cLcd_Init();
+    return;
+}
 
 
 /**************************************************************************//*!
@@ -61,7 +99,9 @@ Help(
     AppIfPc_Printf( "     -c, --i2clcd : control the (I2C) LCD.                        \n\r" );
     AppIfPc_Printf( "                                                                  \n\r" );
     AppIfPc_Printf( " Sub option)                                                      \n\r" );
+    AppIfPc_Printf( "     -c,        --clear         : clear the LCD display.          \n\r" );
     AppIfPc_Printf( "     -h,        --help          : display the help menu.          \n\r" );
+    AppIfPc_Printf( "     -i,        --init          : init the LCD display.           \n\r" );
     AppIfPc_Printf( "     -x number, --dir_x=number  : the value of x-axis.            \n\r" );
     AppIfPc_Printf( "     -y number, --dir_y=number  : the value of y-axis.            \n\r" );
     AppIfPc_Printf( "     -s string, --string=string : the string to display on LCD.   \n\r" );
@@ -90,10 +130,12 @@ Opt_I2cLcd(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hs:x:y:";
+    const char      optstring[] = "chis:x:y:";
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
+        { "clear",  no_argument,       NULL,  'c' },
         { "help",   no_argument,       NULL,  'h' },
+        { "init",   no_argument,       NULL,  'i' },
         { "string", required_argument, NULL,  's' },
         { "dir_x",  required_argument, NULL,  'x' },
         { "dir_y",  required_argument, NULL,  'y' },
@@ -126,9 +168,19 @@ Opt_I2cLcd(
             Help();
             goto err;
             break;
+        } else if( opt == 'c' )
+        {
+            Clear();
+            goto err;
+            break;
         } else if( opt == 'h' )
         {
             Help();
+            goto err;
+            break;
+        } else if( opt == 'i' )
+        {
+            Init();
             goto err;
             break;
         }

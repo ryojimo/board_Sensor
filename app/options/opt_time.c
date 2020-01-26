@@ -40,7 +40,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void Help( void );
+static void       Help( void );
+static EHalBool_t IsEnterSw( void );
+static void       Loop( void );
 
 
 /**************************************************************************//*!
@@ -60,10 +62,11 @@ Help(
     AppIfPc_Printf( " Main option)                        \n\r" );
     AppIfPc_Printf( "     -t, --time : get the time.      \n\r" );
     AppIfPc_Printf( "                                     \n\r" );
-    AppIfPc_Printf( " Sub option)                                         \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.             \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format. \n\r" );
-    AppIfPc_Printf( "                                                     \n\r" );
+    AppIfPc_Printf( " Sub option)                                                     \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                         \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.             \n\r" );
+    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                \n\r" );
     AppIfPc_Printf( "     -t      -h     \n\r" );
@@ -71,6 +74,73 @@ Help(
     AppIfPc_Printf( "     -t      -j     \n\r" );
     AppIfPc_Printf( "     --time  --json \n\r" );
     AppIfPc_Printf("\x1b[39m");
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
+
+
+/**************************************************************************//*!
+ * @brief     実行する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Loop(
+    void
+){
+    SHalTime_t* date;   ///< 日時データの構造体
+
+    DBG_PRINT_TRACE( "Loop() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.\n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == IsEnterSw() )
+    {
+        // 日時データを取得
+        date = HalTime_GetLocaltime();
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "Date(local) = " );
+        AppIfPc_Printf( "%04d/%02d/%02d %02d:%02d:%02d \n\r",
+                date->year, date->month, date->day,
+                date->hour, date->min,   date->sec );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "%04d/%02d/%02d",
+                         date->year, date->month, date->day
+                         );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02d:%02d:%02d",
+                         date->hour, date->min, date->sec
+                         );
+
+        // 1 秒スリープ
+        usleep( 1000 * 1000 );
+    }
+
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -90,12 +160,13 @@ Opt_Time(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hj";
+    const char      optstring[] = "hjl";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
+        { "loop", no_argument, NULL,  'l' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
@@ -141,6 +212,10 @@ Opt_Time(
                             data->min,
                             data->sec );
             AppIfPc_Printf( "\n\r" );
+        } else if( opt == 'l' )
+        {
+            Loop();
+            break;
         }
     }
 

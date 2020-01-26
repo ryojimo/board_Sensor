@@ -33,7 +33,9 @@
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void Help( void );
+static void       Help( void );
+static EHalBool_t IsEnterSw( void );
+static void       Volume( int ch );
 
 
 /**************************************************************************//*!
@@ -54,16 +56,85 @@ Help(
     AppIfPc_Printf( "     -e, --i2cpca9685 : control the (I2C) PCA9685.                 \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf( " Sub option)                                                       \n\r" );
-    AppIfPc_Printf( "     -h               --help              : display the help menu. \n\r" );
+    AppIfPc_Printf( "     -h,              --help              : display the help menu. \n\r" );
     AppIfPc_Printf( "     -c number,       --ch=number         : the target channnel.   \n\r" );
     AppIfPc_Printf( "     -r float-number, --rate=float-number : the duty-rate.         \n\r" );
+    AppIfPc_Printf( "     -v,              --volume            : change the duty-rate by volume. \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                                                               \n\r" );
     AppIfPc_Printf( "     -e           -c   <number>  -r     <float-number>             \n\r" );
     AppIfPc_Printf( "     --i2cpca9685 --ch=<number>  --rate=<float-number>             \n\r" );
+    AppIfPc_Printf( "     -e           -c   <number>  -v                                \n\r" );
+    AppIfPc_Printf( "     --i2cpca9685 --ch=<number>  --volume                          \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
+
+
+/**************************************************************************//*!
+ * @brief     Volume を使ってサーボモータをまわす。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Volume(
+    int             ch    ///< 対象の channel
+){
+    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
+    double          value;      ///< サーボモータを回す値
+
+    DBG_PRINT_TRACE( "Volume() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
+    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == IsEnterSw() )
+    {
+        // センサデータを取得
+        data = HalSensorPm_Get();
+
+        // サーボモータを回す値を計算する。
+        value = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
+
+        // モータ制御
+        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CCW, value );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "motor SV : rate = %3d \r", value );
+
+        // LCD に表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f(\%)", value );
+    }
+
+    AppIfPc_Printf( "\n\r" );
+
+    // モータを停止
+    HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
     return;
 }
 
@@ -82,13 +153,14 @@ Opt_I2cPca9685(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hc:r:";
+    const char      optstring[] = "hc:r:v";
     const struct    option longopts[] = {
-      //{ *name,  has_arg,           *flag, val }, // 説明
-        { "help", no_argument,       NULL,  'h' },
-        { "ch",   required_argument, NULL,  'c' },
-        { "rate", required_argument, NULL,  'r' },
-        { 0,      0,                 NULL,   0  }, // termination
+      //{ *name,    has_arg,           *flag, val }, // 説明
+        { "help",   no_argument,       NULL,  'h' },
+        { "ch",     required_argument, NULL,  'c' },
+        { "rate",   required_argument, NULL,  'r' },
+        { "volume", no_argument,       NULL,  'v' },
+        { 0,        0,                 NULL,   0  }, // termination
     };
     int             longindex = 0;
     int             ch = 0;
@@ -122,6 +194,11 @@ Opt_I2cPca9685(
             Help();
             goto err;
             break;
+        } else if( opt == 'v' )
+        {
+            Volume( ch );
+            goto err;
+            break;
         }
 
         switch( opt )
@@ -137,6 +214,9 @@ Opt_I2cPca9685(
 
     if( 0 <= ch && ch <= 15 )
     {
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%5.2f(\%)", rate );
+
         HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
     } else
     {

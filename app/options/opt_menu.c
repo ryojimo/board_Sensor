@@ -21,6 +21,7 @@
 #include <getopt.h>
 
 #include "../../hal/hal.h"
+#include "../../sys/sys.h"
 
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
@@ -110,6 +111,8 @@ Opt_Menu(
     pt = (unsigned char*)str;
 
     AppIfLcd_CursorSet( 0, 1 );
+
+    Sys_ShowInfo();
 
     while( 1 )
     {

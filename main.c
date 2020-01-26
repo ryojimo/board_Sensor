@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "a:c:e:g:hi:l:m:o:p:r:st:u:vw:x:y:z:";
+    const char      optstring[] = "a:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "sa_acc",      required_argument, NULL,  'a' },
@@ -95,8 +95,9 @@ int main(int argc, char *argv[])
         { "menu",        required_argument, NULL,  'm' },
         { "motorsv",     required_argument, NULL,  'o' },
         { "sa_pm",       required_argument, NULL,  'p' },
+        { "sensors",     no_argument,       NULL,  'q' },
         { "relay",       required_argument, NULL,  'r' },
-        { "sensors",     no_argument,       NULL,  's' },
+        { "pushsw",      required_argument, NULL,  's' },
         { "time",        required_argument, NULL,  't' },
         { "usbkey",      required_argument, NULL,  'u' },
         { "version",     no_argument,       NULL,  'v' },
@@ -129,8 +130,6 @@ int main(int argc, char *argv[])
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( "cmd:%s", argv[1] );
 
-    Sys_ShowInfo();
-
     while( 1 )
     {
         opt = getopt_long( argc, argv, optstring, longopts, &longindex );
@@ -162,8 +161,9 @@ int main(int argc, char *argv[])
         case 'm': Opt_Menu( argc, argv ); break;
         case 'o': Opt_MotorSV( argc, argv ); break;
         case 'p': Opt_Sa_Pm( argc, argv ); break;
+        case 'q': Opt_Sensors(); break;
         case 'r': Opt_Relay( argc, argv ); break;
-        case 's': Opt_Sensors(); break;
+        case 's': Opt_PushSwitch( argc, argv ); break;
         case 't': Opt_Time( argc, argv ); break;
         case 'v': Opt_Version(); break;
         case 'w': Opt_Si_Bme280( argc, argv ); break;

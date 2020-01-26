@@ -40,7 +40,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void Help( void );
+static void       Help( void );
+static EHalBool_t IsEnterSw( void );
+static void       Loop( void );
 
 
 /**************************************************************************//*!
@@ -60,10 +62,11 @@ Help(
     AppIfPc_Printf( " Main option)                                                      \n\r" );
     AppIfPc_Printf( "     -x, --si_gp2y0e03 : get the value of a sensor(I2C), GP2Y0E03. \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
-    AppIfPc_Printf( " Sub option)                                          \n\r" );
-    AppIfPc_Printf( "     -h, --help  : display the help menu.             \n\r" );
-    AppIfPc_Printf( "     -j, --json  : get the all values of json format. \n\r" );
-    AppIfPc_Printf( "                                                      \n\r" );
+    AppIfPc_Printf( " Sub option)                                                     \n\r" );
+    AppIfPc_Printf( "     -h, --help  : display the help menu.                        \n\r" );
+    AppIfPc_Printf( "     -j, --json  : get the all values of json format.            \n\r" );
+    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                       \n\r" );
     AppIfPc_Printf( "     -x             -j     \n\r" );
@@ -71,6 +74,64 @@ Help(
     AppIfPc_Printf( "     -x             -h     \n\r" );
     AppIfPc_Printf( "     --si_gp2y0e03  --help \n\r" );
     AppIfPc_Printf("\x1b[39m");
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
+
+
+/**************************************************************************//*!
+ * @brief     実行する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Loop(
+    void
+){
+    SHalSensor_t*   data;   ///< センサデータの構造体
+
+    DBG_PRINT_TRACE( "Loop() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.\n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == IsEnterSw() )
+    {
+        // センサデータを取得
+        data  = HalSensorGP2Y0E03_Get();
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "distance = %02d cm \n\r", (int)data->cur );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02d cm", (int)data->cur );
+
+        // 1 秒スリープ
+        usleep( 1000 * 1000 );
+    }
+
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -90,12 +151,13 @@ Opt_Si_Gp2y0e03(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hj";
+    const char      optstring[] = "hjl";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,   has_arg,     *flag, val }, // 説明
         { "help",  no_argument, NULL,  'h' },
         { "json",  no_argument, NULL,  'j' },
+        { "loop",  no_argument, NULL,  'l' },
         { 0,       0,           NULL,   0  }, // termination
     };
 
@@ -133,6 +195,10 @@ Opt_Si_Gp2y0e03(
             AppIfPc_Printf( "{\"sensor\": \"si_gp2y0e03\", \"value\": %5.2f}",
                             data->cur );
             AppIfPc_Printf( "\n\r" );
+        } else if( opt == 'l' )
+        {
+            Loop();
+            break;
         }
     }
 

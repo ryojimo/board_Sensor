@@ -58,7 +58,7 @@ Help(
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( " Main option)                                           \n\r" );
-    AppIfPc_Printf( "     -s, --sensors : display the values of all sensors. \n\r" );
+    AppIfPc_Printf( "     -q, --sensors : display the values of all sensors. \n\r" );
     AppIfPc_Printf( "\n\r" );
     return;
 }
