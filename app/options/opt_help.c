@@ -59,7 +59,7 @@ Opt_Help(
     AppIfPc_Printf( " -w, --si_bme280   : get the value of a sensor(I2C), BME280.        \n\r" );
     AppIfPc_Printf( " -x, --si_gp2y0e03 : get the value of a sensor(I2C), GP2Y0E03.      \n\r" );
     AppIfPc_Printf( " -y, --si_lps25h   : get the value of a sensor(I2C), LPS25H.        \n\r" );
-    AppIfPc_Printf( " -z, --si_lps25h   : get the value of a sensor(I2C), TSL2561.       \n\r" );
+    AppIfPc_Printf( " -z, --si_tsl2561  : get the value of a sensor(I2C), TSL2561.       \n\r" );
     AppIfPc_Printf( " -t, --time        : get the time.                                  \n\r" );
     AppIfPc_Printf( "\n\r" );
     return;
