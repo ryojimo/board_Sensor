@@ -172,7 +172,6 @@ Opt_Si_Lps25h(
     };
 
     DBG_PRINT_TRACE( "Opt_Si_Lps25h() \n\r" );
-    SHalSensor_t*       data;
     SHalSensor_t*       dataAtmos;
     SHalSensor_t*       dataTemp;
 
