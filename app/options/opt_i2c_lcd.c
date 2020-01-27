@@ -18,6 +18,8 @@
 /* include                                               */
 //********************************************************
 #include <getopt.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "../../hal/hal.h"
 

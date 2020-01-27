@@ -73,7 +73,7 @@ const SAppMenuCmd_t g_menuCmdTable[ MAX_CMD_NUM ] =
 
 /* コマンド・バッファ */
 unsigned char g_menuCmd[ SYS_MAX_CMD_OPT_NUM ][ SYS_MAX_CMD_NAME_LEN ];
-
+int           g_menuCmdCnt;
 
 //********************************************************
 /* Global Parameter  ( File Scope )                      */
@@ -130,6 +130,7 @@ MenuCmd_Init(
     DBG_PRINT_TRACE( "\n\r" );
 
     memset( &g_menuCmd[0][0], '\0', SYS_MAX_CMD_BUFF );
+    g_menuCmdCnt = 0;
 
     return;
 }
@@ -216,6 +217,8 @@ ParseCmd(
     }
 
     Strlower( (char*)&g_menuCmd[0][0] );  // コマンド名を小文字列へ変換
+    g_menuCmdCnt = cnt + 1;
+
     ret = EN_MENU_MSG_DONE;
 
     DBG_PRINT_TRACE( "cmd = %s \n\r", &g_menuCmd[0][0] );
@@ -361,7 +364,9 @@ SelectCmd(
                     DBG_PRINT_ERROR( "\n\r input error : %s\n\r", str );
                 }
 
+                // クリア
                 memset( &g_menuCmd[0][0], '\0', SYS_MAX_CMD_BUFF );
+                g_menuCmdCnt = 0;
             }
 
             memset( str, '\0', SYS_MAX_CMD_BUFF );
