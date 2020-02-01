@@ -40,9 +40,24 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Loop( void );
+static void       Help( void );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -83,18 +98,100 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     TSL2561 BROADBAND のデータを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
+void
+Opt_SiTsl2561Broadband(
     void
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Broadband() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+    AppIfLcd_Printf( "%5.2f (BB)", data->cur );
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     TSL2561 IR のデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SiTsl2561Ir(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Ir() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+    AppIfLcd_Printf( "%5.2f (IR)", data->cur );
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     TSL2561 LUX のデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SiTsl2561Lux(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Lux() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+    AppIfLcd_Printf( "%5.2f (LUX)", data->cur );
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SiTsl2561Json(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Json() \n\r" );
+    SHalSensor_t*       dataBB;
+    SHalSensor_t*       dataIR;
+    SHalSensor_t*       dataLUX;
+
+    dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+    dataIR  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+    dataLUX = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
+
+    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataBB->cur, dataIR->cur, dataLUX->cur );
+
+    AppIfPc_Printf( "{\"sensor\": \"si_tsl2561\", \"value\": {\"broadband\": %5.2f, \"ir\": %5.2f, \"lux\": %5.2f}}",
+                    dataBB->cur,
+                    dataIR->cur,
+                    dataLUX->cur );
+    AppIfPc_Printf( "\n\r" );
+    return;
 }
 
 
@@ -106,15 +203,15 @@ IsEnterSw(
  * @author    Ryoji Morita
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
-static void
-Loop(
+void
+Opt_SiTsl2561Loop(
     void
 ){
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Loop() \n\r" );
+
     SHalSensor_t*   dataBb = NULL;      ///< 照度センサのデータ構造体
     SHalSensor_t*   dataIr = NULL;      ///< 照度センサのデータ構造体
     SHalSensor_t*   dataLux = NULL;     ///< 照度センサのデータ構造体
-
-    DBG_PRINT_TRACE( "Loop() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
 
@@ -162,28 +259,20 @@ Opt_Si_Tsl2561(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjbilp";
+    const char      optstring[] = "hjlbix";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,       has_arg,     *flag, val }, // 説明
         { "help",      no_argument, NULL,  'h' },
         { "json",      no_argument, NULL,  'j' },
+        { "loop",      no_argument, NULL,  'l' },
         { "broadband", no_argument, NULL,  'b' },
         { "ir",        no_argument, NULL,  'i' },
-        { "lux",       no_argument, NULL,  'l' },
-        { "loop",      no_argument, NULL,  'p' },
+        { "lux",       no_argument, NULL,  'x' },
         { 0,           0,           NULL,   0  }, // termination
     };
 
     DBG_PRINT_TRACE( "Opt_Si_Tsl2561() \n\r" );
-    SHalSensor_t*       dataBB;
-    SHalSensor_t*       dataIR;
-    SHalSensor_t*       dataLUX;
-
-    dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
-    dataIR  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
-    dataLUX = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -192,45 +281,26 @@ Opt_Si_Tsl2561(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'j' )
-        {
-            AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataBB->cur, dataIR->cur, dataLUX->cur );
-
-            AppIfPc_Printf( "{\"sensor\": \"si_tsl2561\", \"value\": {\"broadband\": %5.2f, \"ir\": %5.2f, \"lux\": %5.2f}}",
-                            dataBB->cur,
-                            dataIR->cur,
-                            dataLUX->cur );
-            AppIfPc_Printf( "\n\r" );
-        } else if( opt == 'l' )
-        {
-            Loop();
             break;
         }
 
         switch( opt )
         {
-        case 'b': AppIfLcd_Printf( "%5.2f (BB)", dataBB->cur );   AppIfPc_Printf( "%5.2f \n\r", dataBB->cur ); break;
-        case 'i': AppIfLcd_Printf( "%5.2f (IR)", dataIR->cur );   AppIfPc_Printf( "%5.2f \n\r", dataIR->cur ); break;
-        case 'l': AppIfLcd_Printf( "%5.2f (LUX)", dataLUX->cur ); AppIfPc_Printf( "%5.2f \n\r", dataLUX->cur ); break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'j': Opt_SiTsl2561Json(); break;
+        case 'l': Opt_SiTsl2561Loop(); break;
+        case 'b': Opt_SiTsl2561Broadband(); break;
+        case 'i': Opt_SiTsl2561Ir(); break;
+        case 'x': Opt_SiTsl2561Lux(); break;
         default: break;
         }
     }
 
-err :
     return;
 }
 

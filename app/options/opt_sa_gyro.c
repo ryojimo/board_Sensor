@@ -40,9 +40,24 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Loop( void );
+static void       Help( void );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -82,18 +97,75 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     g1-axis のデータを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
+void
+Opt_SaGyroG1(
     void
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Opt_SaGyroG1() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     g2-axis のデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaGyroG2(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaGyroG2() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaGyroJson(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaGyroJson() \n\r" );
+    SHalSensor_t*   dataG1;
+    SHalSensor_t*   dataG2;
+
+    dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+    dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+
+    AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
+
+    AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}}",
+                    (int)dataG1->cur,
+                    (int)dataG2->cur );
+    AppIfPc_Printf( "\n\r" );
+    return;
 }
 
 
@@ -105,14 +177,14 @@ IsEnterSw(
  * @author    Ryoji Morita
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
-static void
-Loop(
+void
+Opt_SaGyroLoop(
     void
 ){
+    DBG_PRINT_TRACE( "Opt_SaGyroLoop() \n\r" );
+
     SHalSensor_t*   g1; ///< センサデータの構造体 : ジャイロセンサ G1 方向
     SHalSensor_t*   g2; ///< センサデータの構造体 : ジャイロセンサ G2 方向
-
-    DBG_PRINT_TRACE( "Loop() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
 
@@ -169,12 +241,6 @@ Opt_Sa_Gyro(
     };
 
     DBG_PRINT_TRACE( "Opt_Sa_Gyro() \n\r" );
-    SHalSensor_t*   dataG1;
-    SHalSensor_t*   dataG2;
-
-    dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -183,43 +249,25 @@ Opt_Sa_Gyro(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'j' )
-        {
-            AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
-
-            AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}}",
-                            (int)dataG1->cur,
-                            (int)dataG2->cur );
-            AppIfPc_Printf( "\n\r" );
-        } else if( opt == 'l' )
-        {
-            Loop();
             break;
         }
 
         switch( opt )
         {
-        case 'x': AppIfLcd_Printf( "0x%04X", (int)dataG1->cur ); AppIfPc_Printf( "%d \n\r", (int)dataG1->cur ); break;
-        case 'y': AppIfLcd_Printf( "0x%04X", (int)dataG2->cur ); AppIfPc_Printf( "%d \n\r", (int)dataG2->cur ); break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'j': Opt_SaGyroJson(); break;
+        case 'l': Opt_SaGyroLoop(); break;
+        case 'x': Opt_SaGyroG1(); break;
+        case 'y': Opt_SaGyroG2(); break;
         default: break;
         }
     }
 
-err :
     return;
 }
 

@@ -167,8 +167,8 @@ Sys_ShowInfo(
     AppIfLcd_Ctrl( 1, 0, 0 );
 
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "RP3 BOARD SENSOR" );
-    usleep( 2000 * 1000 );  // 2sec 表示
+    AppIfLcd_Printf( "RP4 BOARD SENSOR" );
+//    usleep( 1000 * 1000 );  // 1sec 表示
 
     AppIfLcd_CursorSet( 0, 1 );
     date = HalTime_GetLocaltime();
@@ -198,7 +198,7 @@ Sys_ShowInfo(
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( "================================ \n\r" );
 
-    AppIfPc_Puts( "RP3 BOARD SENSOR\n\r" );
+    AppIfPc_Puts( "RP4 BOARD SENSOR\n\r" );
 
     AppIfPc_Puts( "Launch .... \n\r" );
     AppIfPc_Puts( "\n\r" );

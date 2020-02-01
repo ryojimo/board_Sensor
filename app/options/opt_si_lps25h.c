@@ -40,9 +40,24 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Loop( void );
+static void       Help( void );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -82,18 +97,75 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     気圧センサのデータを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
+void
+Opt_SiLps25hAtmos(
     void
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Opt_SiLps25hAtmos() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    AppIfLcd_Printf( "%5.2f (hPa)", data->cur );
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     温度センサのデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SiLps25hTemp(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SiLps25hTemp() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+    AppIfLcd_Printf( "%5.2f ('C)",  data->cur );
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SiLps25hJson(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SiLps25hJson() \n\r" );
+    SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
+    SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
+
+    dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
+    dataTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
+
+    AppIfLcd_Printf( "%5.2f, %5.2f", dataAtmos->cur, dataTemp->cur );
+
+    AppIfPc_Printf( "{\"sensor\": \"si_lps25h\", \"value\": {\"atmos\": %5.2f, \"temp\": %5.2f}}",
+                    dataAtmos->cur,
+                    dataTemp->cur );
+    AppIfPc_Printf( "\n\r" );
+    return;
 }
 
 
@@ -105,14 +177,14 @@ IsEnterSw(
  * @author    Ryoji Morita
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
-static void
-Loop(
+void
+Opt_SiLps25hLoop(
     void
 ){
+    DBG_PRINT_TRACE( "Opt_SiLps25hLoop() \n\r" );
+
     SHalSensor_t*   dataAtmos;  ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp;   ///< 温度センサのデータ構造体
-
-    DBG_PRINT_TRACE( "Loop() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
 
@@ -172,12 +244,6 @@ Opt_Si_Lps25h(
     };
 
     DBG_PRINT_TRACE( "Opt_Si_Lps25h() \n\r" );
-    SHalSensor_t*       dataAtmos;
-    SHalSensor_t*       dataTemp;
-
-    dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
-    dataTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -186,43 +252,25 @@ Opt_Si_Lps25h(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'j' )
-        {
-            AppIfLcd_Printf( "%5.2f, %5.2f", dataAtmos->cur, dataTemp->cur );
-
-            AppIfPc_Printf( "{\"sensor\": \"si_lps25h\", \"value\": {\"atmos\": %5.2f, \"temp\": %5.2f}}",
-                            dataAtmos->cur,
-                            dataTemp->cur );
-            AppIfPc_Printf( "\n\r" );
-        } else if( opt == 'l' )
-        {
-            Loop();
             break;
         }
 
         switch( opt )
         {
-        case 'a': AppIfLcd_Printf( "%5.2f (hPa)", dataAtmos->cur ); AppIfPc_Printf( "%5.2f \n\r", dataAtmos->cur ); break;
-        case 't': AppIfLcd_Printf( "%5.2f ('C)",  dataTemp->cur );  AppIfPc_Printf( "%5.2f \n\r", dataTemp->cur ); break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'j': Opt_SiLps25hJson(); break;
+        case 'l': Opt_SiLps25hLoop(); break;
+        case 'a': Opt_SiLps25hAtmos(); break;
+        case 't': Opt_SiLps25hTemp(); break;
         default: break;
         }
     }
 
-err :
     return;
 }
 

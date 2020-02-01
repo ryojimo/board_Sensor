@@ -18,6 +18,7 @@
 /* include                                               */
 //********************************************************
 #include <getopt.h>
+#include <stdlib.h>
 
 #include "../../hal/hal.h"
 
@@ -40,9 +41,27 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Illumination( void );
+static void       Help( void );
+static void       Run( int data );
+static void       RunIllumination( void );
+static int        GetData( char* str );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -79,18 +98,24 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     LED を点灯する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
+static void
+Run(
+    int           data     ///< [in] LED を光らせる値
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Run() \n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%02d", data );
+
+    HalLed_Set( data );
+    return;
 }
 
 
@@ -103,32 +128,54 @@ IsEnterSw(
  * @return    なし。
  *************************************************************************** */
 static void
-Illumination(
+RunIllumination(
     void
 ){
+    DBG_PRINT_TRACE( "RunIllumination() \n\r" );
+
     unsigned int    value = 0x1;
 
-    DBG_PRINT_TRACE( "Illumination() \n\r" );
-
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )
     {
+        // PC ターミナル表示
+        AppIfPc_Printf( "LED : data = %02d \r", value );
+
         // LED 表示
-        HalLed_Set( value );
-        usleep( 500 * 1000 );
+        Run( value );
         value = ( value << 1 ) % 0x0F;
 
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%02d", value );
+        // 500ms スリープ
+        usleep( 500 * 1000 );
     }
 
     HalLed_Set( 0x00 );
     return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LED を光らせる値を取得する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static int
+GetData(
+    char*   str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+    int     data;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    data = strtol( (const char*)str, NULL, 10 );
+    DBG_PRINT_TRACE( "ch = %d \n\r", data );
+    return data;
 }
 
 
@@ -147,6 +194,7 @@ Opt_Led(
 ){
     int             opt = 0;
     const char      optstring[] = "hin:";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,          has_arg,           *flag, val }, // 説明
         { "help",         no_argument,       NULL,  'h' },
@@ -154,10 +202,11 @@ Opt_Led(
         { "num",          required_argument, NULL,  'n' },
         { 0,              0,                 NULL,   0  }, // termination
     };
-    int             longindex = 0;
-    unsigned int    num;
+    int             data = 0;
+    int             endFlag = 0;
 
     DBG_PRINT_TRACE( "Opt_Led() \n\r" );
+    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
@@ -165,39 +214,28 @@ Opt_Led(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
             break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'i' )
-        {
-            Illumination();
-            break;
-        } else if( opt == 'n' )
-        {
-            DBG_PRINT_TRACE( "optarg = %s \n\r", optarg );
-            sscanf( optarg, "%X", &num );
-            DBG_PRINT_TRACE( "num = %d \n\r", num );
+        }
 
-            AppIfLcd_CursorSet( 0, 1 );
-            AppIfLcd_Printf( "0x%02d", num );
-
-            HalLed_Set( num );
-            break;
+        switch( opt )
+        {
+        case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': endFlag = 1; Help(); break;
+        case 'i': endFlag = 1; RunIllumination(); break;
+        case 'n':              data = GetData( optarg ); break;
+        default: break;
         }
     }
 
-err :
+    if( endFlag == 0 )
+    {
+        Run( data );
+    }
+
     return;
 }
 

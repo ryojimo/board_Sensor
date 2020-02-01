@@ -45,6 +45,43 @@ extern int  optind, opterr, optopt;
 static void Help( void );
 static void Clear( void );
 static void Init( void );
+static void Run( int x, int y, char* str );
+static int  GetDirection( char* str );
+
+
+/**************************************************************************//*!
+ * @brief     HELP を表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Help(
+    void
+){
+    DBG_PRINT_TRACE( "Help() \n\r" );
+    AppIfPc_Printf( "\n\r" );
+    AppIfPc_Printf( " Main option)                                                     \n\r" );
+    AppIfPc_Printf( "     -c, --i2clcd : control the (I2C) LCD.                        \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
+    AppIfPc_Printf( " Sub option)                                                      \n\r" );
+    AppIfPc_Printf( "     -c,        --clear         : clear the LCD display.          \n\r" );
+    AppIfPc_Printf( "     -h,        --help          : display the help menu.          \n\r" );
+    AppIfPc_Printf( "     -i,        --init          : init the LCD display.           \n\r" );
+    AppIfPc_Printf( "     -x number, --dir_x=number  : the value of x-axis.            \n\r" );
+    AppIfPc_Printf( "     -y number, --dir_y=number  : the value of y-axis.            \n\r" );
+    AppIfPc_Printf( "     -s string, --string=string : the string to display on LCD.   \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
+    AppIfPc_Printf("\x1b[36m");
+    AppIfPc_Printf( " Ex)                                                                 \n\r" );
+    AppIfPc_Printf( "     -c        -x      <number>  -y      <number>  -s <string>       \n\r" );
+    AppIfPc_Printf( "     --i2clcd  --dir_x=<number>  --dir_y=<number>  --string=<string> \n\r" );
+    AppIfPc_Printf("\x1b[39m");
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
 
 
 /**************************************************************************//*!
@@ -84,7 +121,29 @@ Init(
 
 
 /**************************************************************************//*!
- * @brief     HELP を表示する。
+ * @brief     座標の番号を取得する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static int
+GetDirection(
+    char*   str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "GetDirection() \n\r" );
+    int     dir;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    dir = strtol( (const char*)str, NULL, 10 );
+    DBG_PRINT_TRACE( "dir = %d \n\r", dir );
+    return dir;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD に表示する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -92,28 +151,22 @@ Init(
  * @return    なし。
  *************************************************************************** */
 static void
-Help(
-    void
+Run(
+    int       x,     ///< [in] x 座標
+    int       y,     ///< [in] y 座標
+    char*     str    ///< [in] 表示する文字列
 ){
-    DBG_PRINT_TRACE( "Help() \n\r" );
-    AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                                                     \n\r" );
-    AppIfPc_Printf( "     -c, --i2clcd : control the (I2C) LCD.                        \n\r" );
-    AppIfPc_Printf( "                                                                  \n\r" );
-    AppIfPc_Printf( " Sub option)                                                      \n\r" );
-    AppIfPc_Printf( "     -c,        --clear         : clear the LCD display.          \n\r" );
-    AppIfPc_Printf( "     -h,        --help          : display the help menu.          \n\r" );
-    AppIfPc_Printf( "     -i,        --init          : init the LCD display.           \n\r" );
-    AppIfPc_Printf( "     -x number, --dir_x=number  : the value of x-axis.            \n\r" );
-    AppIfPc_Printf( "     -y number, --dir_y=number  : the value of y-axis.            \n\r" );
-    AppIfPc_Printf( "     -s string, --string=string : the string to display on LCD.   \n\r" );
-    AppIfPc_Printf( "                                                                  \n\r" );
-    AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                                                                 \n\r" );
-    AppIfPc_Printf( "     -c        -x      <number>  -y      <number>  -s <string>       \n\r" );
-    AppIfPc_Printf( "     --i2clcd  --dir_x=<number>  --dir_y=<number>  --string=<string> \n\r" );
-    AppIfPc_Printf("\x1b[39m");
-    AppIfPc_Printf( "\n\r" );
+    DBG_PRINT_TRACE( "Run() \n\r" );
+
+    DBG_PRINT_TRACE( "(x, y) = (%d, %d) \n\r", x, y );
+    DBG_PRINT_TRACE( "str    = %s \n\r", str );
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "                " );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "                " );
+
+    AppIfLcd_CursorSet( x, y );
+    AppIfLcd_Printf( str );
     return;
 }
 
@@ -133,6 +186,7 @@ Opt_I2cLcd(
 ){
     int             opt = 0;
     const char      optstring[] = "chis:x:y:";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "clear",  no_argument,       NULL,  'c' },
@@ -143,10 +197,10 @@ Opt_I2cLcd(
         { "dir_y",  required_argument, NULL,  'y' },
         { 0,        0,                 NULL,   0  }, // termination
     };
-    int             longindex = 0;
     int             x = 0;
     int             y = 0;
     char            str[16];
+    int             endFlag = 0;
 
     DBG_PRINT_TRACE( "Opt_I2cLcd() \n\r" );
     DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
@@ -161,52 +215,31 @@ Opt_I2cLcd(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'c' )
-        {
-            Clear();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'i' )
-        {
-            Init();
-            goto err;
             break;
         }
 
         switch( opt )
         {
-        case 's': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); strncpy( str, (const char*)optarg, 16 ); break;
-        case 'x': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); x = strtol( (const char*)optarg, NULL, 10 ); break;
-        case 'y': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); y = strtol( (const char*)optarg, NULL, 10 ); break;
+        case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': endFlag = 1; Help(); break;
+        case 'c': endFlag = 1; Clear(); break;
+        case 'i': endFlag = 1; Init(); break;
+        case 's':              strncpy( str, (const char*)optarg, 16 ); break;
+        case 'x':              x = GetDirection( optarg ); break;
+        case 'y':              y = GetDirection( optarg ); break;
         default: break;
         }
     }
 
-    DBG_PRINT_TRACE( "(x, y) = (%d, %d) \n\r", x, y );
-    DBG_PRINT_TRACE( "str    = %s \n\r", str );
-    AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "                " );
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "                " );
+    if( endFlag == 0 )
+    {
+        Run( x, y, str );
+    }
 
-    AppIfLcd_CursorSet( x, y );
-    AppIfLcd_Printf( str );
-
-err:
     return;
 }
 

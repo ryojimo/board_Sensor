@@ -70,6 +70,7 @@ Help(
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                            \n\r" );
     AppIfPc_Printf( "     -m      -h                 \n\r" );
+    AppIfPc_Printf( "     -m      -o      \"\"       \n\r" );
     AppIfPc_Printf( "     -m      -o      \"help\"   \n\r" );
     AppIfPc_Printf( "     -m      -o      \"led il\" \n\r" );
     AppIfPc_Printf( "     --menu  --help             \n\r" );
@@ -94,22 +95,15 @@ Opt_Menu(
 ){
     int             opt = 0;
     const char      optstring[] = "ho:";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
         { "option", required_argument, NULL,  'o' },
         { 0,        0,                 NULL,   0  }, // termination
     };
-    int             longindex = 0;
-    unsigned char   str[256];
-    unsigned char*  pt;
-    int             i = 0;
 
     DBG_PRINT_TRACE( "Opt_Menu() \n\r" );
-
-    memset( str, '\0', sizeof(str) );
-    pt = (unsigned char*)str;
-
     AppIfLcd_CursorSet( 0, 1 );
 
     Sys_ShowInfo();
@@ -120,40 +114,22 @@ Opt_Menu(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
             break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'o' )
-        {
-            // 引数部分を取り出す
-            for( i = 2; i < argc; i++ )
-            {
-                DBG_PRINT_TRACE( "argv[%d] = %s \n\r", i, argv[i] );
-                strncat( (char*)pt, argv[i], strlen( argv[i] ) );
-                pt += strlen( argv[i] );
-                strncat( (char*)pt, " ", strlen( " " ) );
-                pt += strlen( " " );
-            }
+        }
 
-            DBG_PRINT_TRACE( "str = %s \n\r", str );
-            AppMenu_Main( str );
-
-            break;
+        switch( opt )
+        {
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'o': AppMenu_Main( (unsigned char*)optarg ); break;
+        default: break;
         }
     }
 
-err :
     return;
 }
 

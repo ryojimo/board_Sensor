@@ -17,8 +17,8 @@
 //********************************************************
 /* include                                               */
 //********************************************************
-#include <stdlib.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #include "../../hal/hal.h"
 
@@ -31,11 +31,38 @@
 
 
 //********************************************************
+/* モジュールグローバル変数                              */
+//********************************************************
+// getopt() で使用
+extern char *optarg;
+extern int  optind, opterr, optopt;
+
+
+//********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Volume( int ch );
+static void       Help( void );
+static void       Run( int ch, double rate );
+static void       RunVolume( int ch );
+static int        GetChannel( char* str );
+static double     GetRate( char* str );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -63,10 +90,10 @@ Help(
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                                                               \n\r" );
-    AppIfPc_Printf( "     -e           -c   <number>  -r     <float-number>             \n\r" );
-    AppIfPc_Printf( "     --i2cpca9685 --ch=<number>  --rate=<float-number>             \n\r" );
-    AppIfPc_Printf( "     -e           -c   <number>  -v                                \n\r" );
-    AppIfPc_Printf( "     --i2cpca9685 --ch=<number>  --volume                          \n\r" );
+    AppIfPc_Printf( "     -e            -c   <number>  -r     <float-number>            \n\r" );
+    AppIfPc_Printf( "     --i2cpca9685  --ch=<number>  --rate=<float-number>            \n\r" );
+    AppIfPc_Printf( "     -e            -c   <number>  -v                               \n\r" );
+    AppIfPc_Printf( "     --i2cpca9685  --ch=<number>  --volume                         \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -74,18 +101,35 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     サーボモータをまわす。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
+static void
+Run(
+    int       ch,     ///< [in] 対象の channel
+    double    rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Run() \n\r" );
+
+    DBG_PRINT_TRACE( "(ch, rate) = (%02d, %2.4f) \n\r", ch, rate );
+
+    if( 0 <= ch && ch <= 15 )
+    {
+        // LCD に表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02.4f(\%)  ", rate );
+
+        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
+    }
+
+    return;
 }
 
 
@@ -98,13 +142,13 @@ IsEnterSw(
  * @return    なし。
  *************************************************************************** */
 static void
-Volume(
+RunVolume(
     int             ch    ///< 対象の channel
 ){
     SHalSensor_t*   data;       ///< ボリュームのデータ構造体
     double          value;      ///< サーボモータを回す値
 
-    DBG_PRINT_TRACE( "Volume() \n\r" );
+    DBG_PRINT_TRACE( "RunVolume() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.   \n\r" );
     AppIfPc_Printf( "motor speed changes by volume. \n\r" );
@@ -120,15 +164,11 @@ Volume(
         // サーボモータを回す値を計算する。
         value = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
 
-        // モータ制御
-        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CCW, value );
-
         // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %3d \r", value );
+        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", value );
 
-        // LCD に表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%5.2f(\%)", value );
+        // モータ制御
+        Run( ch, value );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -136,6 +176,51 @@ Volume(
     // モータを停止
     HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
     return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Channel 番号を取得する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static int
+GetChannel(
+    char*   str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "GetChannel() \n\r" );
+    int     ch;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    ch   = strtol( (const char*)str, NULL, 10 );
+    DBG_PRINT_TRACE( "ch = %d \n\r", ch );
+    return ch;
+}
+
+
+/**************************************************************************//*!
+ * @brief     rate を取得する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static double
+GetRate(
+    char*   str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "GetRate() \n\r" );
+    char*   endptr;
+    double  rate = 0;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    rate = strtod( (const char*)str, &endptr );
+    DBG_PRINT_TRACE( "rate = %2.4f \n\r", rate );
+    return rate;
 }
 
 
@@ -154,6 +239,7 @@ Opt_I2cPca9685(
 ){
     int             opt = 0;
     const char      optstring[] = "hc:r:v";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
@@ -162,17 +248,12 @@ Opt_I2cPca9685(
         { "volume", no_argument,       NULL,  'v' },
         { 0,        0,                 NULL,   0  }, // termination
     };
-    int             longindex = 0;
     int             ch = 0;
     double          rate = 0;
-    char*           endptr;
+    int             endFlag = 0;
 
     DBG_PRINT_TRACE( "Opt_I2cPca9685() \n\r" );
-    DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
-    DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
-    DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
-    DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
-    DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
+    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
@@ -180,52 +261,29 @@ Opt_I2cPca9685(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'v' )
-        {
-            Volume( ch );
-            goto err;
             break;
         }
 
         switch( opt )
         {
-        case 'c': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); ch   = strtol( (const char*)optarg, NULL, 10 ); break;
-        case 'r': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); rate = strtod( (const char*)optarg, &endptr ); break;
+        case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': endFlag = 1; Help(); break;
+        case 'v': endFlag = 1; RunVolume( ch ); break;
+        case 'c':              ch   = GetChannel( optarg ); break;
+        case 'r':              rate = GetRate( optarg ); break;
         default: break;
         }
     }
 
-    DBG_PRINT_TRACE( "(ch, rate) = (%d, %2.4f) \n\r", ch, rate );
-    DBG_PRINT_TRACE( "endptr     = %s \n\r", endptr );
-
-    if( 0 <= ch && ch <= 15 )
+    if( endFlag == 0 )
     {
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%5.2f(\%)", rate );
-
-        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
-        goto err;
+        Run( ch, rate );
     }
 
-//  usleep( 1000 * 1000 );  // 2s 待つ
-err :
     return;
 }
 

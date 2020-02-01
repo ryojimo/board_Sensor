@@ -40,9 +40,24 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void       Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Loop( void );
+static void       Help( void );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -80,18 +95,50 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     Potintiiometer のデータを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
+void
+Opt_SaPm(
     void
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Opt_SaPm() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorPm_Get();
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaPmJson(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaPmJson() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorPm_Get();
+
+    AppIfLcd_Printf( "%3d %%", data->cur_rate );
+
+    AppIfPc_Printf( "{\"sensor\": \"sa_pm\", \"value\": %3d}",
+                    data->cur_rate );
+    AppIfPc_Printf( "\n\r" );
+    return;
 }
 
 
@@ -103,13 +150,13 @@ IsEnterSw(
  * @author    Ryoji Morita
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
-static void
-Loop(
+void
+Opt_SaPmLoop(
     void
 ){
     SHalSensor_t*   data;   ///< センサデータの構造体
 
-    DBG_PRINT_TRACE( "Loop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SaPmLoop() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
 
@@ -150,20 +197,18 @@ Opt_Sa_Pm(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjl";
+    const char      optstring[] = "hjld";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
         { "loop", no_argument, NULL,  'l' },
+        { "data", no_argument, NULL,  'd' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
     DBG_PRINT_TRACE( "Opt_Sa_Pm() \n\r" );
-    SHalSensor_t*   data;
-
-    data = HalSensorPm_Get();
 
     AppIfLcd_CursorSet( 0, 1 );
 
@@ -173,35 +218,24 @@ Opt_Sa_Pm(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
             break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'j' )
-        {
-            AppIfLcd_Printf( "%3d %%", data->cur_rate );
+        }
 
-            AppIfPc_Printf( "{\"sensor\": \"sa_pm\", \"value\": %3d}",
-                            data->cur_rate );
-            AppIfPc_Printf( "\n\r" );
-        } else if( opt == 'l' )
+        switch( opt )
         {
-            Loop();
-            break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'j': Opt_SaPmJson(); break;
+        case 'l': Opt_SaPmLoop(); break;
+        case 'd': Opt_SaPm(); break;
+        default: break;
         }
     }
 
-err :
     return;
 }
 

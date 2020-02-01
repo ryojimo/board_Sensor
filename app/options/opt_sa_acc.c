@@ -40,9 +40,24 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void Help( void );
 static EHalBool_t IsEnterSw( void );
-static void       Loop( void );
+static void       Help( void );
+
+
+/**************************************************************************//*!
+ * @brief     Enter SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static EHalBool_t
+IsEnterSw(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
 
 /**************************************************************************//*!
@@ -83,18 +98,100 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     x-axis のデータを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
+void
+Opt_SaAccX(
     void
 ){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
+    DBG_PRINT_TRACE( "Opt_SaAccX() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorAcc_Get( EN_SEN_ACC_X );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     y-axis のデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaAccY(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaAccY() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorAcc_Get( EN_SEN_ACC_Y );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     z-axis のデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaAccZ(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaAccZ() \n\r" );
+    SHalSensor_t*   data;
+
+    data = HalSensorAcc_Get( EN_SEN_ACC_Z );
+    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+Opt_SaAccJson(
+    void
+){
+    DBG_PRINT_TRACE( "Opt_SaAccJson() \n\r" );
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
+
+    dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
+    dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
+    dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
+
+    AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+
+    AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}}",
+                    (int)dataX->cur,
+                    (int)dataY->cur,
+                    (int)dataZ->cur );
+    AppIfPc_Printf( "\n\r" );
+    return;
 }
 
 
@@ -106,15 +203,15 @@ IsEnterSw(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static void
-Loop(
+void
+Opt_SaAccLoop(
     void
 ){
+    DBG_PRINT_TRACE( "Opt_SaAccLoop() \n\r" );
+
     SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
     SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
     SHalSensor_t*   z;  ///< センサデータの構造体 : 加速度センサ Z 方向
-
-    DBG_PRINT_TRACE( "Loop() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
@@ -178,14 +275,6 @@ Opt_Sa_Acc(
     };
 
     DBG_PRINT_TRACE( "Opt_Sa_Acc() \n\r" );
-    SHalSensor_t*   dataX;
-    SHalSensor_t*   dataY;
-    SHalSensor_t*   dataZ;
-
-    dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
-    dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -194,46 +283,26 @@ Opt_Sa_Acc(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'j' )
-        {
-            AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
-
-            AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}}",
-                            (int)dataX->cur,
-                            (int)dataY->cur,
-                            (int)dataZ->cur );
-            AppIfPc_Printf( "\n\r" );
-            break;
-        } else if( opt == 'l' )
-        {
-            Loop();
             break;
         }
 
         switch( opt )
         {
-        case 'x': AppIfLcd_Printf( "0x%04X", (int)dataX->cur ); AppIfPc_Printf( "%d \n\r", (int)dataX->cur ); break;
-        case 'y': AppIfLcd_Printf( "0x%04X", (int)dataY->cur ); AppIfPc_Printf( "%d \n\r", (int)dataY->cur ); break;
-        case 'z': AppIfLcd_Printf( "0x%04X", (int)dataZ->cur ); AppIfPc_Printf( "%d \n\r", (int)dataZ->cur ); break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'j': Opt_SaAccJson(); break;
+        case 'l': Opt_SaAccLoop(); break;
+        case 'x': Opt_SaAccX(); break;
+        case 'y': Opt_SaAccY(); break;
+        case 'z': Opt_SaAccZ(); break;
         default: break;
         }
     }
 
-err :
     return;
 }
 

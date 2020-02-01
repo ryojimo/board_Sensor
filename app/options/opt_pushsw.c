@@ -41,7 +41,6 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       Test( void );
 
 
 /**************************************************************************//*!
@@ -83,8 +82,8 @@ Help(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-static void
-Test(
+void
+Opt_PushSwitchLoop(
     void
 ){
     EHalBool_t      status = EN_FALSE;
@@ -96,7 +95,7 @@ Test(
     int             start = 0;  ///< 開始時のポテンショメーターの値 ( % )
     int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
 
-    DBG_PRINT_TRACE( "Test() \n\r" );
+    DBG_PRINT_TRACE( "Opt_PushSwitchLoop() \n\r" );
 
     AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
 
@@ -154,16 +153,17 @@ Opt_PushSwitch(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "ht";
+    const char      optstring[] = "hl";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,           *flag, val }, // 説明
         { "help", no_argument,       NULL,  'h' },
-        { "test", no_argument,       NULL,  't' },
+        { "loop", no_argument,       NULL,  'l' },
         { 0,      0,                 NULL,   0  }, // termination
     };
-    int             longindex = 0;
 
     DBG_PRINT_TRACE( "Opt_PushSwitch() \n\r" );
+    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
@@ -171,28 +171,22 @@ Opt_PushSwitch(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
             break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
+        }
+
+        switch( opt )
         {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
-            break;
-        } else if( opt == 't' )
-        {
-            Test();
-            break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'l': Opt_PushSwitchLoop(); break;
+        default: break;
         }
     }
 
-err :
     return;
 }
 

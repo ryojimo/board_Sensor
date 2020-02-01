@@ -90,6 +90,7 @@ Opt_Relay(
 ){
     int             opt = 0;
     const char      optstring[] = "hnf";
+    int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
@@ -97,10 +98,8 @@ Opt_Relay(
         { "off",  no_argument, NULL,  'f' },
         { 0,      0,           NULL,   0  }, // termination
     };
-    int             longindex = 0;
 
     DBG_PRINT_TRACE( "Opt_Relay() \n\r" );
-
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -109,31 +108,23 @@ Opt_Relay(
         DBG_PRINT_TRACE( "optind = %d \n\r", optind );
         DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
 
-        if( opt == -1 )   // 処理するオプションが無くなった場合
+        // -1 : 処理するオプションが無くなった場合
+        // '?': optstring で指定していない引数が見つかった場合
+        if( opt == -1 )
         {
-            break;
-        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
-        {
-            DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt );
-            Help();
-            goto err;
-            break;
-        } else if( opt == 'h' )
-        {
-            Help();
-            goto err;
             break;
         }
 
         switch( opt )
         {
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
         case 'n': HalRelay_Set( EN_HIGH ); break;
         case 'f': HalRelay_Set( EN_LOW ); break;
         default: break;
         }
     }
 
-err :
     return;
 }
 
