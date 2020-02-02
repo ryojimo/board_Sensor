@@ -21,6 +21,7 @@
 
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -74,12 +75,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "    pm         \n\r" );
-    AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( "    Ex.)\n\r" );
-    AppIfPc_Printf( "        >pm \n\r" );
-    AppIfPc_Printf( "\n\r" );
-
+    AppIfPc_Printf( "Ex.)   \n\r" );
+    AppIfPc_Printf( "  > pm \n\r" );
+    AppIfPc_Printf( "       \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,37 +94,8 @@ static EAppMenuMsg_t
 Exec(
     void
 ){
-    SHalSensor_t*   data;   ///< センサデータの構造体
-
     DBG_PRINT_TRACE( "\n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 4, 0 );
-    AppIfLcd_Puts( "pm" );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
-    {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "Potentiometer : %3d%%, 0x%04X \r",
-                        data->cur_rate, (int)data->cur
-                      );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X %3d%%", (int)data->cur, data->cur_rate );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-
+    Opt_SaPmMenu();
     return EN_MENU_MSG_DONE;
 }
 
@@ -146,9 +115,7 @@ MenuCmd_SA_Pm(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
     ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     return EN_MENU_MSG_DONE;
 }
 

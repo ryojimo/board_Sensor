@@ -174,15 +174,13 @@ void
 Opt_SiBme280Menu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiBme280Menu() \n\r" );
-
     SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
 
+    DBG_PRINT_TRACE( "Opt_SiBme280Menu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

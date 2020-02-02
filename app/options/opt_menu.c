@@ -104,8 +104,7 @@ Opt_Menu(
     };
 
     DBG_PRINT_TRACE( "Opt_Menu() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
-
+    AppIfLcd_Clear();
     Sys_ShowInfo();
 
     while( 1 )

@@ -174,15 +174,13 @@ void
 Opt_SiTsl2561Menu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiTsl2561Menu() \n\r" );
-
     SHalSensor_t*   dataBb = NULL;      ///< 照度センサのデータ構造体
     SHalSensor_t*   dataIr = NULL;      ///< 照度センサのデータ構造体
     SHalSensor_t*   dataLux = NULL;     ///< 照度センサのデータ構造体
 
+    DBG_PRINT_TRACE( "Opt_SiTsl2561Menu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

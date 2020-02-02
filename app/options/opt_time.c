@@ -169,10 +169,8 @@ Opt_TimeMenu(
     SHalTime_t* date;   ///< 日時データの構造体
 
     DBG_PRINT_TRACE( "Opt_TimeMenu() \n\r" );
-
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

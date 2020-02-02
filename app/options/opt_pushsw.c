@@ -96,10 +96,8 @@ Opt_PushSwitchMenu(
     int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
 
     DBG_PRINT_TRACE( "Opt_PushSwitchMenu() \n\r" );
-
     AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // ポテンショメーターのデータを取得
     data = HalSensorPm_Get();

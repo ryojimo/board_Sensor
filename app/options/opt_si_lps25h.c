@@ -169,14 +169,12 @@ void
 Opt_SiLps25hMenu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiLps25hMenu() \n\r" );
-
     SHalSensor_t*   dataAtmos;  ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp;   ///< 温度センサのデータ構造体
 
+    DBG_PRINT_TRACE( "Opt_SiLps25hMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

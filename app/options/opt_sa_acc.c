@@ -166,16 +166,14 @@ void
 Opt_SaAccMenu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaAccMenu() \n\r" );
-
     SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
     SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
     SHalSensor_t*   z;  ///< センサデータの構造体 : 加速度センサ Z 方向
 
+    DBG_PRINT_TRACE( "Opt_SaAccMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

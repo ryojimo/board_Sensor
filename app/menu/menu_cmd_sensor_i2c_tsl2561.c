@@ -21,6 +21,7 @@
 
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -74,12 +75,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "    tsl2561      \n\r" );
-    AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( "    Ex.)\n\r" );
-    AppIfPc_Printf( "        >tsl2561 \n\r" );
-    AppIfPc_Printf( "\n\r" );
-
+    AppIfPc_Printf( "Ex.)        \n\r" );
+    AppIfPc_Printf( "  > tsl2561 \n\r" );
+    AppIfPc_Printf( "            \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,49 +94,8 @@ static EAppMenuMsg_t
 Exec(
     void
 ){
-    SHalSensor_t*   dataBb = NULL;      ///< 照度センサのデータ構造体
-    SHalSensor_t*   dataIr = NULL;      ///< 照度センサのデータ構造体
-    SHalSensor_t*   dataLux = NULL;     ///< 照度センサのデータ構造体
-
     DBG_PRINT_TRACE( "\n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 4, 0 );
-#if 0
-    AppIfLcd_Puts( "tsl2561" );
-#endif
-    // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
-    {
-        // センサデータを取得
-        dataBb  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
-        dataIr  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
-        dataLux = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
-#if 0
-        // PC ターミナル表示
-        AppIfPc_Printf( "(bb, Ir, Lux) = ( %5.2f, %5.2f, %5.2f ) \r",
-                        dataBb->cur, dataIr->cur, dataLux->cur
-                      );
-#endif
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "Ir : %5.2f     ", dataIr->cur );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "Lux: %5.2f     ", dataLux->cur );
-    }
-
-    // PC ターミナル表示
-    AppIfPc_Printf( "(broadband, Ir, Lux) = ( %5.2f, %5.2f, %5.2f ) \r",
-                    dataBb->cur, dataIr->cur, dataLux->cur
-                  );
-
-    AppIfPc_Printf( "\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-
+    Opt_SiTsl2561Menu();
     return EN_MENU_MSG_DONE;
 }
 
@@ -158,9 +115,7 @@ MenuCmd_SI_Tsl2561(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
     ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     return EN_MENU_MSG_DONE;
 }
 

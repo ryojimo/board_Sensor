@@ -162,14 +162,12 @@ void
 Opt_SaGyroMenu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaGyroMenu() \n\r" );
-
     SHalSensor_t*   g1; ///< センサデータの構造体 : ジャイロセンサ G1 方向
     SHalSensor_t*   g2; ///< センサデータの構造体 : ジャイロセンサ G2 方向
 
+    DBG_PRINT_TRACE( "Opt_SaGyroMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == IsEnterSw() )

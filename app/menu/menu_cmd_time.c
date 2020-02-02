@@ -21,6 +21,7 @@
 
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -74,12 +75,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "    date      \n\r" );
-    AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( "    Ex.)\n\r" );
-    AppIfPc_Printf( "        >date \n\r" );
-    AppIfPc_Printf( "\n\r" );
-
+    AppIfPc_Printf( "Ex.)     \n\r" );
+    AppIfPc_Printf( "  > date \n\r" );
+    AppIfPc_Printf( "         \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,39 +94,8 @@ static EAppMenuMsg_t
 Exec(
     void
 ){
-    SHalTime_t* date;   ///< 日時データの構造体
-
     DBG_PRINT_TRACE( "\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 4, 0 );
-    AppIfLcd_Puts( "date" );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
-    {
-        // 日時データを取得
-        date = HalTime_GetLocaltime();
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "Date(local)   = " );
-        AppIfPc_Printf( "%04d/%02d/%02d %02d:%02d:%02d \r",
-                date->year, date->month, date->day,
-                date->hour, date->min,   date->sec );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d/%02d %02d:%02d:%02d",
-                         date->month, date->day,
-                         date->hour, date->min, date->sec
-                         );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-
+    Opt_TimeMenu();
     return EN_MENU_MSG_DONE;
 }
 
@@ -148,9 +115,7 @@ MenuCmd_Time(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
     ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     return EN_MENU_MSG_DONE;
 }
 
