@@ -42,6 +42,8 @@ extern int  optind, opterr, optopt;
 //********************************************************
 static EHalBool_t IsEnterSw( void );
 static void       Help( void );
+static void       GetData( EHalSensorLPS25H_t which );
+static void       GetJson( void );
 
 
 /**************************************************************************//*!
@@ -77,13 +79,14 @@ Help(
     AppIfPc_Printf( " Main option)                                                  \n\r" );
     AppIfPc_Printf( "     -y, --si_lps25h : get the value of a sensor(I2C), LPS25H. \n\r" );
     AppIfPc_Printf( "                                                               \n\r" );
-    AppIfPc_Printf( " Sub option)                                                     \n\r" );
-    AppIfPc_Printf( "     -h, --help  : display the help menu.                        \n\r" );
-    AppIfPc_Printf( "     -a, --atmos : get the value of atmosphere.                  \n\r" );
-    AppIfPc_Printf( "     -t, --temp  : get the value of temperature.                 \n\r" );
-    AppIfPc_Printf( "     -j, --json  : get the all values of json format.            \n\r" );
-    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
-    AppIfPc_Printf( "                                                                 \n\r" );
+    AppIfPc_Printf( " Sub option)                                                   \n\r" );
+    AppIfPc_Printf( "     -h, --help  : display the help menu.                      \n\r" );
+    AppIfPc_Printf( "     -j, --json  : get the all values of json format.          \n\r" );
+    AppIfPc_Printf( "     -m, --menu  : menu mode.                                  \n\r" );
+    AppIfPc_Printf( "                                                               \n\r" );
+    AppIfPc_Printf( "     -a, --atmos : get the value of atmosphere.                \n\r" );
+    AppIfPc_Printf( "     -t, --temp  : get the value of temperature.               \n\r" );
+    AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
     AppIfPc_Printf( "     -y           -a      \n\r" );
@@ -97,44 +100,29 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     気圧センサのデータを表示する。
+ * @brief     データを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SiLps25hAtmos(
-    void
+static void
+GetData(
+    EHalSensorLPS25H_t     which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "Opt_SiLps25hAtmos() \n\r" );
+    DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
-    AppIfLcd_Printf( "%5.2f (hPa)", data->cur );
-    AppIfPc_Printf( "%5.2f \n\r", data->cur );
-    return;
-}
+    data = HalSensorLPS25H_Get( which );
 
+    switch( which )
+    {
+    case EN_SEN_LPS25H_ATMOS : AppIfLcd_Printf( "%5.2f (hPa)", data->cur ); break;
+    case EN_SEN_LPS25H_TEMP  : AppIfLcd_Printf( "%5.2f ('C)",  data->cur ); break;
+    default                  : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
+    }
 
-/**************************************************************************//*!
- * @brief     温度センサのデータを表示する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-void
-Opt_SiLps25hTemp(
-    void
-){
-    DBG_PRINT_TRACE( "Opt_SiLps25hTemp() \n\r" );
-    SHalSensor_t*   data;
-
-    data = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
-    AppIfLcd_Printf( "%5.2f ('C)",  data->cur );
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
@@ -148,11 +136,11 @@ Opt_SiLps25hTemp(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SiLps25hJson(
+static void
+GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiLps25hJson() \n\r" );
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
 
@@ -178,10 +166,10 @@ Opt_SiLps25hJson(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 void
-Opt_SiLps25hLoop(
+Opt_SiLps25hMenu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiLps25hLoop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SiLps25hMenu() \n\r" );
 
     SHalSensor_t*   dataAtmos;  ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp;   ///< 温度センサのデータ構造体
@@ -226,24 +214,24 @@ Opt_SiLps25hLoop(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Si_Lps25h(
+Opt_SiLps25h(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjlat";
+    const char      optstring[] = "hjmat";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,   has_arg,     *flag, val }, // 説明
         { "help",  no_argument, NULL,  'h' },
         { "json",  no_argument, NULL,  'j' },
-        { "loop",  no_argument, NULL,  'l' },
+        { "menu",  no_argument, NULL,  'm' },
         { "atmos", no_argument, NULL,  'a' },
         { "temp",  no_argument, NULL,  't' },
         { 0,       0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Si_Lps25h() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SiLps25h() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -263,10 +251,10 @@ Opt_Si_Lps25h(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'j': Opt_SiLps25hJson(); break;
-        case 'l': Opt_SiLps25hLoop(); break;
-        case 'a': Opt_SiLps25hAtmos(); break;
-        case 't': Opt_SiLps25hTemp(); break;
+        case 'j': GetJson(); break;
+        case 'm': Opt_SiLps25hMenu(); break;
+        case 'a': GetData( EN_SEN_LPS25H_ATMOS ); break;
+        case 't': GetData( EN_SEN_LPS25H_TEMP ); break;
         default: break;
         }
     }

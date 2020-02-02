@@ -60,14 +60,14 @@ Help(
     AppIfPc_Printf( " Main option)                                \n\r" );
     AppIfPc_Printf( "     -s, --switch : control the push switch. \n\r" );
     AppIfPc_Printf( "                                             \n\r" );
-    AppIfPc_Printf( " Sub option)                                 \n\r" );
-    AppIfPc_Printf( "     -h, --help         : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -t, --test         : test the push switch.  \n\r" );
+    AppIfPc_Printf( " Sub option)                             \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu. \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.             \n\r" );
     AppIfPc_Printf( "                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                  \n\r" );
-    AppIfPc_Printf( "     -s        -t     \n\r" );
-    AppIfPc_Printf( "     --switch  --test \n\r" );
+    AppIfPc_Printf( "     -s        -m     \n\r" );
+    AppIfPc_Printf( "     --switch  --menu \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -83,7 +83,7 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_PushSwitchLoop(
+Opt_PushSwitchMenu(
     void
 ){
     EHalBool_t      status = EN_FALSE;
@@ -95,7 +95,7 @@ Opt_PushSwitchLoop(
     int             start = 0;  ///< 開始時のポテンショメーターの値 ( % )
     int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
 
-    DBG_PRINT_TRACE( "Opt_PushSwitchLoop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_PushSwitchMenu() \n\r" );
 
     AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
 
@@ -153,13 +153,13 @@ Opt_PushSwitch(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hl";
+    const char      optstring[] = "hm";
     int             longindex = 0;
     const struct    option longopts[] = {
-      //{ *name,  has_arg,           *flag, val }, // 説明
-        { "help", no_argument,       NULL,  'h' },
-        { "loop", no_argument,       NULL,  'l' },
-        { 0,      0,                 NULL,   0  }, // termination
+      //{ *name,  has_arg,     *flag, val }, // 説明
+        { "help", no_argument, NULL,  'h' },
+        { "menu", no_argument, NULL,  'm' },
+        { 0,      0,           NULL,   0  }, // termination
     };
 
     DBG_PRINT_TRACE( "Opt_PushSwitch() \n\r" );
@@ -182,7 +182,7 @@ Opt_PushSwitch(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'l': Opt_PushSwitchLoop(); break;
+        case 'm': Opt_PushSwitchMenu(); break;
         default: break;
         }
     }

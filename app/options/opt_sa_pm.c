@@ -42,6 +42,8 @@ extern int  optind, opterr, optopt;
 //********************************************************
 static EHalBool_t IsEnterSw( void );
 static void       Help( void );
+static void       GetData( void );
+static void       GetJson( void );
 
 
 /**************************************************************************//*!
@@ -77,11 +79,13 @@ Help(
     AppIfPc_Printf( " Main option)                                                     \n\r" );
     AppIfPc_Printf( "     -p, --sa_pm : get the value of a sensor(A/D), Potentiometer. \n\r" );
     AppIfPc_Printf( "                                                                  \n\r" );
-    AppIfPc_Printf( " Sub option)                                                     \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.                         \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format.             \n\r" );
-    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
-    AppIfPc_Printf( "                                                                 \n\r" );
+    AppIfPc_Printf( " Sub option)                                                      \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                          \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.              \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                                      \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
+    AppIfPc_Printf( "     -d, --data : get the value.                                  \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                 \n\r" );
     AppIfPc_Printf( "     -p       -h     \n\r" );
@@ -95,18 +99,18 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     Potintiiometer のデータを表示する。
+ * @brief     データを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SaPm(
+static void
+GetData(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaPm() \n\r" );
+    DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
     data = HalSensorPm_Get();
@@ -124,11 +128,11 @@ Opt_SaPm(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SaPmJson(
+static void
+GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaPmJson() \n\r" );
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;
 
     data = HalSensorPm_Get();
@@ -151,12 +155,12 @@ Opt_SaPmJson(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 void
-Opt_SaPmLoop(
+Opt_SaPmMenu(
     void
 ){
     SHalSensor_t*   data;   ///< センサデータの構造体
 
-    DBG_PRINT_TRACE( "Opt_SaPmLoop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SaPmMenu() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
 
@@ -192,24 +196,23 @@ Opt_SaPmLoop(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Sa_Pm(
+Opt_SaPm(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjld";
+    const char      optstring[] = "hjmd";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
-        { "loop", no_argument, NULL,  'l' },
+        { "menu", no_argument, NULL,  'm' },
         { "data", no_argument, NULL,  'd' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Sa_Pm() \n\r" );
-
+    DBG_PRINT_TRACE( "Opt_SaPm() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -229,9 +232,9 @@ Opt_Sa_Pm(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'j': Opt_SaPmJson(); break;
-        case 'l': Opt_SaPmLoop(); break;
-        case 'd': Opt_SaPm(); break;
+        case 'j': GetJson(); break;
+        case 'm': Opt_SaPmMenu(); break;
+        case 'd': GetData(); break;
         default: break;
         }
     }

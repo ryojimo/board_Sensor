@@ -42,6 +42,8 @@ extern int  optind, opterr, optopt;
 //********************************************************
 static EHalBool_t IsEnterSw( void );
 static void       Help( void );
+static void       GetData( EHalSensorAcc_t which );
+static void       GetJson( void );
 
 
 /**************************************************************************//*!
@@ -78,13 +80,14 @@ Help(
     AppIfPc_Printf( "     -a, --sa_acc : get the value of a sensor(A/D), Acc. \n\r" );
     AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf( " Sub option)                                             \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.                         \n\r" );
-    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.                       \n\r" );
-    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.                       \n\r" );
-    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.                       \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format.             \n\r" );
-    AppIfPc_Printf( "     -l, --loop : get the all values until the PushSW is pushed. \n\r" );
-    AppIfPc_Printf( "                                                                 \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                 \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.     \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                             \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
+    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.               \n\r" );
+    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.               \n\r" );
+    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.               \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                  \n\r" );
     AppIfPc_Printf( "     -a        -x     \n\r" );
@@ -98,65 +101,21 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     x-axis のデータを表示する。
+ * @brief     データを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SaAccX(
-    void
+static void
+GetData(
+    EHalSensorAcc_t     which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "Opt_SaAccX() \n\r" );
+    DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
-    data = HalSensorAcc_Get( EN_SEN_ACC_X );
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
-    AppIfPc_Printf( "%d \n\r", (int)data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     y-axis のデータを表示する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-void
-Opt_SaAccY(
-    void
-){
-    DBG_PRINT_TRACE( "Opt_SaAccY() \n\r" );
-    SHalSensor_t*   data;
-
-    data = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
-    AppIfPc_Printf( "%d \n\r", (int)data->cur );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     z-axis のデータを表示する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-void
-Opt_SaAccZ(
-    void
-){
-    DBG_PRINT_TRACE( "Opt_SaAccZ() \n\r" );
-    SHalSensor_t*   data;
-
-    data = HalSensorAcc_Get( EN_SEN_ACC_Z );
+    data = HalSensorAcc_Get( which );
     AppIfLcd_Printf( "0x%04X", (int)data->cur );
     AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
@@ -171,11 +130,11 @@ Opt_SaAccZ(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SaAccJson(
+static void
+GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaAccJson() \n\r" );
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataX;
     SHalSensor_t*   dataY;
     SHalSensor_t*   dataZ;
@@ -204,10 +163,10 @@ Opt_SaAccJson(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_SaAccLoop(
+Opt_SaAccMenu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SaAccLoop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SaAccMenu() \n\r" );
 
     SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
     SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
@@ -256,25 +215,25 @@ Opt_SaAccLoop(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Sa_Acc(
+Opt_SaAcc(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjlxyz";
+    const char      optstring[] = "hjmxyz";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
-        { "loop", no_argument, NULL,  'l' },
+        { "menu", no_argument, NULL,  'm' },
         { "x",    no_argument, NULL,  'x' },
         { "y",    no_argument, NULL,  'y' },
         { "z",    no_argument, NULL,  'z' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Sa_Acc() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SaAcc() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -294,11 +253,11 @@ Opt_Sa_Acc(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'j': Opt_SaAccJson(); break;
-        case 'l': Opt_SaAccLoop(); break;
-        case 'x': Opt_SaAccX(); break;
-        case 'y': Opt_SaAccY(); break;
-        case 'z': Opt_SaAccZ(); break;
+        case 'j': GetJson(); break;
+        case 'm': Opt_SaAccMenu(); break;
+        case 'x': GetData( EN_SEN_ACC_X ); break;
+        case 'y': GetData( EN_SEN_ACC_Y ); break;
+        case 'z': GetData( EN_SEN_ACC_Z ); break;
         default: break;
         }
     }

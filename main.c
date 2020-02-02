@@ -152,24 +152,24 @@ int main(int argc, char *argv[])
 
         switch( opt )
         {
-        case 'a': Opt_Sa_Acc( argc, argv ); break;
+        case 'a': Opt_SaAcc( argc, argv ); break;
         case 'c': Opt_I2cLcd( argc, argv ); break;
         case 'e': Opt_I2cPca9685( argc, argv ); break;
-        case 'g': Opt_Sa_Gyro( argc, argv ); break;
+        case 'g': Opt_SaGyro( argc, argv ); break;
         case 'h': Opt_Help(); break;
         case 'l': Opt_Led( argc, argv ); break;
         case 'm': Opt_Menu( argc, argv ); break;
         case 'o': Opt_MotorSV( argc, argv ); break;
-        case 'p': Opt_Sa_Pm( argc, argv ); break;
+        case 'p': Opt_SaPm( argc, argv ); break;
         case 'q': Opt_Sensors(); break;
         case 'r': Opt_Relay( argc, argv ); break;
         case 's': Opt_PushSwitch( argc, argv ); break;
         case 't': Opt_Time( argc, argv ); break;
         case 'v': Opt_Version(); break;
-        case 'w': Opt_Si_Bme280( argc, argv ); break;
-        case 'x': Opt_Si_Gp2y0e03( argc, argv ); break;
-        case 'y': Opt_Si_Lps25h( argc, argv ); break;
-        case 'z': Opt_Si_Tsl2561( argc, argv ); break;
+        case 'w': Opt_SiBme280( argc, argv ); break;
+        case 'x': Opt_SiGp2y0e03( argc, argv ); break;
+        case 'y': Opt_SiLps25h( argc, argv ); break;
+        case 'z': Opt_SiTsl2561( argc, argv ); break;
 
         case 'i': 
             if( argv[2] != NULL )

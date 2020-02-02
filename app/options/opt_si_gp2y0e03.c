@@ -42,6 +42,8 @@ extern int  optind, opterr, optopt;
 //********************************************************
 static EHalBool_t IsEnterSw( void );
 static void       Help( void );
+static void       GetData( void );
+static void       GetJson( void );
 
 
 /**************************************************************************//*!
@@ -80,7 +82,8 @@ Help(
     AppIfPc_Printf( " Sub option)                                                       \n\r" );
     AppIfPc_Printf( "     -h, --help : display the help menu.                           \n\r" );
     AppIfPc_Printf( "     -j, --json : get the values of json format.                   \n\r" );
-    AppIfPc_Printf( "     -l, --loop : get the values until the PushSW is pushed.       \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                                       \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf( "     -d, --data : get the value.                                   \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
@@ -96,18 +99,18 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     GP2Y0E03 のデータを表示する。
+ * @brief     データを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SiGp2y0e03(
+static void
+GetData(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiGp2y0e03() \n\r" );
+    DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
     data = HalSensorGP2Y0E03_Get();
@@ -125,11 +128,11 @@ Opt_SiGp2y0e03(
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-Opt_SiGp2y0e03Json(
+static void
+GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiGp2y0e03Json() \n\r" );
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;   ///< センサデータの構造体
 
     data = HalSensorGP2Y0E03_Get();
@@ -152,10 +155,10 @@ Opt_SiGp2y0e03Json(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 void
-Opt_SiGp2y0e03Loop(
+Opt_SiGp2y0e03Menu(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_SiGp2y0e03Loop() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SiGp2y0e03Menu() \n\r" );
 
     SHalSensor_t*   data;   ///< センサデータの構造体
 
@@ -194,23 +197,23 @@ Opt_SiGp2y0e03Loop(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Si_Gp2y0e03(
+Opt_SiGp2y0e03(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjld";
+    const char      optstring[] = "hjmd";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
-        { "loop", no_argument, NULL,  'l' },
+        { "menu", no_argument, NULL,  'm' },
         { "data", no_argument, NULL,  'd' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Si_Gp2y0e03() \n\r" );
+    DBG_PRINT_TRACE( "Opt_SiGp2y0e03() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -230,9 +233,9 @@ Opt_Si_Gp2y0e03(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'j': Opt_SiGp2y0e03Json(); break;
-        case 'l': Opt_SiGp2y0e03Loop(); break;
-        case 'd': Opt_SiGp2y0e03(); break;
+        case 'j': GetJson(); break;
+        case 'm': Opt_SiGp2y0e03Menu(); break;
+        case 'd': GetData(); break;
         default: break;
         }
     }

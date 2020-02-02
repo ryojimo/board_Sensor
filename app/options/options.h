@@ -58,50 +58,29 @@ void  Opt_Relay( int argc, char *argv[] );        // リレーを ON / OFF す�
 
 void  Opt_Sensors( void );                        // すべてのセンサの値を取得する
 
-void  Opt_Sa_Acc( int argc, char *argv[] );       // SENSOR (ADC) 加速度センサ
-void  Opt_SaAccX( void );
-void  Opt_SaAccY( void );
-void  Opt_SaAccZ( void );
-void  Opt_SaAccJson( void );
-void  Opt_SaAccLoop( void );
+void  Opt_SaAcc( int argc, char *argv[] );       // SENSOR (ADC) 加速度センサ
+void  Opt_SaAccMenu( void );
 
-void  Opt_Sa_Gyro( int argc, char *argv[] );      // SENSOR (ADC) ジャイロセンサ
-void  Opt_SaGyroG1( void );
-void  Opt_SaGyroG2( void );
-void  Opt_SaGyroJson( void );
-void  Opt_SaGyroLoop( void );
+void  Opt_SaGyro( int argc, char *argv[] );      // SENSOR (ADC) ジャイロセンサ
+void  Opt_SaGyroMenu( void );
 
-void  Opt_Sa_Pm( int argc, char *argv[] );        // SENSOR (ADC) ポテンショメータ
-void  Opt_SaPm( void );
-void  Opt_SaPmJson( void );
-void  Opt_SaPmLoop( void );
+void  Opt_SaPm( int argc, char *argv[] );        // SENSOR (ADC) ポテンショメータ
+void  Opt_SaPmMenu( void );
 
-void  Opt_Si_Bme280( int argc, char *argv[] );    // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
-void  Opt_SiBme280Atmos( void );
-void  Opt_SiBme280Humi( void );
-void  Opt_SiBme280Temp( void );
-void  Opt_SiBme280Json( void );
-void  Opt_SiBme280Loop( void );
+void  Opt_SiBme280( int argc, char *argv[] );    // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
+void  Opt_SiBme280Menu( void );
 
-void  Opt_Si_Gp2y0e03( int argc, char *argv[] );  // SENSOR (I2C) GP2Y0E03 ( 距離 )
-void  Opt_SiGp2y0e03( void );
-void  Opt_SiGp2y0e03Json( void );
-void  Opt_SiGp2y0e03Loop( void );
+void  Opt_SiGp2y0e03( int argc, char *argv[] );  // SENSOR (I2C) GP2Y0E03 ( 距離 )
+void  Opt_SiGp2y0e03Menu( void );
 
-void  Opt_Si_Lps25h( int argc, char *argv[] );    // SENSOR (I2C) LPS25H   ( 気圧・温度 )
-void  Opt_SiLps25hAtmos( void );
-void  Opt_SiLps25hTemp( void );
-void  Opt_SiLps25hJson( void );
-void  Opt_SiLps25hLoop( void );
+void  Opt_SiLps25h( int argc, char *argv[] );    // SENSOR (I2C) LPS25H   ( 気圧・温度 )
+void  Opt_SiLps25hMenu( void );
 
-void  Opt_Si_Tsl2561( int argc, char *argv[] );   // SENSOR (I2C) TSL2561  ( 照度 )
-void  Opt_SiTsl2561Broadband( void );
-void  Opt_SiTsl2561Ir( void );
-void  Opt_SiTsl2561Lux( void );
-void  Opt_SiTsl2561Json( void );
-void  Opt_SiTsl2561Loop( void );
+void  Opt_SiTsl2561( int argc, char *argv[] );   // SENSOR (I2C) TSL2561  ( 照度 )
+void  Opt_SiTsl2561Menu( void );
 
 void  Opt_Time( int argc, char *argv[] );         // 日時情報を表示する
+void  Opt_TimeMenu( void );
 
 
 #endif  /* _APP_OPTIONS_H_ */
