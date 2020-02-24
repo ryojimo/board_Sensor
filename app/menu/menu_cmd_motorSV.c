@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -182,7 +183,7 @@ Volume(
     HalMotorSV_SetPwmDuty( EN_MOTOR_CCW, 10 );      // 10% 設定
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
         data = HalSensorPm_Get();

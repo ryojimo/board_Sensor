@@ -23,6 +23,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -85,6 +86,7 @@ int           g_menuCmdCnt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static char*            Strlower( char* str );
+static void             MenuInput_Display( int no );
 static int              SetCmd( unsigned char* in, int num );
 static EAppMenuMsg_t    Execute( unsigned char* name, const SAppMenuCmd_t*  table );
 
@@ -103,7 +105,7 @@ static char*
 Strlower(
     char*   str /* 大文字、小文字を含む文字列 */
 ){
-    char* ret;
+    char*   ret;
 
     ret = str;
     while( *str != '\0' )
@@ -112,6 +114,37 @@ Strlower(
         str++;
     }
     return ret;
+}
+
+
+/**************************************************************************//*!
+ * @brief     どのコマンドを選択してる？かを表示するための関数。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+MenuInput_Display(
+    int     no      ///< [in] 表示するメニュー番号
+){
+//    DBG_PRINT_TRACE( "no = %d \n\r", no );
+
+    // LED 表示
+    HalLed_Set( no );
+
+    // LCD 表示
+    AppIfLcd_Clear();
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( ">" );
+
+    AppIfLcd_CursorSet( 1, 0 ); AppIfLcd_Printf( "%02d.", no );
+    AppIfLcd_CursorSet( 4, 0 ); AppIfLcd_Puts( g_menuCmdTable[no].name );
+
+    AppIfLcd_CursorSet( 1, 1 ); AppIfLcd_Printf( "%02d.", no + 1 );
+    AppIfLcd_CursorSet( 4, 1 ); AppIfLcd_Puts( g_menuCmdTable[no + 1].name );
+    return;
 }
 
 
@@ -333,7 +366,7 @@ SelectCmd(
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( ">" );
 
-    while( EN_FALSE == IsPlusMinusSw() )
+    while( EN_FALSE == AppIfBtn_IsPlusMinus() )
     {
         // コマンド名を取得
         retVol = MenuInput_Volume_Get( &no );
@@ -346,7 +379,7 @@ SelectCmd(
         }
 
         // コマンドを実行
-        if( EN_FALSE == IsMinusSw() && EN_FALSE == IsPlusSw() && EN_TRUE == IsEnterSw() )
+        if( EN_FALSE == AppIfBtn_IsMinus() && EN_FALSE == AppIfBtn_IsPlus() && EN_TRUE == AppIfBtn_IsEnter() )
         {
             if( 0 == strlen( (char*)str ) )
             {

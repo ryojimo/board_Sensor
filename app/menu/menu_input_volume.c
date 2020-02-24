@@ -19,6 +19,7 @@
 //********************************************************
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_pc/if_pc.h"
 
 #include "menu_base.h"

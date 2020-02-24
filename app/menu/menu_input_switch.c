@@ -19,6 +19,7 @@
 //********************************************************
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_pc/if_pc.h"
 
 #include "menu_base.h"
@@ -84,12 +85,12 @@ GetCmdNo(
     max = sizeof(g_menuCmdTable) / sizeof(SAppMenuCmd_t);
 
     // 実行するコマンド番号を決定
-    if( EN_TRUE == IsMinusSw() )
+    if( EN_TRUE == AppIfBtn_IsMinus() )
     {
         value--;
     }
 
-    if( EN_TRUE == IsPlusSw() )
+    if( EN_TRUE == AppIfBtn_IsPlus() )
     {
         value++;
     }

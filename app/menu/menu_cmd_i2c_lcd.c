@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -171,7 +172,7 @@ Display(
     AppIfLcd_CursorSet( 0, 0 );
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         AppIfLcd_CursorSet( xy[0], xy[1] );
         AppIfLcd_Puts( (const char*)&g_menuCmd[3][0] );

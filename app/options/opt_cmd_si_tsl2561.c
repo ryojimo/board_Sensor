@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_si_bme280.c
+ *  @file           opt_si_tsl2561.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -40,26 +41,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
 static void       Help( void );
-static void       GetData( EHalSensorBME280_t which );
+static void       GetData( EHalSensorTSL2561_t which );
 static void       GetJson( void );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
 
 
 /**************************************************************************//*!
@@ -76,24 +60,24 @@ Help(
 ){
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                                                  \n\r" );
-    AppIfPc_Printf( "     -w, --si_bme280 : get the value of a sensor(I2C), BME280. \n\r" );
-    AppIfPc_Printf( "                                                               \n\r" );
-    AppIfPc_Printf( " Sub option)                                                   \n\r" );
-    AppIfPc_Printf( "     -h, --help  : display the help menu.                      \n\r" );
-    AppIfPc_Printf( "     -j, --json  : get the all values of json format.          \n\r" );
-    AppIfPc_Printf( "     -m, --menu  : menu mode.                                  \n\r" );
-    AppIfPc_Printf( "                                                               \n\r" );
-    AppIfPc_Printf( "     -a, --atmos : get the value of atmosphere.                \n\r" );
-    AppIfPc_Printf( "     -u, --humi  : get the value of humidity.                  \n\r" );
-    AppIfPc_Printf( "     -t, --temp  : get the value of temperature.               \n\r" );
-    AppIfPc_Printf( "                                                               \n\r" );
+    AppIfPc_Printf( " Main option)                                                    \n\r" );
+    AppIfPc_Printf( "     -z, --si_tsl2561 : get the value of a sensor(I2C), TSL2561. \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
+    AppIfPc_Printf( " Sub option)                                                     \n\r" );
+    AppIfPc_Printf( "     -h, --help      : display the help menu.                    \n\r" );
+    AppIfPc_Printf( "     -j, --json      : get the all values of json format.        \n\r" );
+    AppIfPc_Printf( "     -m, --menu  : menu mode.                                    \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
+    AppIfPc_Printf( "     -b, --broadband : get the value of ?.                       \n\r" );
+    AppIfPc_Printf( "     -i, --ir        : get the value of ?.                       \n\r" );
+    AppIfPc_Printf( "     -l, --lux       : get the value of LUX.                     \n\r" );
+    AppIfPc_Printf( "                                                                 \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                      \n\r" );
-    AppIfPc_Printf( "     -w           -a      \n\r" );
-    AppIfPc_Printf( "     --si_bme280  --atmos \n\r" );
-    AppIfPc_Printf( "     -w           -h      \n\r" );
-    AppIfPc_Printf( "     --si_bme280  --help  \n\r" );
+    AppIfPc_Printf( " Ex)                       \n\r" );
+    AppIfPc_Printf( "     -z            -l      \n\r" );
+    AppIfPc_Printf( "     --si_tsl2561  --lux   \n\r" );
+    AppIfPc_Printf( "     -z            -h      \n\r" );
+    AppIfPc_Printf( "     --si_tsl2561  --help  \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -110,19 +94,19 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    EHalSensorBME280_t     which   ///< [in] 対象のセンサ
+    EHalSensorTSL2561_t     which   ///< [in] 対象のセンサ
 ){
     DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
-    data = HalSensorBME280_Get( which );
+    data = HalSensorTSL2561_Get( which );
 
     switch( which )
     {
-    case EN_SEN_BME280_ATMOS : AppIfLcd_Printf( "%5.2f (hPa)", data->cur ); break;
-    case EN_SEN_BME280_HUMI  : AppIfLcd_Printf( "%5.2f (%%)",  data->cur ); break;
-    case EN_SEN_BME280_TEMP  : AppIfLcd_Printf( "%5.2f ('C)",  data->cur ); break;
-    default                  : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
+    case EN_SEN_TSL2561_BROADBAND : AppIfLcd_Printf( "%5.2f (BB)",  data->cur ); break;
+    case EN_SEN_TSL2561_IR        : AppIfLcd_Printf( "%5.2f (IR)",  data->cur ); break;
+    case EN_SEN_TSL2561_LUX       : AppIfLcd_Printf( "%5.2f (LUX)", data->cur ); break;
+    default                       : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
     }
 
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
@@ -143,20 +127,20 @@ GetJson(
     void
 ){
     DBG_PRINT_TRACE( "GetJson() \n\r" );
-    SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
-    SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
-    SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
+    SHalSensor_t*   dataBB = NULL;    ///< 照度センサのデータ構造体
+    SHalSensor_t*   dataIR = NULL;    ///< 照度センサのデータ構造体
+    SHalSensor_t*   dataLUX = NULL;   ///< 照度センサのデータ構造体
 
-    dataAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
-    dataHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
-    dataTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+    dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+    dataIR  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+    dataLUX = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
 
-    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataAtmos->cur, dataHumi->cur, dataTemp->cur );
+    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataBB->cur, dataIR->cur, dataLUX->cur );
 
-    AppIfPc_Printf( "{\"sensor\": \"si_bme280\", \"value\": {\"atmos\": %5.2f, \"humi\": %5.2f, \"temp\": %5.2f}}",
-                    dataAtmos->cur,
-                    dataHumi->cur,
-                    dataTemp->cur );
+    AppIfPc_Printf( "{\"sensor\": \"si_tsl2561\", \"value\": {\"broadband\": %5.2f, \"ir\": %5.2f, \"lux\": %5.2f}}",
+                    dataBB->cur,
+                    dataIR->cur,
+                    dataLUX->cur );
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -171,35 +155,35 @@ GetJson(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 void
-Opt_SiBme280Menu(
+OptCmd_SiTsl2561Menu(
     void
 ){
-    SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
-    SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
-    SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
+    SHalSensor_t*   dataBb = NULL;      ///< 照度センサのデータ構造体
+    SHalSensor_t*   dataIr = NULL;      ///< 照度センサのデータ構造体
+    SHalSensor_t*   dataLux = NULL;     ///< 照度センサのデータ構造体
 
-    DBG_PRINT_TRACE( "Opt_SiBme280Menu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiTsl2561Menu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfLcd_Clear();
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
-        dataAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
-        dataHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
-        dataTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+        dataBb  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
+        dataIr  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
+        dataLux = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
 
         // PC ターミナル表示
-        AppIfPc_Printf( "(atmos, humi, temp) = ( %5.2fhPa, %5.2f%%, %5.2f'C ) \n\r",
-                        dataAtmos->cur, dataHumi->cur, dataTemp->cur
+        AppIfPc_Printf( "(broadband, Ir, Lux) = ( %5.2f, %5.2f, %5.2f ) \n\r",
+                        dataBb->cur, dataIr->cur, dataLux->cur
                       );
 
         // LCD 表示
         AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
+        AppIfLcd_Printf( "Ir : %5.2f     ", dataIr->cur );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%3.2f%%  %3.2f'C", dataHumi->cur, dataTemp->cur );
+        AppIfLcd_Printf( "Lux: %5.2f     ", dataLux->cur );
 
         // 1 秒スリープ
         usleep( 1000 * 1000 );
@@ -219,25 +203,25 @@ Opt_SiBme280Menu(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_SiBme280(
+OptCmd_SiTsl2561(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmaut";
+    const char      optstring[] = "hjmbix";
     int             longindex = 0;
     const struct    option longopts[] = {
-      //{ *name,   has_arg,     *flag, val }, // 説明
-        { "help",  no_argument, NULL,  'h' },
-        { "json",  no_argument, NULL,  'j' },
-        { "menu",  no_argument, NULL,  'm' },
-        { "atmos", no_argument, NULL,  'a' },
-        { "humi",  no_argument, NULL,  'u' },
-        { "temp",  no_argument, NULL,  't' },
-        { 0,       0,           NULL,   0  }, // termination
+      //{ *name,       has_arg,     *flag, val }, // 説明
+        { "help",      no_argument, NULL,  'h' },
+        { "json",      no_argument, NULL,  'j' },
+        { "menu",      no_argument, NULL,  'm' },
+        { "broadband", no_argument, NULL,  'b' },
+        { "ir",        no_argument, NULL,  'i' },
+        { "lux",       no_argument, NULL,  'x' },
+        { 0,           0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_SiBme280() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiTsl2561() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -258,10 +242,10 @@ Opt_SiBme280(
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
         case 'j': GetJson(); break;
-        case 'm': Opt_SiBme280Menu(); break;
-        case 'a': GetData( EN_SEN_BME280_ATMOS ); break;
-        case 'u': GetData( EN_SEN_BME280_HUMI  ); break;
-        case 't': GetData( EN_SEN_BME280_TEMP  ); break;
+        case 'm': OptCmd_SiTsl2561Menu(); break;
+        case 'b': GetData( EN_SEN_TSL2561_BROADBAND ); break;
+        case 'i': GetData( EN_SEN_TSL2561_IR        ); break;
+        case 'x': GetData( EN_SEN_TSL2561_LUX       ); break;
         default: break;
         }
     }

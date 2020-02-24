@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -84,7 +85,7 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Relay(
+OptCmd_Relay(
     int             argc,
     char            *argv[]
 ){
@@ -99,7 +100,7 @@ Opt_Relay(
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Relay() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Relay() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )

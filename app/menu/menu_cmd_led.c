@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -137,7 +138,7 @@ Illumination(
     AppIfLcd_Puts( "led" );
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         HalLed_Set( value );
 

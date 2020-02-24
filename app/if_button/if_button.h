@@ -1,26 +1,26 @@
 /**************************************************************************//*!
- *  @file           menu_input.h
- *  @brief          [APP] menu/ フォルダ内向け公開 API を宣言したヘッダファイル。
+ *  @file           if_button.h
+ *  @brief          [APP] 外部公開 API を宣言したヘッダファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
  *                  関数命名規則
- *                      通常関数 : MenuInput_処理名()
+ *                      通常関数 : App[モジュール名]_処理名()
  *  @sa             none.
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2016.07.04
+ *  @last updated   2020.02.24
  *************************************************************************** */
 
 // 多重コンパイル抑止
-#ifndef _APP_MENU_INPUT_H_
-#define _APP_MENU_INPUT_H_
+#ifndef _APP_IF_BUTTON_H_
+#define _APP_IF_BUTTON_H_
 
 
 //********************************************************
 /* include                                               */
 //********************************************************
-// なし
+#include "../../hal/hal.h"
 
 
 //********************************************************
@@ -44,12 +44,12 @@
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-void            MenuInput_Switch_Clear( void );
-EAppMenuMsg_t   MenuInput_Switch_Get( int* no );
+EHalBool_t      AppIfBtn_IsMinus( void );
+EHalBool_t      AppIfBtn_IsPlus( void );
+EHalBool_t      AppIfBtn_IsEnter( void );
+EHalBool_t      AppIfBtn_IsPlusMinus( void );
+EHalBool_t      AppIfBtn_IsAll( void );
 
-void            MenuInput_Volume_Clear( void );
-EAppMenuMsg_t   MenuInput_Volume_Get( int* no );
 
-
-#endif  /* _APP_MENU_INPUT_H_ */
+#endif  /* _APP_IF_BUTTON_H_ */
 

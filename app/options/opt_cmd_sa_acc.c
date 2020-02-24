@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_sa_gyro.c
+ *  @file           opt_sa_acc.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -40,26 +41,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
 static void       Help( void );
-static void       GetData( EHalSensorGyro_t which );
+static void       GetData( EHalSensorAcc_t which );
 static void       GetJson( void );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
 
 
 /**************************************************************************//*!
@@ -76,23 +60,24 @@ Help(
 ){
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                                              \n\r" );
-    AppIfPc_Printf( "     -g, --sa_gyro : get the value of a sensor(A/D), Gyro. \n\r" );
-    AppIfPc_Printf( "                                                           \n\r" );
-    AppIfPc_Printf( " Sub option)                                               \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.                   \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format.       \n\r" );
-    AppIfPc_Printf( "     -m, --menu : menu mode.                               \n\r" );
-    AppIfPc_Printf( "                                                           \n\r" );
-    AppIfPc_Printf( "     -x, --g1   : get the value of g1-axis.                \n\r" );
-    AppIfPc_Printf( "     -y. --g2   : get the value of g2-axis.                \n\r" );
-    AppIfPc_Printf( "                                                           \n\r" );
+    AppIfPc_Printf( " Main option)                                            \n\r" );
+    AppIfPc_Printf( "     -a, --sa_acc : get the value of a sensor(A/D), Acc. \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
+    AppIfPc_Printf( " Sub option)                                             \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                 \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.     \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                             \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
+    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.               \n\r" );
+    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.               \n\r" );
+    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.               \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                   \n\r" );
-    AppIfPc_Printf( "     -g         -x     \n\r" );
-    AppIfPc_Printf( "     --sa_gyro  --g1   \n\r" );
-    AppIfPc_Printf( "     -g         -h     \n\r" );
-    AppIfPc_Printf( "     --sa_gyro  --help \n\r" );
+    AppIfPc_Printf( " Ex)                  \n\r" );
+    AppIfPc_Printf( "     -a        -x     \n\r" );
+    AppIfPc_Printf( "     --sa_acc  --x    \n\r" );
+    AppIfPc_Printf( "     -a        -h     \n\r" );
+    AppIfPc_Printf( "     --sa_acc  --help \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -109,12 +94,12 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    EHalSensorGyro_t    which   ///< [in] 対象のセンサ
+    EHalSensorAcc_t     which   ///< [in] 対象のセンサ
 ){
     DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
-    data = HalSensorGyro_Get( which );
+    data = HalSensorAcc_Get( which );
     AppIfLcd_Printf( "0x%04X", (int)data->cur );
     AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
@@ -134,17 +119,20 @@ GetJson(
     void
 ){
     DBG_PRINT_TRACE( "GetJson() \n\r" );
-    SHalSensor_t*   dataG1;
-    SHalSensor_t*   dataG2;
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
 
-    dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+    dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
+    dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
+    dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
 
-    AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
+    AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
 
-    AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}}",
-                    (int)dataG1->cur,
-                    (int)dataG2->cur );
+    AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}}",
+                    (int)dataX->cur,
+                    (int)dataY->cur,
+                    (int)dataZ->cur );
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -156,36 +144,43 @@ GetJson(
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    EAppMenuMsg_t 型に従う。
+ * @return    なし。
  *************************************************************************** */
 void
-Opt_SaGyroMenu(
+OptCmd_SaAccMenu(
     void
 ){
-    SHalSensor_t*   g1; ///< センサデータの構造体 : ジャイロセンサ G1 方向
-    SHalSensor_t*   g2; ///< センサデータの構造体 : ジャイロセンサ G2 方向
+    SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
+    SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
+    SHalSensor_t*   z;  ///< センサデータの構造体 : 加速度センサ Z 方向
 
-    DBG_PRINT_TRACE( "Opt_SaGyroMenu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SaAccMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
+    AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
     AppIfLcd_Clear();
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
-        g1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-        g2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+        x = HalSensorAcc_Get( EN_SEN_ACC_X );
+        y = HalSensorAcc_Get( EN_SEN_ACC_Y );
+        z = HalSensorAcc_Get( EN_SEN_ACC_Z );
 
         // PC ターミナル表示
-        AppIfPc_Printf( "joystick (g1, g2)=(0x%04X, 0x%04X)=(%04d, %04d)=(%3d%%, %3d%%) \r",
-                        (int)g1->cur, (int)g2->cur,
-                        (int)g1->cur, (int)g2->cur,
-                        g1->cur_rate, g2->cur_rate
+        AppIfPc_Printf( "acc (x, y, z)=(0x%04X, 0x%04X, 0x%04X)=(%04d, %04d, %04d)=(%3d%%, %3d%%, %3d%%) \r",
+                        (int)x->cur, (int)y->cur, (int)z->cur,
+                        (int)x->cur, (int)y->cur, (int)z->cur,
+                        x->cur_rate, y->cur_rate, z->cur_rate
                       );
 
         // LCD 表示
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "x%04X y%04X z%04X", (int)x->cur, (int)y->cur, (int)z->cur );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "g1:%3d%% g2:%3d%%", g1->cur_rate, g2->cur_rate );
+        AppIfLcd_Printf( "%3d%%  ", x->cur_rate );
+        AppIfLcd_Printf( "%3d%%  ", y->cur_rate );
+        AppIfLcd_Printf( "%3d%%",   z->cur_rate );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -202,24 +197,25 @@ Opt_SaGyroMenu(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_SaGyro(
+OptCmd_SaAcc(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmxy";
+    const char      optstring[] = "hjmxyz";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
         { "menu", no_argument, NULL,  'm' },
-        { "g1",   no_argument, NULL,  'x' },
-        { "g2",   no_argument, NULL,  'y' },
+        { "x",    no_argument, NULL,  'x' },
+        { "y",    no_argument, NULL,  'y' },
+        { "z",    no_argument, NULL,  'z' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_SaGyro() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SaAcc() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -240,9 +236,10 @@ Opt_SaGyro(
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
         case 'j': GetJson(); break;
-        case 'm': Opt_SaGyroMenu(); break;
-        case 'x': GetData( EN_SEN_GYRO_G1 ); break;
-        case 'y': GetData( EN_SEN_GYRO_G2 ); break;
+        case 'm': OptCmd_SaAccMenu(); break;
+        case 'x': GetData( EN_SEN_ACC_X ); break;
+        case 'y': GetData( EN_SEN_ACC_Y ); break;
+        case 'z': GetData( EN_SEN_ACC_Z ); break;
         default: break;
         }
     }

@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_motorSV.c
+ *  @file           opt_i2c_lcd.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -18,10 +18,12 @@
 /* include                                               */
 //********************************************************
 #include <getopt.h>
+#include <string.h>
 #include <stdlib.h>
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -41,27 +43,11 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
-static void       Help( void );
-static void       Run( double rate );
-static void       RunVolume( void );
-static double     GetRate( char* str );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
+static void Help( void );
+static void Clear( void );
+static void Init( void );
+static void Run( int x, int y, char* str );
+static int  GetDirection( char* str );
 
 
 /**************************************************************************//*!
@@ -78,19 +64,21 @@ Help(
 ){
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                                \n\r" );
-    AppIfPc_Printf( "     -o, --motorsv : control the SAVO motor. \n\r" );
-    AppIfPc_Printf( "                                             \n\r" );
-    AppIfPc_Printf( " Sub option)                                                   \n\r" );
-    AppIfPc_Printf( "     -h,            --help            : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -r int-number, --rate=int-number : the duty-rate.         \n\r" );
-    AppIfPc_Printf( "                                                               \n\r" );
+    AppIfPc_Printf( " Main option)                                                     \n\r" );
+    AppIfPc_Printf( "     -c, --i2clcd : control the (I2C) LCD.                        \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
+    AppIfPc_Printf( " Sub option)                                                      \n\r" );
+    AppIfPc_Printf( "     -c,        --clear         : clear the LCD display.          \n\r" );
+    AppIfPc_Printf( "     -h,        --help          : display the help menu.          \n\r" );
+    AppIfPc_Printf( "     -i,        --init          : init the LCD display.           \n\r" );
+    AppIfPc_Printf( "     -x number, --dir_x=number  : the value of x-axis.            \n\r" );
+    AppIfPc_Printf( "     -y number, --dir_y=number  : the value of y-axis.            \n\r" );
+    AppIfPc_Printf( "     -s string, --string=string : the string to display on LCD.   \n\r" );
+    AppIfPc_Printf( "                                                                  \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                      \n\r" );
-    AppIfPc_Printf( "     -o         -r  5     \n\r" );
-    AppIfPc_Printf( "     --motorsv  --rate=5  \n\r" );
-    AppIfPc_Printf( "     -o         -v        \n\r" );
-    AppIfPc_Printf( "     --motorsv  --volume  \n\r" );
+    AppIfPc_Printf( " Ex)                                                                 \n\r" );
+    AppIfPc_Printf( "     -c        -x      <number>  -y      <number>  -s <string>       \n\r" );
+    AppIfPc_Printf( "     --i2clcd  --dir_x=<number>  --dir_y=<number>  --string=<string> \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -98,7 +86,65 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     サーボモータをまわす。
+ * @brief     LCD をクリアする。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Clear(
+    void
+){
+    DBG_PRINT_TRACE( "Clear() \n\r" );
+    AppIfLcd_Clear();
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD を初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static void
+Init(
+    void
+){
+    DBG_PRINT_TRACE( "Init() \n\r" );
+    HalI2cLcd_Init();
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     座標の番号を取得する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static int
+GetDirection(
+    char*   str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "GetDirection() \n\r" );
+    int     dir;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+    dir = strtol( (const char*)str, NULL, 10 );
+    DBG_PRINT_TRACE( "dir = %d \n\r", dir );
+    return dir;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD に表示する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -107,85 +153,22 @@ Help(
  *************************************************************************** */
 static void
 Run(
-    double    rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    int       x,     ///< [in] x 座標
+    int       y,     ///< [in] y 座標
+    char*     str    ///< [in] 表示する文字列
 ){
     DBG_PRINT_TRACE( "Run() \n\r" );
 
-    // LCD に表示
+    DBG_PRINT_TRACE( "(x, y) = (%d, %d) \n\r", x, y );
+    DBG_PRINT_TRACE( "str    = %s \n\r", str );
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "                " );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%02.4f(\%)  ", rate );
+    AppIfLcd_Printf( "                " );
 
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)rate );
+    AppIfLcd_CursorSet( x, y );
+    AppIfLcd_Printf( str );
     return;
-}
-
-
-/**************************************************************************//*!
- * @brief     Volume を使ってサーボモータをまわす。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-RunVolume(
-    void
-){
-    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
-    double          value;      ///< サーボモータを回す値
-
-    DBG_PRINT_TRACE( "RunVolume() \n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
-    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
-    {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // サーボモータを回す値を計算する。
-        value = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", value );
-
-        // モータ制御
-        Run( value );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    // モータを停止
-    HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     rate を取得する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static double
-GetRate(
-    char*   str     ///< [in] 文字列
-){
-    DBG_PRINT_TRACE( "GetRate() \n\r" );
-    char*   endptr;
-    double  rate = 0;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-    rate = strtod( (const char*)str, &endptr );
-    DBG_PRINT_TRACE( "rate = %2.4f \n\r", rate );
-    return rate;
 }
 
 
@@ -198,25 +181,34 @@ GetRate(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_MotorSV(
+OptCmd_I2cLcd(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hr:v";
+    const char      optstring[] = "chis:x:y:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
+        { "clear",  no_argument,       NULL,  'c' },
         { "help",   no_argument,       NULL,  'h' },
-        { "rate",   required_argument, NULL,  'r' },
-        { "volume", no_argument,       NULL,  'v' },
+        { "init",   no_argument,       NULL,  'i' },
+        { "string", required_argument, NULL,  's' },
+        { "dir_x",  required_argument, NULL,  'x' },
+        { "dir_y",  required_argument, NULL,  'y' },
         { 0,        0,                 NULL,   0  }, // termination
     };
-    double          rate = 0;
+    int             x = 0;
+    int             y = 0;
+    char            str[16];
     int             endFlag = 0;
 
-    DBG_PRINT_TRACE( "Opt_MotorSV() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
+    DBG_PRINT_TRACE( "OptCmd_I2cLcd() \n\r" );
+    DBG_PRINT_TRACE( "argc    = %d \n\r", argc );
+    DBG_PRINT_TRACE( "argv[0] = %s \n\r", argv[0] );
+    DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
+    DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
+    DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
 
     while( 1 )
     {
@@ -235,15 +227,18 @@ Opt_MotorSV(
         {
         case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': endFlag = 1; Help(); break;
-        case 'v': endFlag = 1; RunVolume(); break;
-        case 'r':              rate = GetRate( optarg ); break;
+        case 'c': endFlag = 1; Clear(); break;
+        case 'i': endFlag = 1; Init(); break;
+        case 's':              strncpy( str, (const char*)optarg, 16 ); break;
+        case 'x':              x = GetDirection( optarg ); break;
+        case 'y':              y = GetDirection( optarg ); break;
         default: break;
         }
     }
 
     if( endFlag == 0 )
     {
-        Run( rate );
+        Run( x, y, str );
     }
 
     return;

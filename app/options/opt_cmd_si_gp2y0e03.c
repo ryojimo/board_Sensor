@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_time.c
+ *  @file           opt_si_gp2y0e03.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -40,26 +41,9 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
 static void       Help( void );
 static void       GetData( void );
 static void       GetJson( void );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
 
 
 /**************************************************************************//*!
@@ -76,22 +60,22 @@ Help(
 ){
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                        \n\r" );
-    AppIfPc_Printf( "     -t, --time : get the time.      \n\r" );
-    AppIfPc_Printf( "                                     \n\r" );
-    AppIfPc_Printf( " Sub option)                                         \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.             \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the all values of json format. \n\r" );
-    AppIfPc_Printf( "     -m, --menu  : menu mode.                        \n\r" );
-    AppIfPc_Printf( "                                                     \n\r" );
-    AppIfPc_Printf( "     -d, --data : get the value.                     \n\r" );
-    AppIfPc_Printf( "                                                     \n\r" );
+    AppIfPc_Printf( " Main option)                                                      \n\r" );
+    AppIfPc_Printf( "     -x, --si_gp2y0e03 : get the value of a sensor(I2C), GP2Y0E03. \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
+    AppIfPc_Printf( " Sub option)                                                       \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                           \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the values of json format.                   \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                                       \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
+    AppIfPc_Printf( "     -d, --data : get the value.                                   \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                \n\r" );
-    AppIfPc_Printf( "     -t      -h     \n\r" );
-    AppIfPc_Printf( "     --time  --help \n\r" );
-    AppIfPc_Printf( "     -t      -j     \n\r" );
-    AppIfPc_Printf( "     --time  --json \n\r" );
+    AppIfPc_Printf( " Ex)                       \n\r" );
+    AppIfPc_Printf( "     -x             -j     \n\r" );
+    AppIfPc_Printf( "     --si_gp2y0e03  --json \n\r" );
+    AppIfPc_Printf( "     -x             -h     \n\r" );
+    AppIfPc_Printf( "     --si_gp2y0e03  --help \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -111,11 +95,11 @@ GetData(
     void
 ){
     DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalTime_t*     data;
+    SHalSensor_t*   data;
 
-    data = HalTime_GetLocaltime();
-    AppIfPc_Printf( "%4d/%02d/%02d ", data->year, data->month, data->day );
-    AppIfPc_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
+    data = HalSensorGP2Y0E03_Get();
+    AppIfLcd_Printf( "%5.2f cm", data->cur );
+    AppIfPc_Printf( "%5.2f cm \n\r", data->cur );
     return;
 }
 
@@ -133,22 +117,14 @@ GetJson(
     void
 ){
     DBG_PRINT_TRACE( "GetJson() \n\r" );
-    SHalTime_t*     data;
+    SHalSensor_t*   data;   ///< センサデータの構造体
 
-    data = HalTime_GetLocaltime();
+    data = HalSensorGP2Y0E03_Get();
 
-    AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
+    AppIfLcd_Printf( "%5.2f cm", data->cur );
 
-    AppIfPc_Printf( "{\"time\": {\"year\": %4d, \"month\": %02d, \"day\": %02d, \"hour\": %02d, \"min\": %02d, \"sec\": %02d}}",
-                    data->year,
-                    data->month,
-                    data->day,
-                    data->hour,
-                    data->min,
-                    data->sec );
+    AppIfPc_Printf( "{\"sensor\": \"si_gp2y0e03\", \"value\": %5.2f}",
+                    data->cur );
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -163,36 +139,27 @@ GetJson(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 void
-Opt_TimeMenu(
+OptCmd_SiGp2y0e03Menu(
     void
 ){
-    SHalTime_t* date;   ///< 日時データの構造体
+    SHalSensor_t*   data;   ///< センサデータの構造体
 
-    DBG_PRINT_TRACE( "Opt_TimeMenu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03Menu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfLcd_Clear();
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        // 日時データを取得
-        date = HalTime_GetLocaltime();
+        // センサデータを取得
+        data  = HalSensorGP2Y0E03_Get();
 
         // PC ターミナル表示
-        AppIfPc_Printf( "Date(local) = " );
-        AppIfPc_Printf( "%04d/%02d/%02d %02d:%02d:%02d \n\r",
-                date->year, date->month, date->day,
-                date->hour, date->min,   date->sec );
+        AppIfPc_Printf( "distance = %02d cm \n\r", (int)data->cur );
 
         // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%04d/%02d/%02d",
-                         date->year, date->month, date->day
-                         );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d:%02d:%02d",
-                         date->hour, date->min, date->sec
-                         );
+        AppIfLcd_Printf( "%02d cm", (int)data->cur );
 
         // 1 秒スリープ
         usleep( 1000 * 1000 );
@@ -212,7 +179,7 @@ Opt_TimeMenu(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Time(
+OptCmd_SiGp2y0e03(
     int             argc,
     char            *argv[]
 ){
@@ -228,7 +195,7 @@ Opt_Time(
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Time() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -249,7 +216,7 @@ Opt_Time(
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
         case 'j': GetJson(); break;
-        case 'm': Opt_TimeMenu(); break;
+        case 'm': OptCmd_SiGp2y0e03Menu(); break;
         case 'd': GetData(); break;
         default: break;
         }

@@ -19,6 +19,7 @@
 //********************************************************
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 #include "../options/options.h"
@@ -95,7 +96,7 @@ Exec(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    Opt_SaPmMenu();
+    OptCmd_SaPmMenu();
     return EN_MENU_MSG_DONE;
 }
 

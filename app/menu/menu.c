@@ -22,6 +22,7 @@
 #include "../../hal/hal.h"
 #include "../../sys/sys.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -84,7 +85,6 @@ AppMenu_Main(
 
     // 初期化
     MenuCmd_Init();
-    MenuInput_Init();
 
     MenuInput_Switch_Clear();
     MenuInput_Volume_Clear();

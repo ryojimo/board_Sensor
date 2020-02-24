@@ -22,6 +22,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -41,28 +42,11 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
 static void       Help( void );
 static void       Run( int ch, double rate );
 static void       RunVolume( int ch );
 static int        GetChannel( char* str );
 static double     GetRate( char* str );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
 
 
 /**************************************************************************//*!
@@ -156,7 +140,7 @@ RunVolume(
     AppIfLcd_CursorSet( 0, 1 );
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
         data = HalSensorPm_Get();
@@ -233,7 +217,7 @@ GetRate(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_I2cPca9685(
+OptCmd_I2cPca9685(
     int             argc,
     char            *argv[]
 ){
@@ -252,7 +236,7 @@ Opt_I2cPca9685(
     double          rate = 0;
     int             endFlag = 0;
 
-    DBG_PRINT_TRACE( "Opt_I2cPca9685() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_I2cPca9685() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )

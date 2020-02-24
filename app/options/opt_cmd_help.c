@@ -33,10 +33,10 @@
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Help(
+OptCmd_Help(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_Help() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( " OPTION            : EXPLAIN                                        \n\r" );
     AppIfPc_Printf( "====================================================================\n\r" );

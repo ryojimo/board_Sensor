@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -83,7 +84,7 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_PushSwitchMenu(
+OptCmd_PushSwitchMenu(
     void
 ){
     EHalBool_t      status = EN_FALSE;
@@ -95,7 +96,7 @@ Opt_PushSwitchMenu(
     int             start = 0;  ///< 開始時のポテンショメーターの値 ( % )
     int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
 
-    DBG_PRINT_TRACE( "Opt_PushSwitchMenu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_PushSwitchMenu() \n\r" );
     AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
     AppIfLcd_Clear();
 
@@ -146,7 +147,7 @@ Opt_PushSwitchMenu(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_PushSwitch(
+OptCmd_PushSwitch(
     int             argc,
     char            *argv[]
 ){
@@ -160,7 +161,7 @@ Opt_PushSwitch(
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_PushSwitch() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_PushSwitch() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
@@ -180,7 +181,7 @@ Opt_PushSwitch(
         {
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
-        case 'm': Opt_PushSwitchMenu(); break;
+        case 'm': OptCmd_PushSwitchMenu(); break;
         default: break;
         }
     }

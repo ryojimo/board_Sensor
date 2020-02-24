@@ -33,10 +33,10 @@
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Version(
+OptCmd_Version(
     void
 ){
-    DBG_PRINT_TRACE( "Opt_Version() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Version() \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( "Copyright (C) 2020 Uz Foundation, Inc. \n\r" );
     AppIfPc_Printf( "Licence: Free. \n\r" );

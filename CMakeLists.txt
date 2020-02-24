@@ -11,14 +11,14 @@ link_directories( /usr/local/lib )
 add_definitions( -lrt -lwiringPi -Wl,-Map=board.map )
 
 # Targets.
-set( h_app ./app/if_lcd/ ./app/if_pc/ ./app/log/ ./app/menu/ ./app/options/ )
+set( h_app ./app/if_button/ ./app/if_lcd/ ./app/if_pc/ ./app/log/ ./app/menu/ ./app/options/ )
 set( h_hal ./hal/ ./hal/bme280/ ./hal/tsl2561/ )
 set( h_sys ./sys/ )
 set( h_all ${h_app} ${h_hal} ${h_sys} )
 include_directories( ${h_all} )
 message( "h_all: " ${h_all} "\n" )
 
-file( GLOB c_app  ./app/if_lcd/*.c ./app/if_pc/*.c ./app/log/*.c ./app/menu/*.c ./app/options/*.c )
+file( GLOB c_app  ./app/if_button/*.c ./app/if_lcd/*.c ./app/if_pc/*.c ./app/log/*.c ./app/menu/*.c ./app/options/*.c )
 file( GLOB c_hal  ./hal/*.c ./hal/bme280/*.c ./hal/tsl2561/*.c )
 file( GLOB c_sys  ./sys/*.c )
 file( GLOB c_main ./main.c )

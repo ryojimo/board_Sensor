@@ -22,6 +22,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -41,27 +42,10 @@ extern int  optind, opterr, optopt;
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static EHalBool_t IsEnterSw( void );
 static void       Help( void );
 static void       Run( int data );
 static void       RunIllumination( void );
 static int        GetData( char* str );
-
-
-/**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static EHalBool_t
-IsEnterSw(
-    void
-){
-    return HalPushSw_Get( EN_PUSH_SW_2 );
-}
 
 
 /**************************************************************************//*!
@@ -139,7 +123,7 @@ RunIllumination(
     AppIfLcd_CursorSet( 0, 1 );
 
     // キーを押されるまでループ
-    while( EN_FALSE == IsEnterSw() )
+    while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // PC ターミナル表示
         AppIfPc_Printf( "LED : data = %02d \r", value );
@@ -188,7 +172,7 @@ GetData(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Led(
+OptCmd_Led(
     int             argc,
     char            *argv[]
 ){
@@ -205,7 +189,7 @@ Opt_Led(
     int             data = 0;
     int             endFlag = 0;
 
-    DBG_PRINT_TRACE( "Opt_Led() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Led() \n\r" );
     AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )

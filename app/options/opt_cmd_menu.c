@@ -23,6 +23,7 @@
 #include "../../hal/hal.h"
 #include "../../sys/sys.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 #include "../menu/menu.h"
@@ -89,7 +90,7 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Menu(
+OptCmd_Menu(
     int             argc,
     char            *argv[]
 ){
@@ -103,7 +104,7 @@ Opt_Menu(
         { 0,        0,                 NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "Opt_Menu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Menu() \n\r" );
     AppIfLcd_Clear();
     Sys_ShowInfo();
 

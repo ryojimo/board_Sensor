@@ -21,6 +21,7 @@
 
 #include "../../hal/hal.h"
 
+#include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
 
@@ -73,11 +74,11 @@ Help(
  * @return    なし。
  *************************************************************************** */
 void
-Opt_Sensors(
+OptCmd_Sensors(
     void
 ){
 
-    DBG_PRINT_TRACE( "Opt_Sensors() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_Sensors() \n\r" );
     SHalSensor_t*   dataSaAccX;
     SHalSensor_t*   dataSaAccY;
     SHalSensor_t*   dataSaAccZ;

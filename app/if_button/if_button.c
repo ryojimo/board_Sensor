@@ -1,13 +1,13 @@
 /**************************************************************************//*!
- *  @file           menu_input.c
- *  @brief          [APP] メニュー・アプリ
+ *  @file           if_button.c
+ *  @brief          [APP] オプション・アプリ
  *  @author         Ryoji Morita
- *  @attention      menu_input_***.c 用共通関数を定義。
+ *  @attention      none.
  *  @sa             none.
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2016.07.04
+ *  @last updated   2020.02.24
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -17,13 +17,7 @@
 //********************************************************
 /* include                                               */
 //********************************************************
-#include "../../hal/hal.h"
-
-#include "../if_lcd/if_lcd.h"
-#include "../if_pc/if_pc.h"
-
-#include "menu_base.h"
-#include "menu_input.h"
+#include "if_button.h"
 
 //#define DBG_PRINT
 #define MY_NAME "APP"
@@ -33,7 +27,7 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define MAX_HISTORY     (4)
+// なし
 
 
 //********************************************************
@@ -45,7 +39,7 @@
 //********************************************************
 /* Global Parameter  ( Global Scope )                    */
 //********************************************************
-extern const SAppMenuCmd_t  g_menuCmdTable[ MAX_CMD_NUM ];
+// なし
 
 
 //********************************************************
@@ -63,83 +57,94 @@ extern const SAppMenuCmd_t  g_menuCmdTable[ MAX_CMD_NUM ];
 
 
 /**************************************************************************//*!
- * @brief     初期化する。
+ * @brief     マイナス SW が押されたか？どうかを返す。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-void
-MenuInput_Init(
+EHalBool_t
+AppIfBtn_IsMinus(
     void
 ){
-    DBG_PRINT_TRACE( "\n\r" );
-    return;
+    return HalPushSw_Get( EN_PUSH_SW_0 );
 }
 
 
 /**************************************************************************//*!
- * @brief     Enter SW が押されたか？どうかを返す。
+ * @brief     プラス SW が押されたか？どうかを返す。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
  * @return    なし。
  *************************************************************************** */
-EHalBool_t IsMinusSw( void ){ return HalPushSw_Get( EN_PUSH_SW_0 ); }
-EHalBool_t IsPlusSw( void ){  return HalPushSw_Get( EN_PUSH_SW_1 ); }
-EHalBool_t IsEnterSw( void ){ return HalPushSw_Get( EN_PUSH_SW_2 ); }
-
-EHalBool_t IsPlusMinusSw( void )
-{
-    EHalBool_t      ret = EN_FALSE;
-    if( IsMinusSw() && IsPlusSw() )
-    {
-        ret = EN_TRUE;
-    }
-    return ret;
-}
-
-EHalBool_t IsAllSw( void )
-{
-    EHalBool_t      ret = EN_FALSE;
-    if( IsMinusSw() && IsPlusSw() && IsAllSw() )
-    {
-        ret = EN_TRUE;
-    }
-    return ret;
-}
-
-
-/**************************************************************************//*!
- * @brief     どのコマンドを選択してる？かを表示するための関数。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-void
-MenuInput_Display(
-    int     no      ///< [in] 表示するメニュー番号
+EHalBool_t
+AppIfBtn_IsPlus(
+    void
 ){
-//    DBG_PRINT_TRACE( "no = %d \n\r", no );
+    return HalPushSw_Get( EN_PUSH_SW_1 );
+}
 
-    // LED 表示
-    HalLed_Set( no );
 
-    // LCD 表示
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( ">" );
+/**************************************************************************//*!
+ * @brief     エンター SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+EHalBool_t
+AppIfBtn_IsEnter(
+    void
+){
+    return HalPushSw_Get( EN_PUSH_SW_2 );
+}
 
-    AppIfLcd_CursorSet( 1, 0 ); AppIfLcd_Printf( "%02d.", no );
-    AppIfLcd_CursorSet( 4, 0 ); AppIfLcd_Puts( g_menuCmdTable[no].name );
 
-    AppIfLcd_CursorSet( 1, 1 ); AppIfLcd_Printf( "%02d.", no + 1 );
-    AppIfLcd_CursorSet( 4, 1 ); AppIfLcd_Puts( g_menuCmdTable[no + 1].name );
-    return;
+/**************************************************************************//*!
+ * @brief     プラス SW とマイナス SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+EHalBool_t
+AppIfBtn_IsPlusMinus(
+    void
+){
+    EHalBool_t  ret = EN_FALSE;
+
+    if( AppIfBtn_IsMinus() && AppIfBtn_IsPlus() )
+    {
+        ret = EN_TRUE;
+    }
+    return ret;
+}
+
+
+/**************************************************************************//*!
+ * @brief     すべての SW が押されたか？どうかを返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+EHalBool_t
+AppIfBtn_IsAll(
+    void
+){
+    EHalBool_t  ret = EN_FALSE;
+
+    if( AppIfBtn_IsMinus() && AppIfBtn_IsPlus() && AppIfBtn_IsEnter() )
+    {
+        ret = EN_TRUE;
+    }
+    return ret;
 }
 
 
