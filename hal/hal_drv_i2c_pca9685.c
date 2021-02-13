@@ -1,6 +1,6 @@
 /**************************************************************************//*!
- *  @file           hal_i2c_pca9685.c
- *  @brief          [HAL] I2C PCA9685 ドライバ API を定義したファイル。
+ *  @file           hal_drv_i2c_pca9685.c
+ *  @brief          [HAL] I2C PCA9685 (16ch PWM/サーボ ドライバー) の API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
  *  @sa             none.
@@ -168,7 +168,7 @@ HalI2cPca9685_Init(
 
 
 /**************************************************************************//*!
- * @brief     I2C LCD を終了する。
+ * @brief     I2C PCA9685 を終了する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
