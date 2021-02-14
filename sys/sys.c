@@ -77,20 +77,25 @@ Sys_Init(
 
     HalCmnGpio_Init();
     HalCmnI2c_Init();
+#if 0
     HalCmnSpi_Init();
+#endif
 
+    HalI2cAds1015_Init();
     HalI2cCmd_Init();
     HalI2cLcd_Init();
-    HalI2cPca9685_Init();
+//    HalI2cPca9685_Init();
     HalLed_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
     HalRelay_Init();
 
+#if 0
     // SENSOR (ADC)
     HalSensorAcc_Init();
     HalSensorGyro_Init();
     HalSensorPm_Init();
+#endif
 
     // SENSOR (I2C)
     HalSensorBME280_Init();
@@ -120,16 +125,18 @@ Sys_Fini(
 
     HalI2cCmd_Fini();
     HalI2cLcd_Fini();
-    HalI2cPca9685_Fini();
+//    HalI2cPca9685_Fini();
     HalLed_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
     HalRelay_Fini();
 
+#if 0
     // SENSOR (ADC)
     HalSensorAcc_Fini();
     HalSensorGyro_Fini();
     HalSensorPm_Fini();
+#endif
 
     // SENSOR (I2C)
     HalSensorBME280_Fini();
@@ -141,7 +148,9 @@ Sys_Fini(
 
     HalCmnGpio_Fini();
     HalCmnI2c_Fini();
+#if 0
     HalCmnSpi_Fini();
+#endif
 
     return;
 }

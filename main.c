@@ -82,10 +82,11 @@ int main(int argc, char *argv[])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "a:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
+    const char      optstring[] = "a:b:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "sa_acc",      required_argument, NULL,  'a' },
+        { "i2cads1015",  required_argument, NULL,  'b' },
         { "i2clcd",      required_argument, NULL,  'c' },
         { "i2cpca9685",  required_argument, NULL,  'e' },
         { "sa_gyro",     required_argument, NULL,  'g' },
@@ -153,6 +154,7 @@ int main(int argc, char *argv[])
         switch( opt )
         {
         case 'a': OptCmd_SaAcc( argc, argv ); break;
+        case 'b': OptCmd_I2cAds1015( argc, argv ); break;
         case 'c': OptCmd_I2cLcd( argc, argv ); break;
         case 'e': OptCmd_I2cPca9685( argc, argv ); break;
         case 'g': OptCmd_SaGyro( argc, argv ); break;

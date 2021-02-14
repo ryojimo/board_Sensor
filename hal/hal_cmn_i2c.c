@@ -203,6 +203,7 @@ HalCmnI2c_Write(
     DBG_PRINT_TRACE( "\n\r" );
 
     res = write( g_param.fd, data, size );
+    DBG_PRINT_TRACE( "res = %d \n\r", res );
     if( res != size )
     {
         DBG_PRINT_WARN( "fail to write data to i2c slave. \n\r" );
@@ -233,6 +234,7 @@ HalCmnI2c_Read(
     DBG_PRINT_TRACE( "\n\r" );
 
     res = read( g_param.fd, data, size );
+    DBG_PRINT_TRACE( "res = %d \n\r", res );
     if( res != size )
     {
         DBG_PRINT_WARN( "fail to read data from i2c slave. \n\r" );

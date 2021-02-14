@@ -45,6 +45,7 @@ OptCmd_Help(
     AppIfPc_Printf( " -m, --menu        : go to the menu mode.                           \n\r" );
     AppIfPc_Printf( " -q, --sensors     : display the values of all sensors.             \n\r" );
     AppIfPc_Printf( "                                                                    \n\r" );
+    AppIfPc_Printf( " -b, --i2cads1015  : control the (I2C) ADS1015.                     \n\r" );
     AppIfPc_Printf( " -c, --i2clcd      : control the (I2C) LCD.                         \n\r" );
     AppIfPc_Printf( " -e, --i2cpca9685  : control the (I2C) PCA9685.                     \n\r" );
     AppIfPc_Printf( " -o, --motorsv     : control the SAVO motor.                        \n\r" );

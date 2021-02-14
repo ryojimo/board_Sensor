@@ -35,6 +35,7 @@
 #define I2C_SLAVE_HDC1000       (0x40)
 #define I2C_SLAVE_PCA9685       (0x41)
 #define I2C_SLAVE_ADT7410       (0x48)
+#define I2C_SLAVE_ADS1015       (0x48)
 #define I2C_SLAVE_LPS25H        (0x5C)
 #define I2C_SLAVE_BME280        (0x76)
 
