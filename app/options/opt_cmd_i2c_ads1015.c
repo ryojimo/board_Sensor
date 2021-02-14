@@ -43,7 +43,8 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       Run( int ch );
+static void       GetData( int ch );
+static void       GetJson( void );
 static int        GetChannel( char* str );
 
 
@@ -65,8 +66,11 @@ Help(
     AppIfPc_Printf( "     -b, --i2cads1015 : control the (I2C) ADS1015.                 \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf( " Sub option)                                                       \n\r" );
-    AppIfPc_Printf( "     -h,              --help              : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -c number,       --ch=number         : the target channnel.   \n\r" );
+    AppIfPc_Printf( "     -h, --help  : display the help menu.                          \n\r" );
+    AppIfPc_Printf( "     -j, --json  : get the all values of json format.              \n\r" );
+    AppIfPc_Printf( "     -m, --menu  : menu mode.                                      \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
+    AppIfPc_Printf( "     -c number, --ch=number : the target channnel.                 \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                                                               \n\r" );
@@ -87,23 +91,25 @@ Help(
  * @return    なし。
  *************************************************************************** */
 static void
-Run(
-    int       ch      ///< [in] 対象の channel
+GetData(
+    int           ch      ///< [in] 対象の channel
 ){
-    DBG_PRINT_TRACE( "Run() \n\r" );
-    DBG_PRINT_TRACE( "ch = %02d \n\r", ch );
+    DBG_PRINT_TRACE( "GetData() \n\r" );
     unsigned int  data;
 
     if( 0 <= ch && ch <= 3 )
     {
+        data = HalI2cAds1015_Get( ch );
+
         // LCD に表示
         AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%d (mV)",  data );
 
-        data = HalI2cAds1015_Get( ch );
-        AppIfLcd_Printf( "%d (V)",  data );
+        // PC のターミナルに表示
+        AppIfPc_Printf( "%d \n\r", data );
     } else
     {
-        DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
+        DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 3. : %d \n\r", ch );
     }
 
     return;
@@ -133,6 +139,76 @@ GetChannel(
 
 
 /**************************************************************************//*!
+ * @brief     JSON 形式でデータを表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+GetJson(
+    void
+){
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
+    unsigned int    data0;
+    unsigned int    data1;
+    unsigned int    data2;
+    unsigned int    data3;
+
+    data0 = HalI2cAds1015_Get( 0 );
+    data1 = HalI2cAds1015_Get( 1 );
+    data2 = HalI2cAds1015_Get( 2 );
+    data3 = HalI2cAds1015_Get( 3 );
+
+    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", data0, data1, data2, data3 );
+
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "C0:%04d  C1:%04d", data0, data1 );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "C2:%04d  C3:%04d", data2, data3 );
+
+    AppIfPc_Printf( "{\"sensor\": \"si_ads1015\", \"value\": {\"ch0\": %d, \"ch1\": %d, \"ch2\": %d, \"ch3\": %d}}",
+                    data0,
+                    data1,
+                    data2,
+                    data2 );
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     実行する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+void
+OptCmd_I2cAds1015Menu(
+    void
+){
+    DBG_PRINT_TRACE( "OptCmd_I2cAds1015Menu() \n\r" );
+    AppIfPc_Printf( "if you push any keys, break.\n\r" );
+    AppIfLcd_Clear();
+
+    // キーを押されるまでループ
+    while( EN_FALSE == AppIfBtn_IsEnter() )
+    {
+        // センサデータを取得
+        GetJson();
+        // 0.1 秒スリープ
+        usleep( 100 * 1000 );
+    }
+
+    AppIfPc_Printf( "\n\r" );
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     実行する
  * @attention なし。
  * @note      なし。
@@ -146,11 +222,13 @@ OptCmd_I2cAds1015(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hc:";
+    const char      optstring[] = "hjmc:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
+        { "json",   no_argument,       NULL,  'j' },
+        { "menu",   no_argument,       NULL,  'm' },
         { "ch",     required_argument, NULL,  'c' },
         { 0,        0,                 NULL,   0  }, // termination
     };
@@ -177,6 +255,8 @@ OptCmd_I2cAds1015(
         {
         case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': endFlag = 1; Help(); break;
+        case 'j': endFlag = 1; GetJson(); break;
+        case 'm': endFlag = 1; OptCmd_I2cAds1015Menu(); break;
         case 'c':              ch   = GetChannel( optarg ); break;
         default: break;
         }
@@ -184,7 +264,7 @@ OptCmd_I2cAds1015(
 
     if( endFlag == 0 )
     {
-        Run( ch );
+        GetData( ch );
     }
 
     return;

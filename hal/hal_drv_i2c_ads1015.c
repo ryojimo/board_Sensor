@@ -24,7 +24,7 @@
 #include "hal.h"
 
 
-#define DBG_PRINT
+//#define DBG_PRINT
 #define MY_NAME "HAL"
 #include "../app/log/log.h"
 
@@ -169,47 +169,25 @@ HalI2cAds1015_Fini(
 }
 
 
-#if 0
-static unsigned char i2cRead(void) {
-    EHalBool_t      ret = EN_FALSE;
-    unsigned char   buff;
-
-    ret = HalCmnI2c_Read( &buff, 1 );
-    return buff;
-}
-
-static EHalBool_t i2cWrite(unsigned char x) {
-    EHalBool_t      ret = EN_FALSE;
-
-    ret = HalCmnI2c_Write( &x, 1 );
-    return;
-}
-#endif
-
 static EHalBool_t writeRegister(unsigned char reg, unsigned short value) {
     EHalBool_t      ret = EN_FALSE;
-    unsigned char   buff[2];
+    unsigned char   buff[3];
 
     DBG_PRINT_TRACE( "\n\r" );
     DBG_PRINT_TRACE( "reg   = 0x%02X \n\r", reg );
     DBG_PRINT_TRACE( "value = 0x%04X \n\r", value );
 
     buff[0] = reg;
-    ret = HalCmnI2c_Write( &buff[0], 1 );
+    buff[1] = ( value & 0xFF00 ) >> 8;
+    buff[2] = ( value & 0x00FF ) >> 0;
+    DBG_PRINT_TRACE( "buff[0] = 0x%02X \n\r", buff[0] );
+    DBG_PRINT_TRACE( "buff[1] = 0x%02X \n\r", buff[1] );
+    DBG_PRINT_TRACE( "buff[2] = 0x%02X \n\r", buff[2] );
+
+    ret = HalCmnI2c_Write( buff, 3 );
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write reg to i2c slave. \n\r" );
-        return ret;
-    }
-
-    buff[0] = ( value & 0xFF00 ) >> 8;
-    buff[1] = ( value & 0x00FF ) >> 0;
-    DBG_PRINT_TRACE( "buff[0] = 0x%02X \n\r", buff[0] );
-    DBG_PRINT_TRACE( "buff[1] = 0x%02X \n\r", buff[1] );
-    ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write data to i2c slave. \n\r" );
         return ret;
     }
 
@@ -224,8 +202,7 @@ static unsigned short readRegister(unsigned char reg) {
     DBG_PRINT_TRACE( "\n\r" );
     DBG_PRINT_TRACE( "reg   = 0x%02X \n\r", reg );
 
-    buff[0] = reg;
-    ret = HalCmnI2c_Write( &buff[0], 1 );
+    ret = HalCmnI2c_Write( &reg, 1 );
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write reg to i2c slave. \n\r" );
@@ -238,10 +215,10 @@ static unsigned short readRegister(unsigned char reg) {
         return ret;
     }
 
-    DBG_PRINT_TRACE( "buff[0] = 0x%02X \n\r", buff[0] );
-    DBG_PRINT_TRACE( "buff[1] = 0x%02X \n\r", buff[1] );
-
-    data = (buff[0] << 8) | buff[1];
+    data = ((buff[0] << 8) | buff[1]) >> 4;
+    DBG_PRINT_TRACE( "buff[0] = 0x%02X       \n\r", buff[0] );
+    DBG_PRINT_TRACE( "buff[1] = 0x%02X       \n\r", buff[1] );
+    DBG_PRINT_TRACE( "data    = 0x%04X = %d  \n\r", data, data );
     return data;
 }
 
@@ -327,13 +304,11 @@ HalI2cAds1015_Get(
     writeRegister( ADS1015_REG_POINTER_CONFIG, config );
 
     // Wait for the conversion to complete
-    sleep(2);
+    usleep(1000);
 
     // Read the conversion results
     // Shift 12-bit results right 4 bits for the ADS1015
     data = readRegister( ADS1015_REG_POINTER_CONVERT );
-    DBG_PRINT_TRACE( "data  = %d     \n\r", data );
-    DBG_PRINT_TRACE( "data  = 0x%04X \n\r", data );
     return data;
 }
 
