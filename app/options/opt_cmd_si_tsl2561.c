@@ -208,7 +208,7 @@ OptCmd_SiTsl2561(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmbix";
+    const char      optstring[] = "hjmbil";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,       has_arg,     *flag, val }, // 説明
@@ -217,7 +217,7 @@ OptCmd_SiTsl2561(
         { "menu",      no_argument, NULL,  'm' },
         { "broadband", no_argument, NULL,  'b' },
         { "ir",        no_argument, NULL,  'i' },
-        { "lux",       no_argument, NULL,  'x' },
+        { "lux",       no_argument, NULL,  'l' },
         { 0,           0,           NULL,   0  }, // termination
     };
 
@@ -245,7 +245,7 @@ OptCmd_SiTsl2561(
         case 'm': OptCmd_SiTsl2561Menu(); break;
         case 'b': GetData( EN_SEN_TSL2561_BROADBAND ); break;
         case 'i': GetData( EN_SEN_TSL2561_IR        ); break;
-        case 'x': GetData( EN_SEN_TSL2561_LUX       ); break;
+        case 'l': GetData( EN_SEN_TSL2561_LUX       ); break;
         default: break;
         }
     }
