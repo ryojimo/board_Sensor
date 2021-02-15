@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_i2c_tsl2561.c
+ *  @file           hal_drv_sensor_i2c_tsl2561.c
  *  @brief          [HAL] SENSOR (I2C) TSL2561 ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

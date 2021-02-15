@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_si_tsl2561.c
+ *  @file           opt_cmd_si_tsl2561.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

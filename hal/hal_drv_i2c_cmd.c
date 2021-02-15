@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_i2c_cmd.c
+ *  @file           hal_drv_i2c_cmd.c
  *  @brief          [HAL] I2C 通信ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

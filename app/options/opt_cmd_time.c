@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_time.c
+ *  @file           opt_cmd_time.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

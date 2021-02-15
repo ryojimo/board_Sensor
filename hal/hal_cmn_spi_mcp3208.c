@@ -1,6 +1,6 @@
 /**************************************************************************//*!
  *  @file           hal_cmn_spi_mcp3208.c
- *  @brief          [HAL] SPI AD コンバータ MCP3208 ドライバ API を定義したファイル。
+ *  @brief          [HAL] SPI AD コンバータ MCP3208 のドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
  *  @sa             none.
@@ -68,7 +68,7 @@
  *************************************************************************** */
 unsigned int
 HalCmnSpiMcp3208_Get(
-    EHalSensorMcp3208_t which   ///< [in] 対象のセンサ
+    EHalCh_t            which   ///< [in] 対象の ADC のチャネル
 ){
     unsigned char       send[3];
     unsigned char       recv[3];

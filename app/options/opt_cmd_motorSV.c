@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_motorSV.c
+ *  @file           opt_cmd_motorSV.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

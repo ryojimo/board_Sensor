@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_si_gp2y0e03.c
+ *  @file           opt_cmd_si_gp2y0e03.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

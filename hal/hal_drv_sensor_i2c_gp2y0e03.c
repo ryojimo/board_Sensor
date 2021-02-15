@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_i2c_gp2y0e03.c
+ *  @file           hal_drv_sensor_i2c_gp2y0e03.c
  *  @brief          [HAL] SENSOR (I2C) GP2Y0E03 ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

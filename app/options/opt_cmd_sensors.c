@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_sensors.c
+ *  @file           opt_cmd_sensors.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

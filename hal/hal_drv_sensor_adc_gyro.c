@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_adc_gyro.c
+ *  @file           hal_drv_sensor_adc_gyro.c
  *  @brief          [HAL] SENSOR (ADC) ジャイロセンサ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -205,12 +205,12 @@ HalSensorGyro_Get(
     switch( which )
     {
     case EN_SEN_GYRO_G1 :
-        data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_3 );
+        data = HalCmnSpiMcp3208_Get( EN_CH3 );
         HalCmn_UpdateSenData( &g_dataG1, (double)data );
         ret = &g_dataG1;
     break;
     case EN_SEN_GYRO_G2 :
-        data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_4 );
+        data = HalCmnSpiMcp3208_Get( EN_CH4 );
         HalCmn_UpdateSenData( &g_dataG2, (double)data );
         ret = &g_dataG2;
     break;

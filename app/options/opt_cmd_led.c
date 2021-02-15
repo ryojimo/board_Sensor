@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_led.c
+ *  @file           opt_cmd_led.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

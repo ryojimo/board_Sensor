@@ -34,12 +34,13 @@
 #define I2C_SLAVE_GP2Y0E03      (0x40)
 #define I2C_SLAVE_HDC1000       (0x40)
 #define I2C_SLAVE_PCA9685       (0x41)
-#define I2C_SLAVE_ADT7410       (0x48)
 #define I2C_SLAVE_ADS1015       (0x48)
+#define I2C_SLAVE_ADT7410       (0x48)
 #define I2C_SLAVE_LPS25H        (0x5C)
 #define I2C_SLAVE_BME280        (0x76)
 
 #define MCP3208_MAX_VALE        (0x0F60)
+#define ADS1015_MAX_VALE        (0x0672)
 
 
 //********************************************************
@@ -73,18 +74,18 @@ typedef enum tagEHalState
 //*************************************
 // デバイスを区別するための型
 //*************************************
-// AD コンバータ MCP3208 の Ch 区別に使用する型
-typedef enum tagEHalSensorMcp3208
+// AD コンバータの Ch 区別に使用する型
+typedef enum tagEHalCh
 {
-    EN_MCP3208_CH_0 = 0,    ///< @var : Ch 0
-    EN_MCP3208_CH_1,        ///< @var : Ch 1
-    EN_MCP3208_CH_2,        ///< @var : Ch 2
-    EN_MCP3208_CH_3,        ///< @var : Ch 3
-    EN_MCP3208_CH_4,        ///< @var : Ch 4
-    EN_MCP3208_CH_5,        ///< @var : Ch 5
-    EN_MCP3208_CH_6,        ///< @var : Ch 6
-    EN_MCP3208_CH_7         ///< @var : Ch 7
-} EHalSensorMcp3208_t;
+    EN_CH0 = 0,    ///< @var : Ch 0
+    EN_CH1,        ///< @var : Ch 1
+    EN_CH2,        ///< @var : Ch 2
+    EN_CH3,        ///< @var : Ch 3
+    EN_CH4,        ///< @var : Ch 4
+    EN_CH5,        ///< @var : Ch 5
+    EN_CH6,        ///< @var : Ch 6
+    EN_CH7         ///< @var : Ch 7
+} EHalCh_t;
 
 
 //********************************************************
@@ -124,7 +125,8 @@ EHalBool_t      HalCmnSpi_SendN( unsigned char* data, int );
 EHalBool_t      HalCmnSpi_SendBuffer( unsigned char* data, int size );
 EHalBool_t      HalCmnSpi_RecvN( unsigned char*  send, unsigned char*  recv, unsigned int size );
 
-unsigned int    HalCmnSpiMcp3208_Get( EHalSensorMcp3208_t which );
+int             HalCmnI2cAds1015_Get( EHalCh_t which );
+unsigned int    HalCmnSpiMcp3208_Get( EHalCh_t which );
 
 
 #endif /* _HAL_CMN_H_ */

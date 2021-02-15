@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_si_lps25h.c
+ *  @file           opt_cmd_si_lps25h.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

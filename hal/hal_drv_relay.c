@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_relay.c
+ *  @file           hal_drv_relay.c
  *  @brief          [HAL] Relay ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

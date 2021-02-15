@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_i2c_lps25h.c
+ *  @file           hal_drv_sensor_i2c_lps25h.c
  *  @brief          [HAL] SENSOR (I2C) LPS25H ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

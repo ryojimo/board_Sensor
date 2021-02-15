@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_led.c
+ *  @file           hal_drv_led.c
  *  @brief          [HAL] LED ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_si_bme280.c
+ *  @file           opt_cmd_si_bme280.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

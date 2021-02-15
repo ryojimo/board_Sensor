@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_i2c_pca9685.c
+ *  @file           opt_cmd_i2c_pca9685.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

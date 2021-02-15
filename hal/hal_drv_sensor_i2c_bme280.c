@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_i2c_bme280.c
+ *  @file           hal_drv_sensor_i2c_bme280.c
  *  @brief          [HAL] SENSOR (I2C) BME280 ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

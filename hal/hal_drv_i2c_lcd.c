@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_i2c_lcd.c
+ *  @file           hal_drv_i2c_lcd.c
  *  @brief          [HAL] I2C LCD ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

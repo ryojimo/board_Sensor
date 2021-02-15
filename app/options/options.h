@@ -46,7 +46,6 @@ void  OptCmd_Help( void );                           // オプション一覧を
 void  OptCmd_Version( void );                        // Version を表示する
 void  OptCmd_Menu( int argc, char *argv[] );         // Menu モードへ移動する
 
-void  OptCmd_I2cAds1015( int argc, char *argv[] );   // ADS1015 を制御する
 void  OptCmd_I2cLcd( int argc, char *argv[] );       // LCD を実行する
 void  OptCmd_I2cPca9685( int argc, char *argv[] );   // PCA9685 を制御する
 void  OptCmd_Led( int argc, char *argv[] );          // LED を点灯する

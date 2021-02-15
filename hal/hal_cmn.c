@@ -71,6 +71,11 @@ HalCmn_UpdateSenData(
     double          newData     ///< [in] 新しい値
 ){
     DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "curData->cur = %5.2f \n\r", curData->cur );
+    DBG_PRINT_TRACE( "curData->max = %5.2f \n\r", curData->max );
+    DBG_PRINT_TRACE( "curData->min = %5.2f \n\r", curData->min );
+    DBG_PRINT_TRACE( "newData      = %5.2f \n\r", newData );
+
 
     curData->cur = newData;
 

@@ -81,7 +81,6 @@ Sys_Init(
     HalCmnSpi_Init();
 #endif
 
-    HalI2cAds1015_Init();
     HalI2cCmd_Init();
     HalI2cLcd_Init();
 //    HalI2cPca9685_Init();
@@ -90,12 +89,12 @@ Sys_Init(
     HalPushSw_Init();
     HalRelay_Init();
 
-#if 0
     // SENSOR (ADC)
     HalSensorAcc_Init();
+#if 0
     HalSensorGyro_Init();
-    HalSensorPm_Init();
 #endif
+    HalSensorPm_Init();
 
     // SENSOR (I2C)
     HalSensorBME280_Init();
@@ -131,12 +130,12 @@ Sys_Fini(
     HalPushSw_Fini();
     HalRelay_Fini();
 
-#if 0
     // SENSOR (ADC)
     HalSensorAcc_Fini();
+#if 0
     HalSensorGyro_Fini();
-    HalSensorPm_Fini();
 #endif
+    HalSensorPm_Fini();
 
     // SENSOR (I2C)
     HalSensorBME280_Fini();

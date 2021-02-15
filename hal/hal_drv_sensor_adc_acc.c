@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_adc_acc.c
+ *  @file           hal_drv_sensor_adc_acc.c
  *  @brief          [HAL] SENSOR (ADC) 加速度センサ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -78,24 +78,24 @@ InitParam(
 
     g_dataX.cur = 0;                // cur = センサの現在値 ( MCP3208 の AD 値 )
     g_dataX.ofs = 0;                // ofs = 初期化時に設定したセンサのオフセット値
-    g_dataX.max = MCP3208_MAX_VALE; // max = センサの最大値
-    g_dataX.min = MCP3208_MAX_VALE; // min = センサの最小値
+    g_dataX.max = ADS1015_MAX_VALE; // max = センサの最大値
+    g_dataX.min = ADS1015_MAX_VALE; // min = センサの最小値
     g_dataX.err = 0;                // err = cur - ofs
     g_dataX.cur_rate = 0;           // cur_rate = ( cur / max ) * 100 ( %  )
     g_dataX.cur_vol = 0;            // cur_vol = 電圧に換算した現在値 ( mV )
 
     g_dataY.cur = 0;
     g_dataY.ofs = 0;
-    g_dataY.max = MCP3208_MAX_VALE;
-    g_dataY.min = MCP3208_MAX_VALE;
+    g_dataY.max = ADS1015_MAX_VALE;
+    g_dataY.min = ADS1015_MAX_VALE;
     g_dataY.err = 0;
     g_dataY.cur_rate = 0;
     g_dataY.cur_vol = 0;
 
     g_dataZ.cur = 0;
     g_dataZ.ofs = 0;
-    g_dataZ.max = MCP3208_MAX_VALE;
-    g_dataZ.min = MCP3208_MAX_VALE;
+    g_dataZ.max = ADS1015_MAX_VALE;
+    g_dataZ.min = ADS1015_MAX_VALE;
     g_dataZ.err = 0;
     g_dataZ.cur_rate = 0;
     g_dataZ.cur_vol = 0;
@@ -217,17 +217,17 @@ HalSensorAcc_Get(
     switch( which )
     {
     case EN_SEN_ACC_X :
-        data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_0 );
+        data = HalCmnI2cAds1015_Get( EN_CH1 );
         HalCmn_UpdateSenData( &g_dataX, (double)data );
         ret = &g_dataX;
     break;
     case EN_SEN_ACC_Y :
-        data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_1 );
+        data = HalCmnI2cAds1015_Get( EN_CH2 );
         HalCmn_UpdateSenData( &g_dataY, (double)data );
         ret = &g_dataY;
     break;
     case EN_SEN_ACC_Z :
-        data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_2 );
+        data = HalCmnI2cAds1015_Get( EN_CH3 );
         HalCmn_UpdateSenData( &g_dataZ, (double)data );
         ret = &g_dataZ;
     break;

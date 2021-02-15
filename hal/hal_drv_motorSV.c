@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_motorSV.c
+ *  @file           hal_drv_motorSV.c
  *  @brief          [HAL] サーボモータ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      サーボモータのパルス周期は 15 ～ 20ms にする必要があるらしい。

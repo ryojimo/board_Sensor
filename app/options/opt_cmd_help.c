@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_help.c
+ *  @file           opt_cmd_help.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

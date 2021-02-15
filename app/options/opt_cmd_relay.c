@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_relay.c
+ *  @file           opt_cmd_relay.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

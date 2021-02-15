@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_pushsw.c
+ *  @file           opt_cmd_pushsw.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.

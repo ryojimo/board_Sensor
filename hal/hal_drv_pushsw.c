@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_pushsw.c
+ *  @file           hal_drv_pushsw.c
  *  @brief          [HAL] SW ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.

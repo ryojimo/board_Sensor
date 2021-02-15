@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           hal_sensor_adc_pm.c
+ *  @file           hal_drv_sensor_adc_pm.c
  *  @brief          [HAL] SENSOR (ADC) ポテンショメータ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -76,8 +76,8 @@ InitParam(
 
     g_data.cur = 0;                 // cur = センサの現在値 ( MCP3208 の AD 値 )
     g_data.ofs = 0;                 // ofs = 初期化時に設定したセンサのオフセット値
-    g_data.max = MCP3208_MAX_VALE;  // max = センサの最大値
-    g_data.min = MCP3208_MAX_VALE;  // min = センサの最小値
+    g_data.max = ADS1015_MAX_VALE;  // max = センサの最大値
+    g_data.min = ADS1015_MAX_VALE;  // min = センサの最小値
     g_data.err = 0;                 // err = cur - ofs
     g_data.cur_rate = 0;            // cur_rate = ( cur / max ) * 100 ( %  )
     g_data.cur_vol = 0;             // cur_vol = 電圧に換算した現在値 ( mV )
@@ -185,13 +185,13 @@ SHalSensor_t*
 HalSensorPm_Get(
     void  ///< [in] ナシ
 ){
-    unsigned int    data = 0;
+    unsigned int        data = 0;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    data = HalCmnSpiMcp3208_Get( EN_MCP3208_CH_7 );
-
+    data = HalCmnI2cAds1015_Get( EN_CH0 );
     HalCmn_UpdateSenData( &g_data, (double)data );
+    DBG_PRINT_TRACE( "g_data->cur = %5.2f \n\r", g_data.cur );
 
     return &g_data;
 }
