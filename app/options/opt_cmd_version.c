@@ -38,7 +38,7 @@ OptCmd_Version(
 ){
     DBG_PRINT_TRACE( "OptCmd_Version() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( "Copyright (C) 2020 Uz Foundation, Inc. \n\r" );
+    AppIfPc_Printf( "Copyright (C) 2021 Uz Foundation, Inc. \n\r" );
     AppIfPc_Printf( "Licence: Free. \n\r" );
     AppIfPc_Printf( "\n\r" );
     return;

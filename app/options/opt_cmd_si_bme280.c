@@ -131,12 +131,18 @@ GetJson(
     SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
 
+    // センサデータを取得
     dataAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
     dataHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
     dataTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
 
-    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataAtmos->cur, dataHumi->cur, dataTemp->cur );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%3.2f%%  %3.2f'C", dataHumi->cur, dataTemp->cur );
 
+    // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_bme280\", \"value\": {\"atmos\": %5.2f, \"humi\": %5.2f, \"temp\": %5.2f}}",
                     dataAtmos->cur,
                     dataHumi->cur,

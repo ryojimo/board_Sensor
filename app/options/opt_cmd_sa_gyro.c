@@ -121,15 +121,21 @@ GetJson(
     SHalSensor_t*   dataG1;
     SHalSensor_t*   dataG2;
 
+    // センサデータを取得
     dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
     dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
 
-    AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "g1%04X g2%04X", (int)dataG1->cur, (int)dataG2->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%3d%%  ", dataG1->cur_rate );
+    AppIfLcd_Printf( "%3d%%  ", dataG2->cur_rate );
 
-    AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}}",
+    // PC ターミナル表示
+    AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}} \r",
                     (int)dataG1->cur,
                     (int)dataG2->cur );
-    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -146,9 +152,6 @@ void
 OptCmd_SaGyroMenu(
     void
 ){
-    SHalSensor_t*   g1; ///< センサデータの構造体 : ジャイロセンサ G1 方向
-    SHalSensor_t*   g2; ///< センサデータの構造体 : ジャイロセンサ G2 方向
-
     DBG_PRINT_TRACE( "OptCmd_SaGyroMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfLcd_Clear();
@@ -156,20 +159,7 @@ OptCmd_SaGyroMenu(
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        // センサデータを取得
-        g1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-        g2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "joystick (g1, g2)=(0x%04X, 0x%04X)=(%04d, %04d)=(%3d%%, %3d%%) \r",
-                        (int)g1->cur, (int)g2->cur,
-                        (int)g1->cur, (int)g2->cur,
-                        g1->cur_rate, g2->cur_rate
-                      );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "g1:%3d%% g2:%3d%%", g1->cur_rate, g2->cur_rate );
+        GetJson();
     }
 
     AppIfPc_Printf( "\n\r" );

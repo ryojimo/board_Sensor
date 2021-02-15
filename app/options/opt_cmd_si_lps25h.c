@@ -128,11 +128,17 @@ GetJson(
     SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
 
+    // センサデータを取得
     dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
     dataTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
 
-    AppIfLcd_Printf( "%5.2f, %5.2f", dataAtmos->cur, dataTemp->cur );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%3.2f'C", dataTemp->cur );
 
+    // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_lps25h\", \"value\": {\"atmos\": %5.2f, \"temp\": %5.2f}}",
                     dataAtmos->cur,
                     dataTemp->cur );

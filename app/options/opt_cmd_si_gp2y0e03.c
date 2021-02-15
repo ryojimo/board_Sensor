@@ -98,8 +98,9 @@ GetData(
     SHalSensor_t*   data;
 
     data = HalSensorGP2Y0E03_Get();
-    AppIfLcd_Printf( "%5.2f cm", data->cur );
-    AppIfPc_Printf( "%5.2f cm \n\r", data->cur );
+    AppIfLcd_Printf( "%5.2f (cm)", data->cur );
+
+    AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
 
@@ -119,10 +120,13 @@ GetJson(
     DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;   ///< センサデータの構造体
 
+    // センサデータを取得
     data = HalSensorGP2Y0E03_Get();
 
-    AppIfLcd_Printf( "%5.2f cm", data->cur );
+    // LCD 表示
+    AppIfLcd_Printf( "%5.2fcm", data->cur );
 
+    // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_gp2y0e03\", \"value\": %5.2f}",
                     data->cur );
     AppIfPc_Printf( "\n\r" );
@@ -155,11 +159,11 @@ OptCmd_SiGp2y0e03Menu(
         data  = HalSensorGP2Y0E03_Get();
 
         // PC ターミナル表示
-        AppIfPc_Printf( "distance = %02d cm \n\r", (int)data->cur );
+        AppIfPc_Printf( "distance = %02dcm \n\r", (int)data->cur );
 
         // LCD 表示
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d cm", (int)data->cur );
+        AppIfLcd_Printf( "%02dcm", (int)data->cur );
 
         // 1 秒スリープ
         usleep( 1000 * 1000 );

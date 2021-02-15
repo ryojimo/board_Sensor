@@ -119,13 +119,18 @@ GetJson(
     DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;
 
+    // センサデータを取得
     data = HalSensorPm_Get();
 
-    AppIfLcd_Printf( "%3d %%", data->cur_rate );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "%04X", (int)data->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%3d%%", data->cur_rate );
 
-    AppIfPc_Printf( "{\"sensor\": \"sa_pm\", \"value\": %3d}",
+    // PC ターミナル表示
+    AppIfPc_Printf( "{\"sensor\": \"sa_pm\", \"value\": %3d} \r",
                     data->cur_rate );
-    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -142,8 +147,6 @@ void
 OptCmd_SaPmMenu(
     void
 ){
-    SHalSensor_t*   data;   ///< センサデータの構造体
-
     DBG_PRINT_TRACE( "OptCmd_SaPmMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfLcd_Clear();
@@ -151,17 +154,7 @@ OptCmd_SaPmMenu(
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "Potentiometer : %3d%%, 0x%04X \r",
-                        data->cur_rate, (int)data->cur
-                      );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X %3d%%", (int)data->cur, data->cur_rate );
+        GetJson();
     }
 
     AppIfPc_Printf( "\n\r" );

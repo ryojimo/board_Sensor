@@ -123,17 +123,24 @@ GetJson(
     SHalSensor_t*   dataY;
     SHalSensor_t*   dataZ;
 
+    // センサデータを取得
     dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
     dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
     dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
 
-    AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "x%04X y%04X z%04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%3d%%  ", dataX->cur_rate );
+    AppIfLcd_Printf( "%3d%%  ", dataY->cur_rate );
+    AppIfLcd_Printf( "%3d%%",   dataZ->cur_rate );
 
-    AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}}",
+    // PC ターミナル表示
+    AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}} \r",
                     (int)dataX->cur,
                     (int)dataY->cur,
                     (int)dataZ->cur );
-    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -150,10 +157,6 @@ void
 OptCmd_SaAccMenu(
     void
 ){
-    SHalSensor_t*   x;  ///< センサデータの構造体 : 加速度センサ X 方向
-    SHalSensor_t*   y;  ///< センサデータの構造体 : 加速度センサ Y 方向
-    SHalSensor_t*   z;  ///< センサデータの構造体 : 加速度センサ Z 方向
-
     DBG_PRINT_TRACE( "OptCmd_SaAccMenu() \n\r" );
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
@@ -162,25 +165,7 @@ OptCmd_SaAccMenu(
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        // センサデータを取得
-        x = HalSensorAcc_Get( EN_SEN_ACC_X );
-        y = HalSensorAcc_Get( EN_SEN_ACC_Y );
-        z = HalSensorAcc_Get( EN_SEN_ACC_Z );
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "acc (x, y, z)=(0x%04X, 0x%04X, 0x%04X)=(%04d, %04d, %04d)=(%3d%%, %3d%%, %3d%%) \r",
-                        (int)x->cur, (int)y->cur, (int)z->cur,
-                        (int)x->cur, (int)y->cur, (int)z->cur,
-                        x->cur_rate, y->cur_rate, z->cur_rate
-                      );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "x%04X y%04X z%04X", (int)x->cur, (int)y->cur, (int)z->cur );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%3d%%  ", x->cur_rate );
-        AppIfLcd_Printf( "%3d%%  ", y->cur_rate );
-        AppIfLcd_Printf( "%3d%%",   z->cur_rate );
+        GetJson();
     }
 
     AppIfPc_Printf( "\n\r" );

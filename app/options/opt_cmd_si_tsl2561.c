@@ -131,12 +131,18 @@ GetJson(
     SHalSensor_t*   dataIR = NULL;    ///< 照度センサのデータ構造体
     SHalSensor_t*   dataLUX = NULL;   ///< 照度センサのデータ構造体
 
+    // センサデータを取得
     dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
     dataIR  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
     dataLUX = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
 
-    AppIfLcd_Printf( "%5.2f, %5.2f, %5.2f", dataBB->cur, dataIR->cur, dataLUX->cur );
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "%5.2f", dataBB->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f  %5.2f", dataIR->cur, dataLUX->cur );
 
+    // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_tsl2561\", \"value\": {\"broadband\": %5.2f, \"ir\": %5.2f, \"lux\": %5.2f}}",
                     dataBB->cur,
                     dataIR->cur,
