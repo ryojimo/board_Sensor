@@ -4,11 +4,11 @@
  *  @author         Ryoji Morita
  *  @attention      none.
  *  @sa             none.
- *  @note           none.
+ *  @note           参考サイト：https://github.com/adafruit/Adafruit_ADS1X15
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2021.02.13
+ *  @last updated   2021.02.15
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
