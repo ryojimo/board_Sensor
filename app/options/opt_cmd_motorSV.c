@@ -133,7 +133,8 @@ RunVolume(
         data = HalSensorPm_Get();
 
         // サーボモータを回す値を計算する。
-        value = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
+        value = 10 + (( 52 - 10 ) * data->cur_rate) / 100;
+//        value = data->cur_rate;
 
         // PC ターミナル表示
         AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", value );

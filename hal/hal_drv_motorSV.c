@@ -92,12 +92,24 @@ static EHalBool_t
 InitReg(
     void  ///< [in] ナシ
 ){
+    unsigned int        clock = 0;  // PWM のカウンタのカウントアップ周期を設定するために使用するパラメータ
+    unsigned int        range = 0;  // PWM の周期を設定するために使用するパラメータ
+
     DBG_PRINT_TRACE( "\n\r" );
 
     pinMode( MOTOR_SV_OUT, PWM_OUTPUT );
     pwmSetMode( PWM_MODE_MS );
-    pwmSetClock( 192 );
-    pwmSetRange( 100 );
+
+    // PWM のカウンタのカウントアップ周期
+    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ
+    clock = 3840;    // 2 - 4095 まで
+
+    // PWM 周期
+    // 5kHz / range(=100) = 50Hz
+    range = 100;    // 1 - 4096 まで
+
+    pwmSetClock( clock );
+    pwmSetRange( range );
 
     return EN_TRUE;
 }
@@ -166,30 +178,11 @@ HalMotorSV_SetPwmDuty(
     EHalMotorState_t    status, ///< [in] モータの状態
     int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
-    unsigned int        clock = 0;  // PWM のカウンタのカウントアップ周期を設定するために使用するパラメータ
-    unsigned int        range = 0;  // PWM の周期を設定するために使用するパラメータ
-    unsigned int        value = 0;
-
     DBG_PRINT_TRACE( "rate    = %d%% \n\r", rate );
 
-    // PWM のカウンタのカウントアップ周期
-    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ
-    clock = 3840;    // 2 - 4095 まで
-
-    // PWM 周期
-    // 5kHz / range(=100) = 50Hz
-    range = 100;    // 1 - 4096 まで
-
-    // デューティ比 = value / range
-    value = rate / 8 + 2;
-
-    pwmSetClock( clock );
-    pwmSetRange( range );
-
-    if( status == EN_MOTOR_CCW ||
-        status == EN_MOTOR_CW   )
+    if( status == EN_MOTOR_CCW || status == EN_MOTOR_CW   )
     {
-        pwmWrite( MOTOR_SV_OUT, value );
+        pwmWrite( MOTOR_SV_OUT, rate );
     } else
     {
         pwmWrite( MOTOR_SV_OUT, 0 );
