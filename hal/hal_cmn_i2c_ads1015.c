@@ -126,6 +126,7 @@ HalCmnI2cAds1015_Get(
     case 1: config |= ADS1015_REG_CONFIG_MUX_SINGLE_1; break;
     case 2: config |= ADS1015_REG_CONFIG_MUX_SINGLE_2; break;
     case 3: config |= ADS1015_REG_CONFIG_MUX_SINGLE_3; break;
+    default: DBG_PRINT_ERROR( "invalid channel. ch: %d. \n\r", which ); break;
     }
 
     // 'start single-conversion' に設定
