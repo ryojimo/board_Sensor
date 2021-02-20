@@ -73,10 +73,12 @@ Help(
     AppIfPc_Printf( "                                                           \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                   \n\r" );
-    AppIfPc_Printf( "     -g         -x     \n\r" );
-    AppIfPc_Printf( "     --sa_gyro  --g1   \n\r" );
     AppIfPc_Printf( "     -g         -h     \n\r" );
     AppIfPc_Printf( "     --sa_gyro  --help \n\r" );
+    AppIfPc_Printf( "     -g         -j     \n\r" );
+    AppIfPc_Printf( "     --sa_gyro  --json \n\r" );
+    AppIfPc_Printf( "     -g         -x     \n\r" );
+    AppIfPc_Printf( "     --sa_gyro  --g1   \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -95,11 +97,18 @@ static void
 GetData(
     EHalSensorGyro_t    which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
+    SHalSensor_t*       data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorGyro_Get( which );
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "0x%03X %04d %03d%%", (int)data->cur, (int)data->cur, (int)data->cur_rate );
+
+    // PC ターミナル表示
     AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
 }
@@ -117,9 +126,10 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataG1;
     SHalSensor_t*   dataG2;
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
@@ -127,15 +137,15 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "g1%04X g2%04X", (int)dataG1->cur, (int)dataG2->cur );
+    AppIfLcd_Printf( "g1:%04d g2:%04d", (int)dataG1->cur, (int)dataG2->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3d%%  ", dataG1->cur_rate );
-    AppIfLcd_Printf( "%3d%%  ", dataG2->cur_rate );
+    AppIfLcd_Printf( "%03d(%%) %03d(%%)", dataG1->cur_rate, dataG2->cur_rate );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"sa_gyro\", \"value\": {\"g1\": %d, \"g2\": %d}} \r",
                     (int)dataG1->cur,
                     (int)dataG2->cur );
+    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -152,14 +162,28 @@ void
 OptCmd_SaGyroMenu(
     void
 ){
+    SHalSensor_t*   dataG1;
+    SHalSensor_t*   dataG2;
+
     DBG_PRINT_TRACE( "OptCmd_SaGyroMenu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        GetJson();
+        // センサデータを取得
+        dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
+        dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%03d(%%) %03d(%%)", dataG1->cur_rate, dataG2->cur_rate );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "G1: { A/D: 0x%04X(digit), rate: %03d(%%) }, G2: { A/D: 0x%04X(digit), rate: %03d(%%) } \r",
+                        (int)dataG1->cur, dataG1->cur_rate,
+                        (int)dataG2->cur, dataG2->cur_rate );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -194,7 +218,6 @@ OptCmd_SaGyro(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SaGyro() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

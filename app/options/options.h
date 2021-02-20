@@ -48,13 +48,18 @@ void  OptCmd_Menu( int argc, char *argv[] );         // Menu モードへ移動�
 
 void  OptCmd_I2cLcd( int argc, char *argv[] );       // LCD を実行する
 void  OptCmd_I2cPca9685( int argc, char *argv[] );   // PCA9685 を制御する
+
 void  OptCmd_Led( int argc, char *argv[] );          // LED を点灯する
+void  OptCmd_LedMenu( void );
+
 void  OptCmd_MotorSV( int argc, char *argv[] );      // サーボモータを制御する
+void  OptCmd_MotorSvMenu( void );
 
 void  OptCmd_PushSwitch( int argc, char *argv[] );   // Push Switch の値を取得する
-void  OptCmd_PushSwitchLoop( void );
+void  OptCmd_PushSwitchMenu( void );
 
 void  OptCmd_Relay( int argc, char *argv[] );        // リレーを ON / OFF する
+void	OptCmd_RelayMenu( void );
 
 void  OptCmd_Sensors( void );                        // すべてのセンサの値を取得する
 

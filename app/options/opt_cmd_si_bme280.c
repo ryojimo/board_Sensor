@@ -18,6 +18,8 @@
 /* include                                               */
 //********************************************************
 #include <getopt.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "../../hal/hal.h"
 
@@ -74,10 +76,12 @@ Help(
     AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
-    AppIfPc_Printf( "     -w           -a      \n\r" );
-    AppIfPc_Printf( "     --si_bme280  --atmos \n\r" );
     AppIfPc_Printf( "     -w           -h      \n\r" );
     AppIfPc_Printf( "     --si_bme280  --help  \n\r" );
+    AppIfPc_Printf( "     -w           -j      \n\r" );
+    AppIfPc_Printf( "     --si_bme280  --json  \n\r" );
+    AppIfPc_Printf( "     -w           -a      \n\r" );
+    AppIfPc_Printf( "     --si_bme280  --atmos \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -94,21 +98,26 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    EHalSensorBME280_t     which   ///< [in] 対象のセンサ
+    EHalSensorBME280_t  which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
+    SHalSensor_t*       data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorBME280_Get( which );
 
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
     switch( which )
     {
-    case EN_SEN_BME280_ATMOS : AppIfLcd_Printf( "%5.2f (hPa)", data->cur ); break;
-    case EN_SEN_BME280_HUMI  : AppIfLcd_Printf( "%5.2f (%%)",  data->cur ); break;
-    case EN_SEN_BME280_TEMP  : AppIfLcd_Printf( "%5.2f ('C)",  data->cur ); break;
+    case EN_SEN_BME280_ATMOS : AppIfLcd_Printf( "%5.2f(hPa)", data->cur ); break;
+    case EN_SEN_BME280_HUMI  : AppIfLcd_Printf( "%5.2f(%%)",  data->cur ); break;
+    case EN_SEN_BME280_TEMP  : AppIfLcd_Printf( "%5.2f('C)",  data->cur ); break;
     default                  : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
     }
 
+    // PC ターミナル表示
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
@@ -126,10 +135,11 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     dataAtmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
@@ -138,9 +148,9 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
+    AppIfLcd_Printf( "%5.2f(hPa)", dataAtmos->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3.2f%%  %3.2f'C", dataHumi->cur, dataTemp->cur );
+    AppIfLcd_Printf( "%3.2f(%%) %3.2f('C)", dataHumi->cur, dataTemp->cur );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_bme280\", \"value\": {\"atmos\": %5.2f, \"humi\": %5.2f, \"temp\": %5.2f}}",
@@ -168,9 +178,12 @@ OptCmd_SiBme280Menu(
     SHalSensor_t*   dataHumi  = NULL;   ///< 湿度センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
 
+    char            buff[APP_LCD_MAX_SCROLL];
+
     DBG_PRINT_TRACE( "OptCmd_SiBme280Menu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
+    AppIfLcd_ScrollClear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
@@ -180,19 +193,16 @@ OptCmd_SiBme280Menu(
         dataHumi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
         dataTemp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
 
+        // LCD スクロール表示
+        memset( buff, '\0', sizeof(buff) );
+        sprintf( buff, "atmos: %5.2f(hPa), humi: %3.2f(%%), temp: %3.2f('C)", dataAtmos->cur, dataHumi->cur, dataTemp->cur );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Scroll( buff );
+
         // PC ターミナル表示
-        AppIfPc_Printf( "(atmos, humi, temp) = ( %5.2fhPa, %5.2f%%, %5.2f'C ) \n\r",
+        AppIfPc_Printf( "{ atmos: %5.2f(hPa), humi: %5.2f(%%), temp: %5.2f('C) } \n\r",
                         dataAtmos->cur, dataHumi->cur, dataTemp->cur
                       );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%3.2f%%  %3.2f'C", dataHumi->cur, dataTemp->cur );
-
-        // 1 秒スリープ
-        usleep( 1000 * 1000 );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -228,7 +238,6 @@ OptCmd_SiBme280(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SiBme280() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

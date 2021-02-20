@@ -237,7 +237,6 @@ OptCmd_I2cPca9685(
     int             endFlag = 0;
 
     DBG_PRINT_TRACE( "OptCmd_I2cPca9685() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

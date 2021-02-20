@@ -91,9 +91,7 @@ Sys_Init(
 
     // SENSOR (ADC)
     HalSensorAcc_Init();
-#if 0
     HalSensorGyro_Init();
-#endif
     HalSensorPm_Init();
 
     // SENSOR (I2C)
@@ -132,9 +130,7 @@ Sys_Fini(
 
     // SENSOR (ADC)
     HalSensorAcc_Fini();
-#if 0
     HalSensorGyro_Fini();
-#endif
     HalSensorPm_Fini();
 
     // SENSOR (I2C)

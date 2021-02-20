@@ -205,12 +205,20 @@ HalSensorGyro_Get(
     switch( which )
     {
     case EN_SEN_GYRO_G1 :
+#if 0
         data = HalCmnSpiMcp3208_Get( EN_CH3 );
+#else
+        data = 0;
+#endif
         HalCmn_UpdateSenData( &g_dataG1, (double)data );
         ret = &g_dataG1;
     break;
     case EN_SEN_GYRO_G2 :
+#if 0
         data = HalCmnSpiMcp3208_Get( EN_CH4 );
+#else
+        data = 0;
+#endif
         HalCmn_UpdateSenData( &g_dataG2, (double)data );
         ret = &g_dataG2;
     break;

@@ -50,7 +50,7 @@
 //********************************************************
 /* モジュールグローバル変数                              */
 //********************************************************
-// なし
+static char   g_scrollCounter;  // 文字列をスクロール表示させれためのカウンタ
 
 
 //********************************************************
@@ -321,7 +321,7 @@ AppIfLcd_Printf(
     len = strlen( format );
     if( len > 64 )
     {
-        DBG_PRINT_ERROR( "length of format is over 24. \n\r" );
+        DBG_PRINT_ERROR( "length of format is over 64. \n\r" );
         return -1;
     }
 
@@ -334,6 +334,65 @@ AppIfLcd_Printf(
 
     len = strlen( buff );
     return len;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD に文字列をスクロール表示させる際の表示カウンタをゼロ・クリアする。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+AppIfLcd_ScrollClear(
+    void
+){
+    g_scrollCounter = 0;
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     LCD に文字列をスクロール表示させる。
+ * @attention 使用前に AppIfLcd_ScrollClear() を呼んで g_scrollCounter をゼロ・クリアしてから使うこと。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    成功時 = 出力した文字数 , 失敗時 = -1
+ *************************************************************************** */
+int
+AppIfLcd_Scroll(
+    const char*     str   ///< [in] スクロール表示する文字列
+){
+    int             ret = EOF;
+    size_t          len = 0;
+
+    len = strlen( str );
+
+    if( len <= APP_LCD_MAX_X )
+    {
+        ret = AppIfLcd_Puts( &str[g_scrollCounter] );
+        sleep( 2 );
+    } else
+    {
+        ret = AppIfLcd_Puts( &str[g_scrollCounter] );
+        if( g_scrollCounter == 0 )
+        {
+            g_scrollCounter++;
+            sleep( 1 );                         // 表示開始時に 1s の wait を入れて表示を止める
+        } else if( g_scrollCounter >= len - APP_LCD_MAX_X )
+        {
+            g_scrollCounter = 0;
+            sleep( 2 );                         // 文字列を表示し終わったら 2s の wait を入れて表示を止める
+        } else
+        {
+            g_scrollCounter++;
+            usleep( 50 * 1000 );               // 50ms でスクロール表示させる
+        }
+    }
+    return ret;
 }
 
 

@@ -94,10 +94,18 @@ static void
 GetData(
     void
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalTime_t*     data;
+    SHalTime_t*     data;   ///< 日時データの構造体
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // 日時データを取得
     data = HalTime_GetLocaltime();
+
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
+
+    // PC ターミナル表示
     AppIfPc_Printf( "%4d/%02d/%02d ", data->year, data->month, data->day );
     AppIfPc_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
     return;
@@ -116,16 +124,20 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
-    SHalTime_t*     data;
+    SHalTime_t*     data;   ///< 日時データの構造体
 
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
+
+    // 日時データを取得
     data = HalTime_GetLocaltime();
 
+    // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
 
+    // PC ターミナル表示
     AppIfPc_Printf( "{\"time\": {\"year\": %4d, \"month\": %02d, \"day\": %02d, \"hour\": %02d, \"min\": %02d, \"sec\": %02d}}",
                     data->year,
                     data->month,
@@ -150,9 +162,10 @@ void
 OptCmd_TimeMenu(
     void
 ){
-    SHalTime_t* date;   ///< 日時データの構造体
+    SHalTime_t*     data;   ///< 日時データの構造体
 
     DBG_PRINT_TRACE( "OptCmd_TimeMenu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfLcd_Clear();
 
@@ -160,23 +173,19 @@ OptCmd_TimeMenu(
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // 日時データを取得
-        date = HalTime_GetLocaltime();
+        data = HalTime_GetLocaltime();
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 0 );
+        AppIfLcd_Printf( "%04d/%02d/%02d", data->year, data->month, data->day );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
 
         // PC ターミナル表示
         AppIfPc_Printf( "Date(local) = " );
         AppIfPc_Printf( "%04d/%02d/%02d %02d:%02d:%02d \n\r",
-                date->year, date->month, date->day,
-                date->hour, date->min,   date->sec );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%04d/%02d/%02d",
-                         date->year, date->month, date->day
-                         );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d:%02d:%02d",
-                         date->hour, date->min, date->sec
-                         );
+                data->year, data->month, data->day,
+                data->hour, data->min,   data->sec );
 
         // 1 秒スリープ
         usleep( 1000 * 1000 );
@@ -213,7 +222,6 @@ OptCmd_Time(
     };
 
     DBG_PRINT_TRACE( "OptCmd_Time() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

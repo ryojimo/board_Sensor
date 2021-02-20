@@ -133,10 +133,11 @@ static int
 GetDirection(
     char*   str     ///< [in] 文字列
 ){
-    DBG_PRINT_TRACE( "GetDirection() \n\r" );
     int     dir;
 
+    DBG_PRINT_TRACE( "GetDirection() \n\r" );
     DBG_PRINT_TRACE( "str = %s \n\r", str );
+
     dir = strtol( (const char*)str, NULL, 10 );
     DBG_PRINT_TRACE( "dir = %d \n\r", dir );
     return dir;
@@ -158,9 +159,9 @@ Run(
     char*     str    ///< [in] 表示する文字列
 ){
     DBG_PRINT_TRACE( "Run() \n\r" );
-
     DBG_PRINT_TRACE( "(x, y) = (%d, %d) \n\r", x, y );
     DBG_PRINT_TRACE( "str    = %s \n\r", str );
+
     AppIfLcd_CursorSet( 0, 0 );
     AppIfLcd_Printf( "                " );
     AppIfLcd_CursorSet( 0, 1 );

@@ -67,6 +67,8 @@ Help(
     AppIfPc_Printf( "                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                  \n\r" );
+    AppIfPc_Printf( "     -s        -h     \n\r" );
+    AppIfPc_Printf( "     --switch  --help \n\r" );
     AppIfPc_Printf( "     -s        -m     \n\r" );
     AppIfPc_Printf( "     --switch  --menu \n\r" );
     AppIfPc_Printf("\x1b[39m");
@@ -76,7 +78,7 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     テストする。
+ * @brief     実行する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -97,8 +99,8 @@ OptCmd_PushSwitchMenu(
     int             stop = 0;   ///< 終了時のポテンショメーターの値 ( % )
 
     DBG_PRINT_TRACE( "OptCmd_PushSwitchMenu() \n\r" );
+
     AppIfPc_Printf( "if you change the value of PM, break.\n\r" );
-    AppIfLcd_Clear();
 
     // ポテンショメーターのデータを取得
     data = HalSensorPm_Get();
@@ -118,12 +120,12 @@ OptCmd_PushSwitchMenu(
         status = HalPushSw_Get( EN_PUSH_SW_2 );
         if( status == EN_TRUE ){ data2++; }
 
-        // PC ターミナル表示
-        AppIfPc_Printf( "Push SW : SW0=%02d , SW1=%02d , SW2=%02d \r", data0, data1, data2 );
-
         // LCD 表示
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%4d %4d %4d", data0, data1, data2 );
+        AppIfLcd_Printf( "0:%02d  1:%02d  2:%02d", data0, data1, data2 );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "{ SW0: %02d(cnt), SW1: %02d(cnt), SW2: %02d(cnt) } \r", data0, data1, data2 );
 
         // LED 表示
         HalLed_Set( ( data2 % 2 ) << 2 | ( data1 % 2 ) << 1 | ( data0 % 2 ) << 0 );
@@ -162,7 +164,6 @@ OptCmd_PushSwitch(
     };
 
     DBG_PRINT_TRACE( "OptCmd_PushSwitch() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

@@ -76,6 +76,8 @@ Help(
     AppIfPc_Printf( "     --sa_pm  --help \n\r" );
     AppIfPc_Printf( "     -p       -j     \n\r" );
     AppIfPc_Printf( "     --sa_pm  --json \n\r" );
+    AppIfPc_Printf( "     -p       -d     \n\r" );
+    AppIfPc_Printf( "     --sa_pm  --data \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -94,11 +96,18 @@ static void
 GetData(
     void
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
     SHalSensor_t*   data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorPm_Get();
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "0x%03X %04d %03d%%", (int)data->cur, (int)data->cur, (int)data->cur_rate );
+
+    // PC ターミナル表示
     AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
 }
@@ -116,21 +125,23 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     data = HalSensorPm_Get();
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%04X", (int)data->cur );
+    AppIfLcd_Printf( "%04d(digit)", (int)data->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3d%%", data->cur_rate );
+    AppIfLcd_Printf( "%03d(%%)", data->cur_rate );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"sa_pm\", \"value\": %3d} \r",
                     data->cur_rate );
+    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -147,14 +158,24 @@ void
 OptCmd_SaPmMenu(
     void
 ){
+    SHalSensor_t*   data;
+
     DBG_PRINT_TRACE( "OptCmd_SaPmMenu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        GetJson();
+        // センサデータを取得
+        data = HalSensorPm_Get();
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%03X %04d %03d%%", (int)data->cur, (int)data->cur, (int)data->cur_rate );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "{ A/D(HEX): 0x%04X(digit), A/D(DEC): %04d(digit), rate: %03d(%%) } \r", (int)data->cur, (int)data->cur, data->cur_rate );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -188,7 +209,6 @@ OptCmd_SaPm(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SaPm() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

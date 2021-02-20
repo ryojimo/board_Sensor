@@ -62,6 +62,9 @@ OptCmd_Help(
     AppIfPc_Printf( " -y, --si_lps25h   : get the value of a sensor(I2C), LPS25H.        \n\r" );
     AppIfPc_Printf( " -z, --si_tsl2561  : get the value of a sensor(I2C), TSL2561.       \n\r" );
     AppIfPc_Printf( " -t, --time        : get the time.                                  \n\r" );
+    AppIfPc_Printf( "                                                                    \n\r" );
+    AppIfPc_Printf( " -i, --pic         : control PIC micon.                             \n\r" );
+    AppIfPc_Printf( " -u, --usbkey      : control the target USB device.                 \n\r" );
     AppIfPc_Printf( "\n\r" );
     return;
 }

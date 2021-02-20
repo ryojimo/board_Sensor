@@ -26,8 +26,9 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define APP_LCD_MAX_X   (16)    ///< @def : LCD の表示可能文字数の最大値 : X 軸 ( 0 - 15 )
-#define APP_LCD_MAX_Y   (2)     ///< @def : LCD の表示可能文字数の最大値 : Y 軸 ( 0 -  1 )
+#define APP_LCD_MAX_X       (16)    ///< @def : LCD に表示可能な最大文字数 : X 軸 ( 0 - 15 )
+#define APP_LCD_MAX_Y       (2)     ///< @def : LCD に表示可能な最大数     : Y 軸 ( 0 -  1 )
+#define APP_LCD_MAX_SCROLL  (64)    ///< @def : スクロール表示させる際の最大文字数
 
 
 //********************************************************
@@ -55,6 +56,9 @@ void AppIfLcd_Clear( void );
 int  AppIfLcd_Putc( int c );
 int  AppIfLcd_Puts( const char* str );
 int  AppIfLcd_Printf( const char* format, ... );
+
+void AppIfLcd_ScrollClear( void );
+int  AppIfLcd_Scroll( const char* str );
 
 
 #endif /* _APP_IF_LCD_H_ */

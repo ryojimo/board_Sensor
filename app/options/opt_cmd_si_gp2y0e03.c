@@ -72,10 +72,12 @@ Help(
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                       \n\r" );
-    AppIfPc_Printf( "     -x             -j     \n\r" );
-    AppIfPc_Printf( "     --si_gp2y0e03  --json \n\r" );
     AppIfPc_Printf( "     -x             -h     \n\r" );
     AppIfPc_Printf( "     --si_gp2y0e03  --help \n\r" );
+    AppIfPc_Printf( "     -x             -j     \n\r" );
+    AppIfPc_Printf( "     --si_gp2y0e03  --json \n\r" );
+    AppIfPc_Printf( "     -x             -d     \n\r" );
+    AppIfPc_Printf( "     --si_gp2y0e03  --data \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -94,12 +96,18 @@ static void
 GetData(
     void
 ){
+    SHalSensor_t*       data;
+
     DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
 
+    // センサデータを取得
     data = HalSensorGP2Y0E03_Get();
-    AppIfLcd_Printf( "%5.2f (cm)", data->cur );
 
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f(cm)", data->cur );
+
+    // PC ターミナル表示
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
@@ -117,14 +125,16 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   data;   ///< センサデータの構造体
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     data = HalSensorGP2Y0E03_Get();
 
     // LCD 表示
-    AppIfLcd_Printf( "%5.2fcm", data->cur );
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f(cm)", data->cur );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_gp2y0e03\", \"value\": %5.2f}",
@@ -148,9 +158,12 @@ OptCmd_SiGp2y0e03Menu(
 ){
     SHalSensor_t*   data;   ///< センサデータの構造体
 
+    char            buff[APP_LCD_MAX_SCROLL];
+
     DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03Menu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
+    AppIfLcd_ScrollClear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
@@ -158,15 +171,14 @@ OptCmd_SiGp2y0e03Menu(
         // センサデータを取得
         data  = HalSensorGP2Y0E03_Get();
 
-        // PC ターミナル表示
-        AppIfPc_Printf( "distance = %02dcm \n\r", (int)data->cur );
-
-        // LCD 表示
+        // LCD スクロール表示
+        memset( buff, '\0', sizeof(buff) );
+        sprintf( buff, "distance: %02d(cm)", (int)data->cur );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02dcm", (int)data->cur );
+        AppIfLcd_Scroll( buff );
 
-        // 1 秒スリープ
-        usleep( 1000 * 1000 );
+        // PC ターミナル表示
+        AppIfPc_Printf( "{ distance: %02d(cm) } \n\r", (int)data->cur );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -200,7 +212,6 @@ OptCmd_SiGp2y0e03(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

@@ -43,9 +43,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       Run( double rate );
-static void       RunVolume( void );
-static double     GetRate( char* str );
+static double     GetValue( char* str );
 
 
 /**************************************************************************//*!
@@ -67,14 +65,17 @@ Help(
     AppIfPc_Printf( "                                             \n\r" );
     AppIfPc_Printf( " Sub option)                                                   \n\r" );
     AppIfPc_Printf( "     -h,            --help            : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -r int-number, --rate=int-number : the duty-rate.         \n\r" );
+    AppIfPc_Printf( "     -m,            --menu            : menu mode.             \n\r" );
+    AppIfPc_Printf( "     -r int-number, --rate=int-number : set the duty-rate.     \n\r" );
     AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
+    AppIfPc_Printf( "     -o         -h        \n\r" );
+    AppIfPc_Printf( "     --motorsv  --help    \n\r" );
+    AppIfPc_Printf( "     -o         -m        \n\r" );
+    AppIfPc_Printf( "     --motorsv  --menu    \n\r" );
     AppIfPc_Printf( "     -o         -r  5     \n\r" );
     AppIfPc_Printf( "     --motorsv  --rate=5  \n\r" );
-    AppIfPc_Printf( "     -o         -v        \n\r" );
-    AppIfPc_Printf( "     --motorsv  --volume  \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -82,77 +83,7 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     サーボモータをまわす。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run(
-    double    rate    ///< [in] デューティ比 : 0% ～ 100% まで
-){
-    DBG_PRINT_TRACE( "Run() \n\r" );
-
-    // LCD に表示
-    AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%02.4f(\%)  ", rate );
-
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)rate );
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     Volume を使ってサーボモータをまわす。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-RunVolume(
-    void
-){
-    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
-    double          value;      ///< サーボモータを回す値
-
-    DBG_PRINT_TRACE( "RunVolume() \n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
-    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == AppIfBtn_IsEnter() )
-    {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // サーボモータを回す値を計算する。
-        value = 10 + (( 52 - 10 ) * data->cur_rate) / 100;
-//        value = data->cur_rate;
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", value );
-
-        // モータ制御
-        Run( value );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    // モータを停止
-    HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     rate を取得する
+ * @brief     サーボモータをまわす rate 値を取得する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -160,17 +91,67 @@ RunVolume(
  * @return    なし。
  *************************************************************************** */
 static double
-GetRate(
+GetValue(
     char*   str     ///< [in] 文字列
 ){
-    DBG_PRINT_TRACE( "GetRate() \n\r" );
     char*   endptr;
-    double  rate = 0;
+    double  value = 0;
 
+    DBG_PRINT_TRACE( "GetValue() \n\r" );
     DBG_PRINT_TRACE( "str = %s \n\r", str );
-    rate = strtod( (const char*)str, &endptr );
-    DBG_PRINT_TRACE( "rate = %2.4f \n\r", rate );
-    return rate;
+
+    value = strtod( (const char*)str, &endptr );
+    DBG_PRINT_TRACE( "value = %2.4f \n\r", value );
+    return value;
+}
+
+
+/**************************************************************************//*!
+ * @brief     実行する。
+ * @attention Volume を使ってサーボモータをまわす。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+OptCmd_MotorSvMenu(
+    void
+){
+    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
+    double          value;      ///< サーボモータを回す値
+
+    DBG_PRINT_TRACE( "OptCmd_MotorSvMenu() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
+    AppIfPc_Printf( "motor-rotate changes by volume. \n\r" );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == AppIfBtn_IsEnter() )
+    {
+        // センサデータを取得
+        data = HalSensorPm_Get();
+
+        // サーボモータを回す値を計算する
+        value = 10 + (( 52 - 10 ) * data->cur_rate) / 100;
+//        value = data->cur_rate;
+
+        // モータ制御
+        HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)value );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02.4f(%%)  ", value );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "motor SV: { rate: %2.4f(%%) } \r", value );
+    }
+
+    AppIfPc_Printf( "\n\r" );
+
+    // モータを停止
+    HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
+    return;
 }
 
 
@@ -188,20 +169,18 @@ OptCmd_MotorSV(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hr:v";
+    const char      optstring[] = "hmr:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
+        { "menu",   no_argument,       NULL,  'm' },
         { "rate",   required_argument, NULL,  'r' },
-        { "volume", no_argument,       NULL,  'v' },
         { 0,        0,                 NULL,   0  }, // termination
     };
     double          rate = 0;
-    int             endFlag = 0;
 
     DBG_PRINT_TRACE( "OptCmd_MotorSV() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
@@ -218,17 +197,16 @@ OptCmd_MotorSV(
 
         switch( opt )
         {
-        case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
-        case 'h': endFlag = 1; Help(); break;
-        case 'v': endFlag = 1; RunVolume(); break;
-        case 'r':              rate = GetRate( optarg ); break;
+        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': Help(); break;
+        case 'm': OptCmd_MotorSvMenu(); break;
+        case 'r': rate = GetValue( optarg );
+                  AppIfLcd_CursorSet( 0, 1 );
+                  AppIfLcd_Printf( "%02.4f(%%)  ", rate );
+                  HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)rate );
+        break;
         default: break;
         }
-    }
-
-    if( endFlag == 0 )
-    {
-        Run( rate );
     }
 
     return;

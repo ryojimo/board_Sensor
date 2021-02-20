@@ -74,10 +74,12 @@ Help(
     AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                  \n\r" );
-    AppIfPc_Printf( "     -a        -x     \n\r" );
-    AppIfPc_Printf( "     --sa_acc  --x    \n\r" );
     AppIfPc_Printf( "     -a        -h     \n\r" );
     AppIfPc_Printf( "     --sa_acc  --help \n\r" );
+    AppIfPc_Printf( "     -a        -j     \n\r" );
+    AppIfPc_Printf( "     --sa_acc  --json \n\r" );
+    AppIfPc_Printf( "     -a        -x     \n\r" );
+    AppIfPc_Printf( "     --sa_acc  --x    \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -96,11 +98,18 @@ static void
 GetData(
     EHalSensorAcc_t     which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
+    SHalSensor_t*       data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorAcc_Get( which );
-    AppIfLcd_Printf( "0x%04X", (int)data->cur );
+
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "0x%03X %04d %03d%%", (int)data->cur, (int)data->cur, (int)data->cur_rate );
+
+    // PC ターミナル表示
     AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
 }
@@ -118,10 +127,11 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataX;
     SHalSensor_t*   dataY;
     SHalSensor_t*   dataZ;
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
@@ -130,17 +140,18 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "x%04X y%04X z%04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+    AppIfLcd_Printf( "x%03X  y%03X  z%03X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3d%%  ", dataX->cur_rate );
-    AppIfLcd_Printf( "%3d%%  ", dataY->cur_rate );
-    AppIfLcd_Printf( "%3d%%",   dataZ->cur_rate );
+    AppIfLcd_Printf( "%03d%%  ", dataX->cur_rate );
+    AppIfLcd_Printf( "%03d%%  ", dataY->cur_rate );
+    AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"sa_acc\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}} \r",
                     (int)dataX->cur,
                     (int)dataY->cur,
                     (int)dataZ->cur );
+    AppIfPc_Printf( "\n\r" );
     return;
 }
 
@@ -157,15 +168,34 @@ void
 OptCmd_SaAccMenu(
     void
 ){
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
+
     DBG_PRINT_TRACE( "OptCmd_SaAccMenu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
     AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
-    AppIfLcd_Clear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
-        GetJson();
+        // センサデータを取得
+        dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
+        dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
+        dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
+
+        // LCD 表示
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%03d%%  ", dataX->cur_rate );
+        AppIfLcd_Printf( "%03d%%  ", dataY->cur_rate );
+        AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "X: { A/D: 0x%04X(digit), rate: %03d(%%) }, Y: { A/D: 0x%04X(digit), rate: %03d(%%) }, Z: { A/D: 0x%04X(digit), rate: %03d(%%) } \r",
+                        (int)dataX->cur, dataX->cur_rate,
+                        (int)dataY->cur, dataY->cur_rate,
+                        (int)dataZ->cur, dataZ->cur_rate );
     }
 
     AppIfPc_Printf( "\n\r" );

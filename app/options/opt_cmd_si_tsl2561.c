@@ -74,10 +74,12 @@ Help(
     AppIfPc_Printf( "                                                                 \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                       \n\r" );
-    AppIfPc_Printf( "     -z            -l      \n\r" );
-    AppIfPc_Printf( "     --si_tsl2561  --lux   \n\r" );
     AppIfPc_Printf( "     -z            -h      \n\r" );
     AppIfPc_Printf( "     --si_tsl2561  --help  \n\r" );
+    AppIfPc_Printf( "     -z            -j      \n\r" );
+    AppIfPc_Printf( "     --si_tsl2561  --json  \n\r" );
+    AppIfPc_Printf( "     -z            -l      \n\r" );
+    AppIfPc_Printf( "     --si_tsl2561  --lux   \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -94,21 +96,26 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    EHalSensorTSL2561_t     which   ///< [in] 対象のセンサ
+    EHalSensorTSL2561_t which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
+    SHalSensor_t*       data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorTSL2561_Get( which );
 
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
     switch( which )
     {
-    case EN_SEN_TSL2561_BROADBAND : AppIfLcd_Printf( "%5.2f (BB)",  data->cur ); break;
-    case EN_SEN_TSL2561_IR        : AppIfLcd_Printf( "%5.2f (IR)",  data->cur ); break;
-    case EN_SEN_TSL2561_LUX       : AppIfLcd_Printf( "%5.2f (LUX)", data->cur ); break;
+    case EN_SEN_TSL2561_BROADBAND : AppIfLcd_Printf( "%5.2f(BB)",  data->cur ); break;
+    case EN_SEN_TSL2561_IR        : AppIfLcd_Printf( "%5.2f(IR)",  data->cur ); break;
+    case EN_SEN_TSL2561_LUX       : AppIfLcd_Printf( "%5.2f(LUX)", data->cur ); break;
     default                       : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
     }
 
+    // PC ターミナル表示
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
@@ -126,10 +133,11 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataBB = NULL;    ///< 照度センサのデータ構造体
     SHalSensor_t*   dataIR = NULL;    ///< 照度センサのデータ構造体
     SHalSensor_t*   dataLUX = NULL;   ///< 照度センサのデータ構造体
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     dataBB  = HalSensorTSL2561_Get( EN_SEN_TSL2561_BROADBAND );
@@ -138,9 +146,9 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%5.2f", dataBB->cur );
+    AppIfLcd_Printf( "%5.2f(?)", dataBB->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f  %5.2f", dataIR->cur, dataLUX->cur );
+    AppIfLcd_Printf( "%5.2f(?) %5.2f(?)", dataIR->cur, dataLUX->cur );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_tsl2561\", \"value\": {\"broadband\": %5.2f, \"ir\": %5.2f, \"lux\": %5.2f}}",
@@ -168,9 +176,12 @@ OptCmd_SiTsl2561Menu(
     SHalSensor_t*   dataIr = NULL;      ///< 照度センサのデータ構造体
     SHalSensor_t*   dataLux = NULL;     ///< 照度センサのデータ構造体
 
+    char            buff[APP_LCD_MAX_SCROLL];
+
     DBG_PRINT_TRACE( "OptCmd_SiTsl2561Menu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
+    AppIfLcd_ScrollClear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
@@ -180,19 +191,16 @@ OptCmd_SiTsl2561Menu(
         dataIr  = HalSensorTSL2561_Get( EN_SEN_TSL2561_IR );
         dataLux = HalSensorTSL2561_Get( EN_SEN_TSL2561_LUX );
 
+        // LCD スクロール表示
+        memset( buff, '\0', sizeof(buff) );
+        sprintf( buff, "broadband: %5.2f(?), Ir: %5.2f(?), Lux: %5.2f(?)", dataBb->cur, dataIr->cur, dataLux->cur );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Scroll( buff );
+
         // PC ターミナル表示
-        AppIfPc_Printf( "(broadband, Ir, Lux) = ( %5.2f, %5.2f, %5.2f ) \n\r",
+        AppIfPc_Printf( "{ broadband: %5.2f(?), Ir: %5.2f(?), Lux: %5.2f(?) } \n\r",
                         dataBb->cur, dataIr->cur, dataLux->cur
                       );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "Ir : %5.2f     ", dataIr->cur );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "Lux: %5.2f     ", dataLux->cur );
-
-        // 1 秒スリープ
-        usleep( 1000 * 1000 );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -228,7 +236,6 @@ OptCmd_SiTsl2561(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SiTsl2561() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {

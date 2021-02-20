@@ -73,10 +73,12 @@ Help(
     AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
-    AppIfPc_Printf( "     -y           -a      \n\r" );
-    AppIfPc_Printf( "     --si_lps25h  --atmos \n\r" );
     AppIfPc_Printf( "     -y           -h      \n\r" );
     AppIfPc_Printf( "     --si_lps25h  --help  \n\r" );
+    AppIfPc_Printf( "     -y           -j      \n\r" );
+    AppIfPc_Printf( "     --si_lps25h  --json  \n\r" );
+    AppIfPc_Printf( "     -y           -a      \n\r" );
+    AppIfPc_Printf( "     --si_lps25h  --atmos \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -93,20 +95,25 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    EHalSensorLPS25H_t     which   ///< [in] 対象のセンサ
+    EHalSensorLPS25H_t  which   ///< [in] 対象のセンサ
 ){
-    DBG_PRINT_TRACE( "GetData() \n\r" );
-    SHalSensor_t*   data;
+    SHalSensor_t*       data;
 
+    DBG_PRINT_TRACE( "GetData() \n\r" );
+
+    // センサデータを取得
     data = HalSensorLPS25H_Get( which );
 
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
     switch( which )
     {
-    case EN_SEN_LPS25H_ATMOS : AppIfLcd_Printf( "%5.2f (hPa)", data->cur ); break;
-    case EN_SEN_LPS25H_TEMP  : AppIfLcd_Printf( "%5.2f ('C)",  data->cur ); break;
+    case EN_SEN_LPS25H_ATMOS : AppIfLcd_Printf( "%5.2f(hPa)", data->cur ); break;
+    case EN_SEN_LPS25H_TEMP  : AppIfLcd_Printf( "%5.2f('C)",  data->cur ); break;
     default                  : DBG_PRINT_ERROR( "Invalid argument. \n\r" ); break;
     }
 
+    // PC ターミナル表示
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
     return;
 }
@@ -124,9 +131,10 @@ static void
 GetJson(
     void
 ){
-    DBG_PRINT_TRACE( "GetJson() \n\r" );
     SHalSensor_t*   dataAtmos = NULL;   ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp  = NULL;   ///< 温度センサのデータ構造体
+
+    DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
     dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
@@ -134,9 +142,9 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "%5.2fhPa", dataAtmos->cur );
+    AppIfLcd_Printf( "%5.2f(hPa)", dataAtmos->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%3.2f'C", dataTemp->cur );
+    AppIfLcd_Printf( "%3.2f('C)", dataTemp->cur );
 
     // PC ターミナル表示
     AppIfPc_Printf( "{\"sensor\": \"si_lps25h\", \"value\": {\"atmos\": %5.2f, \"temp\": %5.2f}}",
@@ -162,9 +170,12 @@ OptCmd_SiLps25hMenu(
     SHalSensor_t*   dataAtmos;  ///< 気圧センサのデータ構造体
     SHalSensor_t*   dataTemp;   ///< 温度センサのデータ構造体
 
+    char            buff[APP_LCD_MAX_SCROLL];
+
     DBG_PRINT_TRACE( "OptCmd_SiLps25hMenu() \n\r" );
+
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_Clear();
+    AppIfLcd_ScrollClear();
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
@@ -173,19 +184,14 @@ OptCmd_SiLps25hMenu(
         dataAtmos = HalSensorLPS25H_Get( EN_SEN_LPS25H_ATMOS );
         dataTemp  = HalSensorLPS25H_Get( EN_SEN_LPS25H_TEMP );
 
-        // PC ターミナル表示
-        AppIfPc_Printf( "(atmos, temp) = ( %5.2f hPa, %5.2f 'C ) \n\r",
-                        dataAtmos->cur, dataTemp->cur
-                      );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%5.2f hPa", dataAtmos->cur );
+        // LCD スクロール表示
+        memset( buff, '\0', sizeof(buff) );
+        sprintf( buff, "atmos: %5.2f(hPa), temp: %3.2f('C)", dataAtmos->cur, dataTemp->cur );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%5.2f 'C", dataTemp->cur );
+        AppIfLcd_Scroll( buff );
 
-        // 1 秒スリープ
-        usleep( 1000 * 1000 );
+        // PC ターミナル表示
+        AppIfPc_Printf( "{ atmos: %5.2f(hPa), temp: %5.2f('C) } \n\r", dataAtmos->cur, dataTemp->cur );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -220,7 +226,6 @@ OptCmd_SiLps25h(
     };
 
     DBG_PRINT_TRACE( "OptCmd_SiLps25h() \n\r" );
-    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
