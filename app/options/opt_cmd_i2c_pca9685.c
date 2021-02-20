@@ -98,7 +98,6 @@ Run(
     double    rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
     DBG_PRINT_TRACE( "Run() \n\r" );
-
     DBG_PRINT_TRACE( "(ch, rate) = (%02d, %2.4f) \n\r", ch, rate );
 
     if( 0 <= ch && ch <= 15 )
