@@ -24,6 +24,7 @@
 #include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -52,7 +53,7 @@ static EAppMenuMsg_t    PrintFormat( void );
 static EAppMenuMsg_t    Stop( void );
 static EAppMenuMsg_t    Cw( void );
 static EAppMenuMsg_t    Ccw( void );
-static EAppMenuMsg_t    Volume( void );
+static EAppMenuMsg_t    Exec( void );
 
 
 //********************************************************
@@ -61,14 +62,14 @@ static EAppMenuMsg_t    Volume( void );
 /* オプションテーブル */
 static const SAppMenuCmd_t g_optTable[] =
 {
-    { ""         , PrintFormat },
+    { ""         , Exec },
     { "h"        , PrintFormat },
     { "help"     , PrintFormat },
     { "s"        , Stop },
     { "stop"     , Stop },
     { "cw"       , Cw },
     { "ccw"      , Ccw },
-    { "vol"      , Volume },
+    { "vol"      , Exec },
     { "END    "  , NULL }
 };
 
@@ -166,47 +167,11 @@ Ccw(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 static EAppMenuMsg_t
-Volume(
+Exec(
     void
 ){
-    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
-
     DBG_PRINT_TRACE( "\n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
-    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 4, 0 );
-    AppIfLcd_Puts( "motorSV" );
-
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CCW, 10 );      // 10% 設定
-
-    // キーを押されるまでループ
-    while( EN_FALSE == AppIfBtn_IsEnter() )
-    {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // モータ制御
-        HalMotorSV_SetPwmDuty( EN_MOTOR_CCW, data->cur_rate );
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %3d \r", data->cur_rate );
-
-        // LCD 表示
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%3d", data->cur_rate );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-
-    // モータを停止
-    HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 0 );
-
+    OptCmd_MotorSvMenu();
     return EN_MENU_MSG_DONE;
 }
 
@@ -227,9 +192,7 @@ MenuCmd_MotorSV(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
     ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     return EN_MENU_MSG_DONE;
 }
 

@@ -24,6 +24,7 @@
 #include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -49,6 +50,7 @@ extern unsigned char g_menuCmd[ SYS_MAX_CMD_OPT_NUM ][ SYS_MAX_CMD_NAME_LEN ];
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static EAppMenuMsg_t    PrintFormat( void );
+static EAppMenuMsg_t    Exec( void );
 static EAppMenuMsg_t    On( void );
 static EAppMenuMsg_t    Off( void );
 
@@ -59,7 +61,7 @@ static EAppMenuMsg_t    Off( void );
 /* オプションテーブル */
 static const SAppMenuCmd_t g_optTable[] =
 {
-    { ""         , PrintFormat },
+    { ""         , Exec },
     { "h"        , PrintFormat },
     { "help"     , PrintFormat },
     { "on"       , On },
@@ -132,6 +134,24 @@ Off(
 
 
 /**************************************************************************//*!
+ * @brief     実行する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EAppMenuMsg_t 型に従う。
+ *************************************************************************** */
+static EAppMenuMsg_t
+Exec(
+    void
+){
+    DBG_PRINT_TRACE( "\n\r" );
+    OptCmd_RelayMenu();
+    return EN_MENU_MSG_DONE;
+}
+
+
+/**************************************************************************//*!
  * @brief     リレーを ON / OFF する。
  * @attention g_menuCmd 配列の内部構造
  *              g_menuCmd[0][] : コマンド名
@@ -146,9 +166,7 @@ MenuCmd_Relay(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
     ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     return EN_MENU_MSG_DONE;
 }
 

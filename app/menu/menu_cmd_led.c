@@ -24,6 +24,7 @@
 #include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"
@@ -50,7 +51,7 @@ extern unsigned char g_menuCmd[ SYS_MAX_CMD_OPT_NUM ][ SYS_MAX_CMD_NAME_LEN ];
 //********************************************************
 static EAppMenuMsg_t    PrintFormat( void );
 static EAppMenuMsg_t    Clear( void );
-static EAppMenuMsg_t    Illumination( void );
+static EAppMenuMsg_t    Exec( void );
 static EAppMenuMsg_t    Display( void );
 
 
@@ -60,12 +61,11 @@ static EAppMenuMsg_t    Display( void );
 /* オプションテーブル */
 static const SAppMenuCmd_t g_optTable[] =
 {
-    { ""         , Illumination },
+    { ""         , Exec },
     { "h"        , PrintFormat },
     { "help"     , PrintFormat },
     { "clear"    , Clear },
     { "clean"    , Clear },
-    { "il"       , Illumination },
     { "END    "  , NULL }
 };
 
@@ -85,7 +85,6 @@ PrintFormat(
     AppIfPc_Printf( "    led [OPTION01] \n\r" );
     AppIfPc_Printf( "        OPTION01 : number   : light LED. ( 1 -> 0xF )\n\r" );
     AppIfPc_Printf( "                   clear    : clear LED   \n\r" );
-    AppIfPc_Printf( "                   il       : illuminate LED   \n\r" );
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( "    Ex.)\n\r" );
     AppIfPc_Printf( "        >led clear \n\r" );
@@ -124,38 +123,11 @@ Clear(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 static EAppMenuMsg_t
-Illumination(
+Exec(
     void
 ){
-    unsigned int    value = 0x1;
-
     DBG_PRINT_TRACE( "\n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.\n\r" );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 4, 0 );
-    AppIfLcd_Puts( "led" );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == AppIfBtn_IsEnter() )
-    {
-        HalLed_Set( value );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%02d", value );
-
-        usleep( 500 * 1000 );
-        value = ( value << 1 ) % 0x0F;
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    HalLed_Set( 0x00 );
-
-    AppIfLcd_Clear();
-    AppIfLcd_CursorSet( 0, 0 );
-
+    OptCmd_LedMenu();
     return EN_MENU_MSG_DONE;
 }
 
@@ -208,14 +180,11 @@ MenuCmd_Led(
     EAppMenuMsg_t   ret;
 
     DBG_PRINT_TRACE( "\n\r" );
-
     ret = ExecuteCmd( &g_menuCmd[1][0], g_optTable );
-
     if( ret == EN_MENU_MSG_ACK )
     {
         Display();
     }
-
     return EN_MENU_MSG_DONE;
 }
 

@@ -131,8 +131,8 @@ OptCmd_RelayMenu(
         AppIfLcd_CursorSet( 0, 1 );
         switch(flag)
         {
-        case EN_FALSE: AppIfLcd_Printf( "OFF" ); break;
-        case EN_TRUE : AppIfLcd_Printf( "ON " ); break;
+        case EN_FALSE: AppIfLcd_Printf( "OFF             " ); break;
+        case EN_TRUE : AppIfLcd_Printf( "ON              " ); break;
         default: break;
         }
 
