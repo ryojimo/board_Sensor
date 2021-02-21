@@ -67,6 +67,7 @@ Help(
     AppIfPc_Printf( "     -h,            --help            : display the help menu. \n\r" );
     AppIfPc_Printf( "     -m,            --menu            : menu mode.             \n\r" );
     AppIfPc_Printf( "     -r int-number, --rate=int-number : set the duty-rate.     \n\r" );
+    AppIfPc_Printf( "     -s,            --stop            : stop SAVO motor.       \n\r" );
     AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
@@ -169,13 +170,14 @@ OptCmd_MotorSV(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hmr:";
+    const char      optstring[] = "hmr:s";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
         { "menu",   no_argument,       NULL,  'm' },
         { "rate",   required_argument, NULL,  'r' },
+        { "stop",   required_argument, NULL,  's' },
         { 0,        0,                 NULL,   0  }, // termination
     };
     double          rate = 0;
@@ -205,6 +207,7 @@ OptCmd_MotorSV(
                   AppIfLcd_Printf( "%02.4f(%%)  ", rate );
                   HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)rate );
         break;
+        case 's': HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 0 ); break;
         default: break;
         }
     }

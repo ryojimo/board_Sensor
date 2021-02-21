@@ -63,11 +63,12 @@ Help(
     AppIfPc_Printf( " Main option)                     \n\r" );
     AppIfPc_Printf( "     -l, --led : control the LED. \n\r" );
     AppIfPc_Printf( "                                  \n\r" );
-    AppIfPc_Printf( " Sub option)                             \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu. \n\r" );
-    AppIfPc_Printf( "     -m, --menu : menu mode.             \n\r" );
-    AppIfPc_Printf( "     -n, --num  : number to light up.    \n\r" );
-    AppIfPc_Printf( "                                         \n\r" );
+    AppIfPc_Printf( " Sub option)                              \n\r" );
+    AppIfPc_Printf( "     -h, --help  : display the help menu. \n\r" );
+    AppIfPc_Printf( "     -m, --menu  : menu mode.             \n\r" );
+    AppIfPc_Printf( "     -c, --clear : clear to light up.     \n\r" );
+    AppIfPc_Printf( "     -n, --num   : number to light up.    \n\r" );
+    AppIfPc_Printf( "                                          \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                \n\r" );
     AppIfPc_Printf( "     -l     -h      \n\r" );
@@ -163,12 +164,13 @@ OptCmd_Led(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hmn:";
+    const char      optstring[] = "hmcn:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
         { "menu",   no_argument,       NULL,  'm' },
+        { "clear",  no_argument,       NULL,  'c' },
         { "num",    required_argument, NULL,  'n' },
         { 0,        0,                 NULL,   0  }, // termination
     };
@@ -194,6 +196,7 @@ OptCmd_Led(
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
         case 'm': OptCmd_LedMenu(); break;
+        case 'c': HalLed_Set( 0x00 ); break;
         case 'n': value = GetValue( optarg );
                   AppIfLcd_CursorSet( 0, 1 );
                   AppIfLcd_Printf( "%02d(cnt)  ", value );
