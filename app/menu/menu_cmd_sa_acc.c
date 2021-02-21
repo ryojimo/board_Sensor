@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           menu_cmd_sensor_i2c_gp2y0e03.c
+ *  @file           menu_cmd_sensor_adc_acc.c
  *  @brief          [APP] メニュー・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -76,9 +76,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "Ex.)     \n\r" );
-    AppIfPc_Printf( "  > dist \n\r" );
-    AppIfPc_Printf( "         \n\r" );
+    AppIfPc_Printf( "Ex.)    \n\r" );
+    AppIfPc_Printf( "  > acc \n\r" );
+    AppIfPc_Printf( "        \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,13 +96,13 @@ Exec(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    OptCmd_SiGp2y0e03Menu();
+    OptCmd_SaAccMenu();
     return EN_MENU_MSG_DONE;
 }
 
 
 /**************************************************************************//*!
- * @brief     GP2Y0E03 ( 距離 ) センサの値を表示する。
+ * @brief     acceleration ( 加速度計 ) の値を表示する。
  * @attention g_menuCmd 配列の内部構造
  *              g_menuCmd[0][] : コマンド名
  *              g_menuCmd[1][] : オプション
@@ -112,7 +112,7 @@ Exec(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 EAppMenuMsg_t
-MenuCmd_SI_Gp2y0e03(
+MenuCmd_SaAcc(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );

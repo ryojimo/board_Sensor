@@ -81,15 +81,15 @@ EAppMenuMsg_t   MenuCmd_I2cLcd( void );         // LCD を表示する
 EAppMenuMsg_t   MenuCmd_I2cPca9685( void );     // PCA9685 を制御する
 EAppMenuMsg_t   MenuCmd_Led( void );            // LED を点灯する
 EAppMenuMsg_t   MenuCmd_MotorSV( void );        // SERVO MOTOR を回す
-EAppMenuMsg_t   MenuCmd_PushSw( void );         // PUSH SWITCH の押された回数を表示
+EAppMenuMsg_t   MenuCmd_PushSwitch( void );     // PUSH SWITCH の押された回数を表示
 EAppMenuMsg_t   MenuCmd_Relay( void );          // リレーを ON / OFF する
-EAppMenuMsg_t   MenuCmd_SA_Acc( void );         // SENSOR (ADC) 加速度センサ
-EAppMenuMsg_t   MenuCmd_SA_Gyro( void );        // SENSOR (ADC) ジャイロセンサ
-EAppMenuMsg_t   MenuCmd_SA_Pm( void );          // SENSOR (ADC) ポテンショメータ
-EAppMenuMsg_t   MenuCmd_SI_Bme280( void );      // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
-EAppMenuMsg_t   MenuCmd_SI_Gp2y0e03( void );    // SENSOR (I2C) GP2Y0E03 ( 距離 )
-EAppMenuMsg_t   MenuCmd_SI_Lps25h( void );      // SENSOR (I2C) LPS25H   ( 気圧・温度 )
-EAppMenuMsg_t   MenuCmd_SI_Tsl2561( void );     // SENSOR (I2C) TSL2561  ( 照度 )
+EAppMenuMsg_t   MenuCmd_SaAcc( void );          // SENSOR (ADC) 加速度センサ
+EAppMenuMsg_t   MenuCmd_SaGyro( void );         // SENSOR (ADC) ジャイロセンサ
+EAppMenuMsg_t   MenuCmd_SaPm( void );           // SENSOR (ADC) ポテンショメータ
+EAppMenuMsg_t   MenuCmd_SiBme280( void );      // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
+EAppMenuMsg_t   MenuCmd_SiGp2y0e03( void );    // SENSOR (I2C) GP2Y0E03 ( 距離 )
+EAppMenuMsg_t   MenuCmd_SiLps25h( void );      // SENSOR (I2C) LPS25H   ( 気圧・温度 )
+EAppMenuMsg_t   MenuCmd_SiTsl2561( void );     // SENSOR (I2C) TSL2561  ( 照度 )
 EAppMenuMsg_t   MenuCmd_Time( void );           // 日時情報を表示する
 
 

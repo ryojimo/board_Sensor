@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           menu_cmd_sensor_i2c_tsl2561.c
+ *  @file           menu_cmd_sensor_i2c_bme280.c
  *  @brief          [APP] メニュー・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -7,7 +7,7 @@
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2016.08.28
+ *  @last updated   2017.12.02
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -76,9 +76,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "Ex.)        \n\r" );
-    AppIfPc_Printf( "  > tsl2561 \n\r" );
-    AppIfPc_Printf( "            \n\r" );
+    AppIfPc_Printf( "Ex.)       \n\r" );
+    AppIfPc_Printf( "  > bme280 \n\r" );
+    AppIfPc_Printf( "           \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,13 +96,13 @@ Exec(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    OptCmd_SiTsl2561Menu();
+    OptCmd_SiBme280Menu();
     return EN_MENU_MSG_DONE;
 }
 
 
 /**************************************************************************//*!
- * @brief     TSL2561 ( 照度 ) センサの値を表示する。
+ * @brief     BME280 ( 気圧・湿度・温度 ) センサの値を表示する。
  * @attention g_menuCmd 配列の内部構造
  *              g_menuCmd[0][] : コマンド名
  *              g_menuCmd[1][] : オプション
@@ -112,7 +112,7 @@ Exec(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 EAppMenuMsg_t
-MenuCmd_SI_Tsl2561(
+MenuCmd_SiBme280(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );

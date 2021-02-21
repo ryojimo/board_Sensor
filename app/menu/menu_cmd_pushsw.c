@@ -115,7 +115,7 @@ Exec(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 EAppMenuMsg_t
-MenuCmd_PushSw(
+MenuCmd_PushSwitch(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );

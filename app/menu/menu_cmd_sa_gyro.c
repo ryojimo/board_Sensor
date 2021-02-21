@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           menu_cmd_sensor_adc_pm.c
+ *  @file           menu_cmd_sensor_adc_gyro.c
  *  @brief          [APP] メニュー・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -76,9 +76,9 @@ static EAppMenuMsg_t
 PrintFormat(
     void
 ){
-    AppIfPc_Printf( "Ex.)   \n\r" );
-    AppIfPc_Printf( "  > pm \n\r" );
-    AppIfPc_Printf( "       \n\r" );
+    AppIfPc_Printf( "Ex.)     \n\r" );
+    AppIfPc_Printf( "  > gyro \n\r" );
+    AppIfPc_Printf( "         \n\r" );
     return EN_MENU_MSG_DONE;
 }
 
@@ -96,13 +96,13 @@ Exec(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    OptCmd_SaPmMenu();
+    OptCmd_SaGyroMenu();
     return EN_MENU_MSG_DONE;
 }
 
 
 /**************************************************************************//*!
- * @brief     ポテンショメーターの値を表示する。
+ * @brief     ジャイロセンサの値を表示する。
  * @attention g_menuCmd 配列の内部構造
  *              g_menuCmd[0][] : コマンド名
  *              g_menuCmd[1][] : オプション
@@ -112,7 +112,7 @@ Exec(
  * @return    EAppMenuMsg_t 型に従う。
  *************************************************************************** */
 EAppMenuMsg_t
-MenuCmd_SA_Pm(
+MenuCmd_SaGyro(
     void
 ){
     DBG_PRINT_TRACE( "\n\r" );
