@@ -124,6 +124,15 @@ typedef enum tagEHalSensorBME280
 } EHalSensorBME280_t;
 
 
+// SENSOR (I2C) BMX055 センサの区別に使用する型
+typedef enum tagEHalSensorBMX055
+{
+    EN_SEN_BMX055_X = 0,          ///< @var : X 軸
+    EN_SEN_BMX055_Y,              ///< @var : Y 軸
+    EN_SEN_BMX055_Z               ///< @var : Z 軸
+} EHalSensorBMX055_t;
+
+
 // SENSOR (I2C) LPS25H センサの区別に使用する型
 typedef enum tagEHalSensorLPS25H
 {
@@ -227,6 +236,21 @@ SHalSensor_t*   HalSensorPm_Get( void );
 EHalBool_t      HalSensorBME280_Init( void );
 void            HalSensorBME280_Fini( void );
 SHalSensor_t*   HalSensorBME280_Get( EHalSensorBME280_t which );
+
+// SENSOR (I2C) BMX055 ( Accelerometer ) API
+EHalBool_t      HalSensorBMX055Acc_Init( void );
+void            HalSensorBMX055Acc_Fini( void );
+SHalSensor_t*   HalSensorBMX055Acc_Get( EHalSensorBMX055_t which );
+
+// SENSOR (I2C) BMX055 ( Gyroscope ) API
+EHalBool_t      HalSensorBMX055Gyro_Init( void );
+void            HalSensorBMX055Gyro_Fini( void );
+SHalSensor_t*   HalSensorBMX055Gyro_Get( EHalSensorBMX055_t which );
+
+// SENSOR (I2C) BMX055 ( Magnetometer ) API
+EHalBool_t      HalSensorBMX055Mag_Init( void );
+void            HalSensorBMX055Mag_Fini( void );
+SHalSensor_t*   HalSensorBMX055Mag_Get( EHalSensorBMX055_t which );
 
 // SENSOR (I2C) GP2Y0E03 API
 EHalBool_t      HalSensorGP2Y0E03_Init( void );

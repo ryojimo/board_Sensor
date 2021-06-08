@@ -1,5 +1,5 @@
 /**************************************************************************//*!
- *  @file           opt_cmd_si_gp2y0e03.c
+ *  @file           opt_cmd_si_bmx055_mag.c
  *  @brief          [APP] オプション・コマンド
  *  @author         Ryoji Morita
  *  @attention      none.
@@ -7,7 +7,7 @@
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2020.01.19
+ *  @last updated   2021.06.08
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -18,7 +18,6 @@
 /* include                                               */
 //********************************************************
 #include <getopt.h>
-#include <string.h>
 
 #include "../../hal/hal.h"
 
@@ -43,7 +42,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       GetData( void );
+static void       GetData( EHalSensorBMX055_t which );
 static void       GetJson( void );
 
 
@@ -61,24 +60,26 @@ Help(
 ){
     DBG_PRINT_TRACE( "Help() \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( " Main option)                                                      \n\r" );
-    AppIfPc_Printf( "     -x, --si_gp2y0e03 : get the value of a sensor(I2C), GP2Y0E03. \n\r" );
-    AppIfPc_Printf( "                                                                   \n\r" );
-    AppIfPc_Printf( " Sub option)                                                       \n\r" );
-    AppIfPc_Printf( "     -h, --help : display the help menu.                           \n\r" );
-    AppIfPc_Printf( "     -j, --json : get the values of json format.                   \n\r" );
-    AppIfPc_Printf( "     -m, --menu : menu mode.                                       \n\r" );
-    AppIfPc_Printf( "                                                                   \n\r" );
-    AppIfPc_Printf( "     -d, --data : get the value.                                   \n\r" );
-    AppIfPc_Printf( "                                                                   \n\r" );
+    AppIfPc_Printf( " Main option)                                            \n\r" );
+    AppIfPc_Printf( "     -a, --si_bmx055_mag : get the value of a sensor(I2C), BMX055 MAG. \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
+    AppIfPc_Printf( " Sub option)                                             \n\r" );
+    AppIfPc_Printf( "     -h, --help : display the help menu.                 \n\r" );
+    AppIfPc_Printf( "     -j, --json : get the all values of json format.     \n\r" );
+    AppIfPc_Printf( "     -m, --menu : menu mode.                             \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
+    AppIfPc_Printf( "     -x, --x    : get the value of x-axis.               \n\r" );
+    AppIfPc_Printf( "     -y, --y    : get the value of y-axis.               \n\r" );
+    AppIfPc_Printf( "     -z, --z    : get the value of z-axis.               \n\r" );
+    AppIfPc_Printf( "                                                         \n\r" );
     AppIfPc_Printf("\x1b[36m");
-    AppIfPc_Printf( " Ex)                       \n\r" );
-    AppIfPc_Printf( "     -x             -h     \n\r" );
-    AppIfPc_Printf( "     --si_gp2y0e03  --help \n\r" );
-    AppIfPc_Printf( "     -x             -j     \n\r" );
-    AppIfPc_Printf( "     --si_gp2y0e03  --json \n\r" );
-    AppIfPc_Printf( "     -x             -d     \n\r" );
-    AppIfPc_Printf( "     --si_gp2y0e03  --data \n\r" );
+    AppIfPc_Printf( " Ex)                         \n\r" );
+    AppIfPc_Printf( "     -a               -h     \n\r" );
+    AppIfPc_Printf( "     --si_bmx055_mag  --help \n\r" );
+    AppIfPc_Printf( "     -a               -j     \n\r" );
+    AppIfPc_Printf( "     --si_bmx055_mag  --json \n\r" );
+    AppIfPc_Printf( "     -a               -x     \n\r" );
+    AppIfPc_Printf( "     --si_bmx055_mag  --x    \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -95,21 +96,21 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    void
+    EHalSensorBMX055_t     which   ///< [in] 対象のセンサ
 ){
     SHalSensor_t*       data;
 
     DBG_PRINT_TRACE( "GetData() \n\r" );
 
     // センサデータを取得
-    data = HalSensorGP2Y0E03_Get();
+    data = HalSensorBMX055Mag_Get( which );
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f(cm)", data->cur );
+    AppIfLcd_Printf( "0x%03X %04d %03d%%", (int)data->cur, (int)data->cur, (int)data->cur_rate );
 
     // PC ターミナル表示
-    AppIfPc_Printf( "%5.2f \n\r", data->cur );
+    AppIfPc_Printf( "%d \n\r", (int)data->cur );
     return;
 }
 
@@ -126,20 +127,30 @@ static void
 GetJson(
     void
 ){
-    SHalSensor_t*   data;   ///< センサデータの構造体
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
 
     DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
-    data = HalSensorGP2Y0E03_Get();
+    dataX = HalSensorBMX055Mag_Get( EN_SEN_BMX055_X );
+    dataY = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Y );
+    dataZ = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Z );
 
     // LCD 表示
+    AppIfLcd_CursorSet( 0, 0 );
+    AppIfLcd_Printf( "x%03X  y%03X  z%03X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f(cm)", data->cur );
+    AppIfLcd_Printf( "%03d%%  ", dataX->cur_rate );
+    AppIfLcd_Printf( "%03d%%  ", dataY->cur_rate );
+    AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
     // PC ターミナル表示
-    AppIfPc_Printf( "{\"sensor\": \"si_gp2y0e03\", \"value\": %5.2f}",
-                    data->cur );
+    AppIfPc_Printf( "{\"sensor\": \"si_bmx055_mag\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}} \r",
+                    (int)dataX->cur,
+                    (int)dataY->cur,
+                    (int)dataZ->cur );
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -151,35 +162,41 @@ GetJson(
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    EAppMenuMsg_t 型に従う。
+ * @return    なし。
  *************************************************************************** */
 void
-OptCmd_SiGp2y0e03Menu(
+OptCmd_SiBmx055MagMenu(
     void
 ){
-    SHalSensor_t*   data;   ///< センサデータの構造体
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
 
-    char            buff[APP_LCD_MAX_SCROLL];
-
-    DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03Menu() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiBmx055MagMenu() \n\r" );
 
     AppIfPc_Printf( "if you push any keys, break.\n\r" );
-    AppIfLcd_ScrollClear();
+    AppIfPc_Printf( "range : -2g -> +2g.         \n\r" );
 
     // キーを押されるまでループ
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
-        data  = HalSensorGP2Y0E03_Get();
+        dataX = HalSensorBMX055Mag_Get( EN_SEN_BMX055_X );
+        dataY = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Y );
+        dataZ = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Z );
 
-        // LCD スクロール表示
-        memset( buff, '\0', sizeof(buff) );
-        sprintf( buff, "distance: %02d(cm)", (int)data->cur );
+        // LCD 表示
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Scroll( buff );
+        AppIfLcd_Printf( "%03d%%  ", dataX->cur_rate );
+        AppIfLcd_Printf( "%03d%%  ", dataY->cur_rate );
+        AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
         // PC ターミナル表示
-        AppIfPc_Printf( "{ distance: %02d(cm) } \n\r", (int)data->cur );
+        AppIfPc_Printf( "{ x: %5.2f(mg), y: %5.2f(mg), z: %5.2f(mg) } \n\r",
+                        dataX->cur, dataY->cur, dataZ->cur
+                      );
+        // 500ms スリープ
+        usleep( 500 * 1000 );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -196,23 +213,26 @@ OptCmd_SiGp2y0e03Menu(
  * @return    なし。
  *************************************************************************** */
 void
-OptCmd_SiGp2y0e03(
+OptCmd_SiBmx055Mag(
     int             argc,
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmd";
+    const char      optstring[] = "hjmxyz";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
         { "help", no_argument, NULL,  'h' },
         { "json", no_argument, NULL,  'j' },
         { "menu", no_argument, NULL,  'm' },
-        { "data", no_argument, NULL,  'd' },
+        { "x",    no_argument, NULL,  'x' },
+        { "y",    no_argument, NULL,  'y' },
+        { "z",    no_argument, NULL,  'z' },
         { 0,      0,           NULL,   0  }, // termination
     };
 
-    DBG_PRINT_TRACE( "OptCmd_SiGp2y0e03() \n\r" );
+    DBG_PRINT_TRACE( "OptCmd_SiBmx055Mag() \n\r" );
+    AppIfLcd_CursorSet( 0, 1 );
 
     while( 1 )
     {
@@ -232,8 +252,10 @@ OptCmd_SiGp2y0e03(
         case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': Help(); break;
         case 'j': GetJson(); break;
-        case 'm': OptCmd_SiGp2y0e03Menu(); break;
-        case 'd': GetData(); break;
+        case 'm': OptCmd_SiBmx055MagMenu(); break;
+        case 'x': GetData( EN_SEN_BMX055_X ); break;
+        case 'y': GetData( EN_SEN_BMX055_Y ); break;
+        case 'z': GetData( EN_SEN_BMX055_Z ); break;
         default: break;
         }
     }

@@ -47,23 +47,26 @@ MenuCmd_Help(
 ){
     DBG_PRINT_TRACE( "MenuCmd_Help() \n\r" );
 
-    AppIfPc_Printf( "\t COMMAND    : EXPLAIN                                         \n\r" );
-    AppIfPc_Printf( "\t==============================================================\n\r" );
-    AppIfPc_Printf( "\t help       : display command list.                           \n\r" );
-    AppIfPc_Printf( "\t i2clcd     : display I2C LCD.                                \n\r" );
-    AppIfPc_Printf( "\t led        : Light LED.                                      \n\r" );
-    AppIfPc_Printf( "\t motorSV    : turn around the SERVO    motor.                 \n\r" );
-    AppIfPc_Printf( "\t pushsw     : display count data of push switch.              \n\r" );
-    AppIfPc_Printf( "\t relay      : Control Relay.                                  \n\r" );
-    AppIfPc_Printf( "\t                                                              \n\r" );
-    AppIfPc_Printf( "\t sa_acc     : sensor(adc) display acceleration data. (X,Y,Z)  \n\r" );
-    AppIfPc_Printf( "\t sa_gyro    : sensor(adc) display gyro data. (G1,G2)          \n\r" );
-    AppIfPc_Printf( "\t sa_pm      : sensor(adc) display Potentiometer data.         \n\r" );
-    AppIfPc_Printf( "\t si_bme280  : sensor(i2c) display BME280 sensor data.         \n\r" );
-    AppIfPc_Printf( "\t si_gp2y0e03: sensor(i2c) display distance sensor data.       \n\r" );
-    AppIfPc_Printf( "\t si_lps25h  : sensor(i2c) display LPS25H data.                \n\r" );
-    AppIfPc_Printf( "\t si_tsl2561 : sensor(i2c) display TSL2561 data.               \n\r" );
-    AppIfPc_Printf( "\t time       : sensor(i2c) display time/date data.             \n\r" );
+    AppIfPc_Printf( "\t COMMAND    : EXPLAIN                                             \n\r" );
+    AppIfPc_Printf( "\t==================================================================\n\r" );
+    AppIfPc_Printf( "\t help           : display command list.                           \n\r" );
+    AppIfPc_Printf( "\t i2clcd         : display I2C LCD.                                \n\r" );
+    AppIfPc_Printf( "\t led            : Light LED.                                      \n\r" );
+    AppIfPc_Printf( "\t motorSV        : turn around the SERVO    motor.                 \n\r" );
+    AppIfPc_Printf( "\t pushsw         : display count data of push switch.              \n\r" );
+    AppIfPc_Printf( "\t relay          : Control Relay.                                  \n\r" );
+    AppIfPc_Printf( "\t                                                                  \n\r" );
+//  AppIfPc_Printf( "\t sa_acc         : sensor(adc) display acceleration data. (X,Y,Z)  \n\r" );
+//  AppIfPc_Printf( "\t sa_gyro        : sensor(adc) display gyro data. (G1,G2)          \n\r" );
+    AppIfPc_Printf( "\t sa_pm          : sensor(adc) display Potentiometer data.         \n\r" );
+    AppIfPc_Printf( "\t si_bme280      : sensor(i2c) display BME280 sensor data.         \n\r" );
+    AppIfPc_Printf( "\t si_bmx055_acc  : sensor(i2c) display BMX055 sensor data.(X,Y,Z)  \n\r" );
+    AppIfPc_Printf( "\t si_bmx055_gyro : sensor(i2c) display BMX055 sensor data.(X,Y,Z)  \n\r" );
+    AppIfPc_Printf( "\t si_bmx055_mag  : sensor(i2c) display BMX055 sensor data.(X,Y,Z)  \n\r" );
+    AppIfPc_Printf( "\t si_gp2y0e03    : sensor(i2c) display distance sensor data.       \n\r" );
+    AppIfPc_Printf( "\t si_lps25h      : sensor(i2c) display LPS25H data.                \n\r" );
+    AppIfPc_Printf( "\t si_tsl2561     : sensor(i2c) display TSL2561 data.               \n\r" );
+    AppIfPc_Printf( "\t time           : sensor(i2c) display time/date data.             \n\r" );
     AppIfPc_Printf( "\n\r" );
 
     return EN_MENU_MSG_DONE;

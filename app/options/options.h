@@ -75,6 +75,15 @@ void  OptCmd_SaPmMenu( void );
 void  OptCmd_SiBme280( int argc, char *argv[] );    // SENSOR (I2C) BME280   ( 気圧・湿度・温度 )
 void  OptCmd_SiBme280Menu( void );
 
+void  OptCmd_SiBmx055Acc( int argc, char *argv[] ); // SENSOR (I2C) BMX055   ( 加速度 )
+void  OptCmd_SiBmx055AccMenu( void );
+
+void  OptCmd_SiBmx055Gyro( int argc, char *argv[] ); // SENSOR (I2C) BMX055   ( ジャイロ )
+void  OptCmd_SiBmx055GyroMenu( void );
+
+void  OptCmd_SiBmx055Mag( int argc, char *argv[] ); // SENSOR (I2C) BMX055   ( 磁気 )
+void  OptCmd_SiBmx055MagMenu( void );
+
 void  OptCmd_SiGp2y0e03( int argc, char *argv[] );  // SENSOR (I2C) GP2Y0E03 ( 距離 )
 void  OptCmd_SiGp2y0e03Menu( void );
 

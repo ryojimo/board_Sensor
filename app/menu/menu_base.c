@@ -53,23 +53,26 @@
 /* コマンドテーブル */
 const SAppMenuCmd_t g_menuCmdTable[ MAX_CMD_NUM ] =
 {
-    { ""            , MenuCmd_Help },
-    { "help"        , MenuCmd_Help },
-    { "i2clcd"      , MenuCmd_I2cLcd },
-    { "i2cpca9685"  , MenuCmd_I2cPca9685 },
-    { "led"         , MenuCmd_Led },
-    { "motorsv"     , MenuCmd_MotorSV },
-    { "pushsw"      , MenuCmd_PushSwitch },
-    { "relay"       , MenuCmd_Relay },
-    { "sa_acc"      , MenuCmd_SaAcc },
-    { "sa_gyro"     , MenuCmd_SaGyro },
-    { "sa_pm"       , MenuCmd_SaPm },
-    { "si_bme280"   , MenuCmd_SiBme280 },
-    { "si_gp2y0e03" , MenuCmd_SiGp2y0e03 },
-    { "si_lps25h"   , MenuCmd_SiLps25h },
-    { "si_tsl2561"  , MenuCmd_SiTsl2561 },
-    { "time"        , MenuCmd_Time },
-    { "END    "  , NULL }
+    { ""               , MenuCmd_Help },
+    { "help"           , MenuCmd_Help },
+    { "i2clcd"         , MenuCmd_I2cLcd },
+    { "i2cpca9685"     , MenuCmd_I2cPca9685 },
+    { "led"            , MenuCmd_Led },
+    { "motorsv"        , MenuCmd_MotorSV },
+    { "pushsw"         , MenuCmd_PushSwitch },
+    { "relay"          , MenuCmd_Relay },
+//    { "sa_acc"         , MenuCmd_SaAcc },
+//    { "sa_gyro"        , MenuCmd_SaGyro },
+    { "sa_pm"          , MenuCmd_SaPm },
+    { "si_bme280"      , MenuCmd_SiBme280 },
+    { "si_bmx055_acc"  , MenuCmd_SiBmx055Acc },
+    { "si_bmx055_gyro" , MenuCmd_SiBmx055Gyro },
+    { "si_bmx055_mag"  , MenuCmd_SiBmx055Mag },
+    { "si_gp2y0e03"    , MenuCmd_SiGp2y0e03 },
+    { "si_lps25h"      , MenuCmd_SiLps25h },
+    { "si_tsl2561"     , MenuCmd_SiTsl2561 },
+    { "time"           , MenuCmd_Time },
+    { "END    "        , NULL }
 };
 
 /* コマンド・バッファ */

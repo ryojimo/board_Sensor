@@ -90,12 +90,15 @@ Sys_Init(
     HalRelay_Init();
 
     // SENSOR (ADC)
-    HalSensorAcc_Init();
+//    HalSensorAcc_Init();
     HalSensorGyro_Init();
     HalSensorPm_Init();
 
     // SENSOR (I2C)
     HalSensorBME280_Init();
+    HalSensorBMX055Acc_Init();
+    HalSensorBMX055Gyro_Init();
+    HalSensorBMX055Mag_Init();
     HalSensorGP2Y0E03_Init();
     HalSensorLPS25H_Init();
     HalSensorTSL2561_Init();
@@ -129,12 +132,15 @@ Sys_Fini(
     HalRelay_Fini();
 
     // SENSOR (ADC)
-    HalSensorAcc_Fini();
+//    HalSensorAcc_Fini();
     HalSensorGyro_Fini();
     HalSensorPm_Fini();
 
     // SENSOR (I2C)
     HalSensorBME280_Fini();
+    HalSensorBMX055Acc_Fini();
+    HalSensorBMX055Gyro_Fini();
+    HalSensorBMX055Mag_Fini();
     HalSensorGP2Y0E03_Fini();
     HalSensorLPS25H_Fini();
     HalSensorTSL2561_Fini();

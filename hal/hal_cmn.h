@@ -28,7 +28,9 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
+#define I2C_SLAVE_BMX055_MAG    (0x13)
 #define I2C_SLAVE_PIC18F14K50   (0x17)
+#define I2C_SLAVE_BMX055_ACC    (0x19)
 #define I2C_SLAVE_TSL2561       (0x39)
 #define I2C_SLAVE_LCD           (0x3C)
 #define I2C_SLAVE_GP2Y0E03      (0x40)
@@ -37,6 +39,7 @@
 #define I2C_SLAVE_ADS1015       (0x48)
 #define I2C_SLAVE_ADT7410       (0x48)
 #define I2C_SLAVE_LPS25H        (0x5C)
+#define I2C_SLAVE_BMX055_GYRO   (0x69)
 #define I2C_SLAVE_BME280        (0x76)
 
 #define MCP3208_MAX_VALE        (0x0F60)

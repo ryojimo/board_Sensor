@@ -82,30 +82,31 @@ int main(int argc, char *argv[])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "a:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
+    const char      optstring[] = "a:b:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
-        { "sa_acc",      required_argument, NULL,  'a' },
-        { "i2clcd",      required_argument, NULL,  'c' },
-        { "i2cpca9685",  required_argument, NULL,  'e' },
-        { "sa_gyro",     required_argument, NULL,  'g' },
-        { "help",        no_argument,       NULL,  'h' },
-        { "pic",         required_argument, NULL,  'i' },
-        { "led",         required_argument, NULL,  'l' },
-        { "menu",        required_argument, NULL,  'm' },
-        { "motorsv",     required_argument, NULL,  'o' },
-        { "sa_pm",       required_argument, NULL,  'p' },
-        { "sensors",     no_argument,       NULL,  'q' },
-        { "relay",       required_argument, NULL,  'r' },
-        { "pushsw",      required_argument, NULL,  's' },
-        { "time",        required_argument, NULL,  't' },
-        { "usbkey",      required_argument, NULL,  'u' },
-        { "version",     no_argument,       NULL,  'v' },
-        { "si_bme280",   required_argument, NULL,  'w' },
-        { "si_gp2y0e03", required_argument, NULL,  'x' },
-        { "si_lps25h",   required_argument, NULL,  'y' },
-        { "si_tsl2561",  required_argument, NULL,  'z' },
-        { 0,             0,                 NULL,   0  }, // termination
+        { "si_bmx055_acc",  required_argument, NULL,  'a' },
+        { "si_bmx055_mag",  required_argument, NULL,  'b' },
+        { "i2clcd",         required_argument, NULL,  'c' },
+        { "i2cpca9685",     required_argument, NULL,  'e' },
+        { "si_bmx055_gyro", required_argument, NULL,  'g' },
+        { "help",           no_argument,       NULL,  'h' },
+        { "pic",            required_argument, NULL,  'i' },
+        { "led",            required_argument, NULL,  'l' },
+        { "menu",           required_argument, NULL,  'm' },
+        { "motorsv",        required_argument, NULL,  'o' },
+        { "sa_pm",          required_argument, NULL,  'p' },
+        { "sensors",        no_argument,       NULL,  'q' },
+        { "relay",          required_argument, NULL,  'r' },
+        { "pushsw",         required_argument, NULL,  's' },
+        { "time",           required_argument, NULL,  't' },
+        { "usbkey",         required_argument, NULL,  'u' },
+        { "version",        no_argument,       NULL,  'v' },
+        { "si_bme280",      required_argument, NULL,  'w' },
+        { "si_gp2y0e03",    required_argument, NULL,  'x' },
+        { "si_lps25h",      required_argument, NULL,  'y' },
+        { "si_tsl2561",     required_argument, NULL,  'z' },
+        { 0,                0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
 
@@ -152,10 +153,11 @@ int main(int argc, char *argv[])
 
         switch( opt )
         {
-        case 'a': OptCmd_SaAcc( argc, argv ); break;
+        case 'a': OptCmd_SiBmx055Acc( argc, argv ); break;
+        case 'b': OptCmd_SiBmx055Mag( argc, argv ); break;
         case 'c': OptCmd_I2cLcd( argc, argv ); break;
         case 'e': OptCmd_I2cPca9685( argc, argv ); break;
-        case 'g': OptCmd_SaGyro( argc, argv ); break;
+        case 'g': OptCmd_SiBmx055Gyro( argc, argv ); break;
         case 'h': OptCmd_Help(); break;
         case 'l': OptCmd_Led( argc, argv ); break;
         case 'm': OptCmd_Menu( argc, argv ); break;

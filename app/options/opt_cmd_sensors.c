@@ -79,16 +79,19 @@ OptCmd_Sensors(
 ){
 
     DBG_PRINT_TRACE( "OptCmd_Sensors() \n\r" );
-    SHalSensor_t*   dataSaAccX;
-    SHalSensor_t*   dataSaAccY;
-    SHalSensor_t*   dataSaAccZ;
-
-    SHalSensor_t*   dataSaGyroG1;
-    SHalSensor_t*   dataSaGyroG2;
-
     SHalSensor_t*   dataSiBme280Atmos;
     SHalSensor_t*   dataSiBme280Humi;
     SHalSensor_t*   dataSiBme280Temp;
+
+    SHalSensor_t*   dataSiBmx055AccX;
+    SHalSensor_t*   dataSiBmx055AccY;
+    SHalSensor_t*   dataSiBmx055AccZ;
+    SHalSensor_t*   dataSiBmx055GyroX;
+    SHalSensor_t*   dataSiBmx055GyroY;
+    SHalSensor_t*   dataSiBmx055GyroZ;
+    SHalSensor_t*   dataSiBmx055MagX;
+    SHalSensor_t*   dataSiBmx055MagY;
+    SHalSensor_t*   dataSiBmx055MagZ;
 
     SHalSensor_t*   dataSiGp2y0e03;
 
@@ -97,16 +100,19 @@ OptCmd_Sensors(
 
     SHalSensor_t*   dataSiTsl2561;
 
-    dataSaAccX   = HalSensorAcc_Get( EN_SEN_ACC_X );
-    dataSaAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    dataSaAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
-
-    dataSaGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataSaGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-
     dataSiBme280Atmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
     dataSiBme280Humi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
     dataSiBme280Temp  = HalSensorBME280_Get( EN_SEN_BME280_TEMP );
+
+    dataSiBmx055AccX  = HalSensorBMX055Acc_Get( EN_SEN_BMX055_X );
+    dataSiBmx055AccY  = HalSensorBMX055Acc_Get( EN_SEN_BMX055_Y );
+    dataSiBmx055AccZ  = HalSensorBMX055Acc_Get( EN_SEN_BMX055_Z );
+    dataSiBmx055GyroX = HalSensorBMX055Gyro_Get( EN_SEN_BMX055_X );
+    dataSiBmx055GyroY = HalSensorBMX055Gyro_Get( EN_SEN_BMX055_Y );
+    dataSiBmx055GyroZ = HalSensorBMX055Gyro_Get( EN_SEN_BMX055_Z );
+    dataSiBmx055MagX  = HalSensorBMX055Mag_Get( EN_SEN_BMX055_X );
+    dataSiBmx055MagY  = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Y );
+    dataSiBmx055MagZ  = HalSensorBMX055Mag_Get( EN_SEN_BMX055_Z );
 
     dataSiGp2y0e03    = HalSensorGP2Y0E03_Get();
 
@@ -117,16 +123,19 @@ OptCmd_Sensors(
 
     // node.js サーバへデータを渡すための printf()
     AppIfPc_Printf( "{ " );
-    AppIfPc_Printf( "\"sa_acc_x\": %d, ", (int)dataSaAccX->cur );
-    AppIfPc_Printf( "\"sa_acc_y\": %d, ", (int)dataSaAccY->cur );
-    AppIfPc_Printf( "\"sa_acc_z\": %d, ", (int)dataSaAccZ->cur );
-
-    AppIfPc_Printf( "\"sa_gyro_g1\": %d, ", (int)dataSaGyroG1->cur );
-    AppIfPc_Printf( "\"sa_gyro_g2\": %d, ", (int)dataSaGyroG2->cur );
-
     AppIfPc_Printf( "\"si_bme280_atmos\": %5.2f, ", dataSiBme280Atmos->cur );
-    AppIfPc_Printf( "\"si_bme280_humi\": %5.2f, ", dataSiBme280Humi->cur );
-    AppIfPc_Printf( "\"si_bme280_temp\": %5.2f, ", dataSiBme280Temp->cur );
+    AppIfPc_Printf( "\"si_bme280_humi\": %5.2f, ",  dataSiBme280Humi->cur );
+    AppIfPc_Printf( "\"si_bme280_temp\": %5.2f, ",  dataSiBme280Temp->cur );
+
+    AppIfPc_Printf( "\"si_bmx055_acc_x\": %5.2f, ",  dataSiBmx055AccX->cur );
+    AppIfPc_Printf( "\"si_bmx055_acc_y\": %5.2f, ",  dataSiBmx055AccY->cur );
+    AppIfPc_Printf( "\"si_bmx055_acc_z\": %5.2f, ",  dataSiBmx055AccZ->cur );
+    AppIfPc_Printf( "\"si_bmx055_gyro_x\": %5.2f, ", dataSiBmx055GyroX->cur );
+    AppIfPc_Printf( "\"si_bmx055_gyro_y\": %5.2f, ", dataSiBmx055GyroY->cur );
+    AppIfPc_Printf( "\"si_bmx055_gyro_z\": %5.2f, ", dataSiBmx055GyroZ->cur );
+    AppIfPc_Printf( "\"si_bmx055_mag_x\": %5.2f, ",  dataSiBmx055MagX->cur );
+    AppIfPc_Printf( "\"si_bmx055_mag_y\": %5.2f, ",  dataSiBmx055MagY->cur );
+    AppIfPc_Printf( "\"si_bmx055_mag_z\": %5.2f, ",  dataSiBmx055MagZ->cur );
 
     AppIfPc_Printf( "\"si_gp2y0e03\": %5.2f, ", dataSiGp2y0e03->cur );
 
