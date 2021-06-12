@@ -140,10 +140,10 @@ GetJson(
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "x%03X  y%03X  z%03X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+    AppIfLcd_Printf( "x%4.0fy%4.0fz%4.0f", dataX->cur, dataY->cur, dataZ->cur );
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%03d%%  ", dataX->cur_rate );
-    AppIfLcd_Printf( "%03d%%  ", dataY->cur_rate );
+    AppIfLcd_Printf( "%03d%% ", dataX->cur_rate );
+    AppIfLcd_Printf( "%03d%% ", dataY->cur_rate );
     AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
     // PC ターミナル表示

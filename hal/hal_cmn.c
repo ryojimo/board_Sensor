@@ -91,7 +91,14 @@ HalCmn_UpdateSenData(
 
     curData->err = curData->cur - curData->ofs;
 
-    curData->cur_rate = (int)( (curData->cur / curData->max) * 100 );
+    if( curData->cur < 0 )
+    {
+        curData->cur_rate = (int)( (curData->cur / curData->min) * 100 );
+        curData->cur_rate *= -1;
+    } else
+    {
+        curData->cur_rate = (int)( (curData->cur / curData->max) * 100 );
+    }
     return;
 }
 
