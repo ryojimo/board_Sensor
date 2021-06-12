@@ -147,10 +147,10 @@ GetJson(
     AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
     // PC ターミナル表示
-    AppIfPc_Printf( "{\"sensor\": \"si_bmx055_gyro\", \"value\": {\"x\": %d, \"y\": %d, \"z\": %d}} \r",
-                    (int)dataX->cur,
-                    (int)dataY->cur,
-                    (int)dataZ->cur );
+    AppIfPc_Printf( "{\"sensor\": \"si_bmx055_gyro\", \"value\": {\"x\": %+5.2f, \"y\": %+5.2f, \"z\": %+5.2f}} \r",
+                    dataX->cur,
+                    dataY->cur,
+                    dataZ->cur );
     AppIfPc_Printf( "\n\r" );
     return;
 }
@@ -192,7 +192,7 @@ OptCmd_SiBmx055GyroMenu(
         AppIfLcd_Printf( "%03d%%",  dataZ->cur_rate );
 
         // PC ターミナル表示
-        AppIfPc_Printf( "{ x: %5.2f(?), y: %5.2f(?), z: %5.2f(?) } \n\r",
+        AppIfPc_Printf( "{ x: %+5.2f(?), y: %+5.2f(?), z: %+5.2f(?) } \n\r",
                         dataX->cur, dataY->cur, dataZ->cur
                       );
         // 500ms スリープ
