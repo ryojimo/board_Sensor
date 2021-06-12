@@ -209,17 +209,35 @@ GetData(
 ){
     EHalBool_t          ret = EN_FALSE;
 
-#if 0
     unsigned char       config[6];
     int                 data = 0;       // 計算結果の一時保管用
     double              data_d = 0;     // センサの計測値
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    // Select Mag register(0x4B)
-    // Soft reset(0x83)
+    // Read register(0x4B)
     config[0] = 0x4B;
-    config[1] = 0x83;
+    ret = HalCmnI2c_Read( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to read data from i2c slave. \n\r" );
+
+        // Select Mag register(0x4B)
+        // Soft reset(0x83)
+        config[0] = 0x4B;
+        config[1] = 0x83;
+        ret = HalCmnI2c_Write( &config[0], 2 );
+        if( ret == EN_FALSE )
+        {
+            DBG_PRINT_ERROR( "fail to write reg:0x4B to i2c slave. \n\r" );
+            return ret;
+        }
+    }
+
+    // Select Mag register(0x4B)
+    // Reset(0x01)
+    config[0] = 0x4B;
+    config[1] = 0x01;
     ret = HalCmnI2c_Write( &config[0], 2 );
     if( ret == EN_FALSE )
     {
@@ -315,7 +333,6 @@ GetData(
     DBG_PRINT_TRACE( "g_dataZ.cur = %5.2f(?) \n\r", g_dataZ.cur );
 #endif
 
-#endif
     ret = EN_TRUE;
     return ret;
 }
