@@ -43,7 +43,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static double     GetValue( char* str );
+static double     GetRate( char* str );
 
 
 /**************************************************************************//*!
@@ -91,15 +91,14 @@ Help(
  * @return    なし。
  *************************************************************************** */
 static double
-GetValue(
+GetRate(
     char*   str     ///< [in] 文字列
 ){
     char*   endptr;
     double  value = 0;
 
-    DBG_PRINT_TRACE( "GetValue() \n\r" );
+    DBG_PRINT_TRACE( "GetRate() \n\r" );
     DBG_PRINT_TRACE( "str = %s \n\r", str );
-
     value = strtod( (const char*)str, &endptr );
     DBG_PRINT_TRACE( "value = %2.4f \n\r", value );
     return value;
@@ -202,7 +201,7 @@ OptCmd_MotorSV(
         case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': endFlag = 1; Help(); break;
         case 'm': endFlag = 1; OptCmd_MotorSvMenu(); break;
-        case 'r':              rate = GetValue( optarg ); status = EN_MOTOR_CW; break;
+        case 'r':              rate = GetRate( optarg ); status = EN_MOTOR_CW; break;
         default: break;
         }
     }

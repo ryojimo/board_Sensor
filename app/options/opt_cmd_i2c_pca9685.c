@@ -44,7 +44,6 @@ extern int  optind, opterr, optopt;
 //********************************************************
 static void       Help( void );
 static void       Run( int ch, EHalMotorState_t status, double rate );
-static void       RunVolume( int ch );
 static int        GetChannel( char* str );
 static double     GetRate( char* str );
 
@@ -68,16 +67,18 @@ Help(
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf( " Sub option)                                                       \n\r" );
     AppIfPc_Printf( "     -h,              --help              : display the help menu. \n\r" );
+    AppIfPc_Printf( "     -m,              --menu              : menu mode.             \n\r" );
     AppIfPc_Printf( "     -c number,       --ch=number         : the target channnel.   \n\r" );
     AppIfPc_Printf( "     -r float-number, --rate=float-number : the duty-rate.         \n\r" );
-    AppIfPc_Printf( "     -v,              --volume            : change the duty-rate by volume. \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                                                               \n\r" );
+    AppIfPc_Printf( "     -e            -h                                              \n\r" );
+    AppIfPc_Printf( "     --i2cpca9685  --help                                          \n\r" );
+    AppIfPc_Printf( "     -e            -m                                              \n\r" );
+    AppIfPc_Printf( "     --i2cpca9685  --menu                                          \n\r" );
     AppIfPc_Printf( "     -e            -c   <number>  -r     <float-number>            \n\r" );
     AppIfPc_Printf( "     --i2cpca9685  --ch=<number>  --rate=<float-number>            \n\r" );
-    AppIfPc_Printf( "     -e            -c   <number>  -v                               \n\r" );
-    AppIfPc_Printf( "     --i2cpca9685  --ch=<number>  --volume                         \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -118,52 +119,6 @@ Run(
 
 
 /**************************************************************************//*!
- * @brief     Volume を使ってサーボモータをまわす。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-RunVolume(
-    int             ch      ///< 対象の channel
-){
-    SHalSensor_t*   data;   ///< ボリュームのデータ構造体
-    double          rate;   ///< サーボモータを回す値
-
-    DBG_PRINT_TRACE( "RunVolume() \n\r" );
-
-    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
-    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
-
-    AppIfLcd_CursorSet( 0, 1 );
-
-    // キーを押されるまでループ
-    while( EN_FALSE == AppIfBtn_IsEnter() )
-    {
-        // センサデータを取得
-        data = HalSensorPm_Get();
-
-        // サーボモータを回す値を計算する。
-        rate = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
-
-        // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", rate );
-
-        // モータ制御
-        Run( ch, EN_MOTOR_CW, rate );
-    }
-
-    AppIfPc_Printf( "\n\r" );
-
-    // モータを停止
-    HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STOP, 4 ); // 4% 設定 ( 無視されるがとりあえずセット )
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     Channel 番号を取得する
  * @attention なし。
  * @note      なし。
@@ -175,9 +130,9 @@ static int
 GetChannel(
     char*   str     ///< [in] 文字列
 ){
-    DBG_PRINT_TRACE( "GetChannel() \n\r" );
     int     ch;
 
+    DBG_PRINT_TRACE( "GetChannel() \n\r" );
     DBG_PRINT_TRACE( "str = %s \n\r", str );
     ch   = strtol( (const char*)str, NULL, 10 );
     DBG_PRINT_TRACE( "ch = %d \n\r", ch );
@@ -197,14 +152,91 @@ static double
 GetRate(
     char*   str     ///< [in] 文字列
 ){
-    DBG_PRINT_TRACE( "GetRate() \n\r" );
     char*   endptr;
     double  rate = 0;
 
+    DBG_PRINT_TRACE( "GetRate() \n\r" );
     DBG_PRINT_TRACE( "str = %s \n\r", str );
     rate = strtod( (const char*)str, &endptr );
     DBG_PRINT_TRACE( "rate = %2.4f \n\r", rate );
     return rate;
+}
+
+
+/**************************************************************************//*!
+ * @brief     Volume を使ってサーボモータをまわす。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+OptCmd_I2cPca9685Menu(
+    void
+){
+    SHalSensor_t*   data;   ///< ボリュームのデータ構造体
+    double          rate;   ///< サーボモータを回す値
+
+    DBG_PRINT_TRACE( "OptCmd_I2cPca9685Menu() \n\r" );
+
+    AppIfPc_Printf( "if you push any keys, break.   \n\r" );
+    AppIfPc_Printf( "motor speed changes by volume. \n\r" );
+
+    AppIfLcd_CursorSet( 0, 1 );
+
+    // キーを押されるまでループ
+    while( EN_FALSE == AppIfBtn_IsEnter() )
+    {
+        // センサデータを取得
+        data = HalSensorPm_Get();
+
+        // サーボモータを回す値を計算する。
+        rate = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
+
+        // PC ターミナル表示
+        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", rate );
+
+        // モータ制御
+        Run(  0, EN_MOTOR_CW, rate );
+        Run(  1, EN_MOTOR_CW, rate );
+        Run(  2, EN_MOTOR_CW, rate );
+        Run(  3, EN_MOTOR_CW, rate );
+        Run(  4, EN_MOTOR_CW, rate );
+        Run(  5, EN_MOTOR_CW, rate );
+        Run(  6, EN_MOTOR_CW, rate );
+        Run(  7, EN_MOTOR_CW, rate );
+        Run(  8, EN_MOTOR_CW, rate );
+        Run(  9, EN_MOTOR_CW, rate );
+        Run( 10, EN_MOTOR_CW, rate );
+        Run( 11, EN_MOTOR_CW, rate );
+        Run( 12, EN_MOTOR_CW, rate );
+        Run( 13, EN_MOTOR_CW, rate );
+        Run( 14, EN_MOTOR_CW, rate );
+        Run( 15, EN_MOTOR_CW, rate );
+    }
+
+    AppIfPc_Printf( "\n\r" );
+
+    // モータを停止
+    // 4% 設定 ( 無視されるがとりあえずセット )
+    HalI2cPca9685_SetPwmDuty(  0, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  1, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  2, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  3, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  4, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  5, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  6, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  7, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  8, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty(  9, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 10, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 11, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 12, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 13, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 14, EN_MOTOR_STOP, 4 );
+    HalI2cPca9685_SetPwmDuty( 15, EN_MOTOR_STOP, 4 );
+    return;
 }
 
 
@@ -222,14 +254,14 @@ OptCmd_I2cPca9685(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hc:r:v";
+    const char      optstring[] = "hmc:r:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
+        { "menu",   no_argument,       NULL,  'm' },
         { "ch",     required_argument, NULL,  'c' },
         { "rate",   required_argument, NULL,  'r' },
-        { "volume", no_argument,       NULL,  'v' },
         { 0,        0,                 NULL,   0  }, // termination
     };
     int             ch = 0;
@@ -255,7 +287,7 @@ OptCmd_I2cPca9685(
         {
         case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
         case 'h': endFlag = 1; Help(); break;
-        case 'v': endFlag = 1; RunVolume( ch ); break;
+        case 'm': endFlag = 1; OptCmd_I2cPca9685Menu(); break;
         case 'c':              ch   = GetChannel( optarg ); break;
         case 'r':              rate = GetRate( optarg ); break;
         default: break;

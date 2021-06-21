@@ -93,7 +93,7 @@ PrintFormat(
     AppIfPc_Printf( "                 : ccw   : turn ccw.                       \n\r" );
     AppIfPc_Printf( "                 : vol   : change speed by volume control. \n\r" );
     AppIfPc_Printf( "\n\r" );
-    AppIfPc_Printf( "    Ex.)                                       \n\r" );
+    AppIfPc_Printf( "    Ex.)                                    \n\r" );
     AppIfPc_Printf( "        >motorSV cw                         \n\r" );
     AppIfPc_Printf( "        >motorSV vol                        \n\r" );
     AppIfPc_Printf( "\n\r" );
