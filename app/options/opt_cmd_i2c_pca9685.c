@@ -43,7 +43,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       Run( int ch, double rate );
+static void       Run( int ch, EHalMotorState_t status, double rate );
 static void       RunVolume( int ch );
 static int        GetChannel( char* str );
 static double     GetRate( char* str );
@@ -94,11 +94,12 @@ Help(
  *************************************************************************** */
 static void
 Run(
-    int       ch,     ///< [in] 対象の channel
-    double    rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    int                 ch,     ///< [in] 対象の channel
+    EHalMotorState_t    status, ///< [in] モータの状態
+    double              rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
     DBG_PRINT_TRACE( "Run() \n\r" );
-    DBG_PRINT_TRACE( "(ch, rate) = (%02d, %2.4f) \n\r", ch, rate );
+    DBG_PRINT_TRACE( "(ch, status, rate) = (%02d, %02d, %2.4f) \n\r", ch, status, rate );
 
     if( 0 <= ch && ch <= 15 )
     {
@@ -106,7 +107,7 @@ Run(
         AppIfLcd_CursorSet( 0, 1 );
         AppIfLcd_Printf( "%02.4f(\%)  ", rate );
 
-        HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, rate );
+        HalI2cPca9685_SetPwmDuty( ch, status, rate );
     } else
     {
         DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
@@ -126,10 +127,10 @@ Run(
  *************************************************************************** */
 static void
 RunVolume(
-    int             ch    ///< 対象の channel
+    int             ch      ///< 対象の channel
 ){
-    SHalSensor_t*   data;       ///< ボリュームのデータ構造体
-    double          value;      ///< サーボモータを回す値
+    SHalSensor_t*   data;   ///< ボリュームのデータ構造体
+    double          rate;   ///< サーボモータを回す値
 
     DBG_PRINT_TRACE( "RunVolume() \n\r" );
 
@@ -145,13 +146,13 @@ RunVolume(
         data = HalSensorPm_Get();
 
         // サーボモータを回す値を計算する。
-        value = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
+        rate = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
 
         // PC ターミナル表示
-        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", value );
+        AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", rate );
 
         // モータ制御
-        Run( ch, value );
+        Run( ch, EN_MOTOR_CW, rate );
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -263,7 +264,7 @@ OptCmd_I2cPca9685(
 
     if( endFlag == 0 )
     {
-        Run( ch, rate );
+        Run( ch, EN_MOTOR_CW, rate );
     }
 
     return;

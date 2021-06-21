@@ -67,7 +67,6 @@ Help(
     AppIfPc_Printf( "     -h,            --help            : display the help menu. \n\r" );
     AppIfPc_Printf( "     -m,            --menu            : menu mode.             \n\r" );
     AppIfPc_Printf( "     -r int-number, --rate=int-number : set the duty-rate.     \n\r" );
-    AppIfPc_Printf( "     -s,            --stop            : stop SAVO motor.       \n\r" );
     AppIfPc_Printf( "                                                               \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                      \n\r" );
@@ -170,17 +169,18 @@ OptCmd_MotorSV(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hmr:s";
+    const char      optstring[] = "hmr:";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,    has_arg,           *flag, val }, // 説明
         { "help",   no_argument,       NULL,  'h' },
         { "menu",   no_argument,       NULL,  'm' },
         { "rate",   required_argument, NULL,  'r' },
-        { "stop",   required_argument, NULL,  's' },
         { 0,        0,                 NULL,   0  }, // termination
     };
-    double          rate = 0;
+    double            rate = 0;
+    int               endFlag = 0;
+    EHalMotorState_t  status = EN_MOTOR_STANDBY;
 
     DBG_PRINT_TRACE( "OptCmd_MotorSV() \n\r" );
 
@@ -199,17 +199,19 @@ OptCmd_MotorSV(
 
         switch( opt )
         {
-        case '?': DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
-        case 'h': Help(); break;
-        case 'm': OptCmd_MotorSvMenu(); break;
-        case 'r': rate = GetValue( optarg );
-                  AppIfLcd_CursorSet( 0, 1 );
-                  AppIfLcd_Printf( "%02.4f(%%)  ", rate );
-                  HalMotorSV_SetPwmDuty( EN_MOTOR_CW, (int)rate );
-        break;
-        case 's': HalMotorSV_SetPwmDuty( EN_MOTOR_STOP, 0 ); break;
+        case '?': endFlag = 1; DBG_PRINT_ERROR( "invalid option. : \"%c\" \n\r", optopt ); break;
+        case 'h': endFlag = 1; Help(); break;
+        case 'm': endFlag = 1; OptCmd_MotorSvMenu(); break;
+        case 'r':              rate = GetValue( optarg ); status = EN_MOTOR_CW; break;
         default: break;
         }
+    }
+
+    if( endFlag == 0 )
+    {
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%02.4f(%%)  ", rate );
+        HalMotorSV_SetPwmDuty( status, (int)rate );
     }
 
     return;
