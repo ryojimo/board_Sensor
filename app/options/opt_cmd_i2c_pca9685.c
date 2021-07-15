@@ -193,6 +193,7 @@ OptCmd_I2cPca9685Menu(
 
         // サーボモータを回す値を計算する。
         rate = 2.8 + (( 12.5 - 2.8 ) * data->cur_rate) / 100;
+//        rate = 20 + (( 45 - 20 ) * data->cur_rate) / 100;
 
         // PC ターミナル表示
         AppIfPc_Printf( "motor SV : rate = %2.4f(\%) \r", rate );
@@ -200,6 +201,7 @@ OptCmd_I2cPca9685Menu(
         // モータ制御
         Run(  0, EN_MOTOR_CW, rate );
         Run(  1, EN_MOTOR_CW, rate );
+#if 0
         Run(  2, EN_MOTOR_CW, rate );
         Run(  3, EN_MOTOR_CW, rate );
         Run(  4, EN_MOTOR_CW, rate );
@@ -214,6 +216,7 @@ OptCmd_I2cPca9685Menu(
         Run( 13, EN_MOTOR_CW, rate );
         Run( 14, EN_MOTOR_CW, rate );
         Run( 15, EN_MOTOR_CW, rate );
+#endif
     }
 
     AppIfPc_Printf( "\n\r" );
@@ -222,6 +225,7 @@ OptCmd_I2cPca9685Menu(
     // 4% 設定 ( 無視されるがとりあえずセット )
     HalI2cPca9685_SetPwmDuty(  0, EN_MOTOR_STOP, 4 );
     HalI2cPca9685_SetPwmDuty(  1, EN_MOTOR_STOP, 4 );
+#if 0
     HalI2cPca9685_SetPwmDuty(  2, EN_MOTOR_STOP, 4 );
     HalI2cPca9685_SetPwmDuty(  3, EN_MOTOR_STOP, 4 );
     HalI2cPca9685_SetPwmDuty(  4, EN_MOTOR_STOP, 4 );
@@ -236,6 +240,7 @@ OptCmd_I2cPca9685Menu(
     HalI2cPca9685_SetPwmDuty( 13, EN_MOTOR_STOP, 4 );
     HalI2cPca9685_SetPwmDuty( 14, EN_MOTOR_STOP, 4 );
     HalI2cPca9685_SetPwmDuty( 15, EN_MOTOR_STOP, 4 );
+#endif
     return;
 }
 
