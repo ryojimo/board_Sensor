@@ -84,7 +84,7 @@ typedef enum tagEHalGain
 static SHalSensor_t     g_dataRed;    // センサの値
 static SHalSensor_t     g_dataGreen;  // センサの値
 static SHalSensor_t     g_dataBlue;   // センサの値
-static SHalSensor_t     g_dataC;      // センサの値
+static SHalSensor_t     g_dataClear;  // センサの値
 
 
 //********************************************************
@@ -95,6 +95,8 @@ static EHalBool_t   InitReg( void );
 static void         SetOffset( void );
 
 static EHalBool_t   Enable( void );
+static EHalBool_t   Disable( void );
+
 static EHalBool_t   SetIntegrationTime( EHalIntegrationTime_t it );
 static EHalBool_t   SetGain( EHalGain_t gain );
 
@@ -141,13 +143,13 @@ InitParam(
     g_dataBlue.cur_rate = 0;        // cur_rate = ( cur / max ) * 100 ( %  )
     g_dataBlue.cur_vol = 0;         // cur_vol = 電圧に換算した現在値 ( mV )
 
-    g_dataC.cur = 0;             // cur = センサの現在値 ( ? )
-    g_dataC.ofs = 0;             // ofs = 初期化時に設定したセンサのオフセット値
-    g_dataC.max = 0;             // max = センサの最大値
-    g_dataC.min = 0xFFFFFFFF;    // min = センサの最小値
-    g_dataC.err = 0;             // err = cur - ofs
-    g_dataC.cur_rate = 0;        // cur_rate = ( cur / max ) * 100 ( %  )
-    g_dataC.cur_vol = 0;         // cur_vol = 電圧に換算した現在値 ( mV )
+    g_dataClear.cur = 0;            // cur = センサの現在値 ( ? )
+    g_dataClear.ofs = 0;            // ofs = 初期化時に設定したセンサのオフセット値
+    g_dataClear.max = 0;            // max = センサの最大値
+    g_dataClear.min = 0xFFFFFFFF;   // min = センサの最小値
+    g_dataClear.err = 0;            // err = cur - ofs
+    g_dataClear.cur_rate = 0;       // cur_rate = ( cur / max ) * 100 ( %  )
+    g_dataClear.cur_vol = 0;        // cur_vol = 電圧に換算した現在値 ( mV )
 
     return;
 }
@@ -166,6 +168,9 @@ InitReg(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
+
+    SetIntegrationTime( TCS34725_INTEGRATIONTIME_24MS );
+    SetGain( TCS34725_GAIN_1X );
     return EN_TRUE;
 }
 
@@ -182,18 +187,18 @@ static void
 SetOffset(
     void  ///< [in] ナシ
 ){
-    SHalSensor_t  dataRed;
-    SHalSensor_t  dataGreen;
-    SHalSensor_t  dataBlue;
+    SHalSensor_t  dataR;
+    SHalSensor_t  dataG;
+    SHalSensor_t  dataB;
     SHalSensor_t  dataC;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    HalSensorTCS34725_Get( &dataRed, &dataGreen, &dataBlue, &dataC );
-    g_dataRed.ofs   = dataRed.cur;
-    g_dataGreen.ofs = dataGreen.cur;
-    g_dataBlue.ofs  = dataBlue.cur;
-    g_dataC.ofs     = dataC.cur;
+    HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+    g_dataRed.ofs   = dataR.cur;
+    g_dataGreen.ofs = dataG.cur;
+    g_dataBlue.ofs  = dataB.cur;
+    g_dataClear.ofs = dataC.cur;
     return;
 }
 
@@ -425,15 +430,13 @@ GetData(
     EHalBool_t          ret = EN_FALSE;
 
     unsigned char       config[2];
-    int                 dataRed   = 0;    // 計算結果の一時保管用
-    int                 dataGreen = 0;    // 計算結果の一時保管用
-    int                 dataBlue  = 0;    // 計算結果の一時保管用
-    int                 dataC     = 0;    // 計算結果の一時保管用
+    int                 dataR = 0;  // 計算結果の一時保管用
+    int                 dataG = 0;  // 計算結果の一時保管用
+    int                 dataB = 0;  // 計算結果の一時保管用
+    int                 dataC = 0;  // 計算結果の一時保管用
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    SetIntegrationTime( TCS34725_INTEGRATIONTIME_24MS );
-    SetGain( TCS34725_GAIN_1X );
     Enable();
 
     // Red
@@ -451,7 +454,7 @@ GetData(
         DBG_PRINT_ERROR( "fail to read dataRed from i2c slave. \n\r" );
         goto err;
     }
-    dataRed = (config[1] << 8) | config[0];
+    dataR = (config[1] << 8) | config[0];
 
     // Green
     config[0] = TCS34725_COMMAND_BIT | TCS34725_GDATAL;
@@ -468,7 +471,7 @@ GetData(
         DBG_PRINT_ERROR( "fail to read dataGreen from i2c slave. \n\r" );
         goto err;
     }
-    dataGreen = (config[1] << 8) | config[0];
+    dataG = (config[1] << 8) | config[0];
 
     // Blue
     config[0] = TCS34725_COMMAND_BIT | TCS34725_BDATAL;
@@ -485,7 +488,7 @@ GetData(
         DBG_PRINT_ERROR( "fail to read dataBlue from i2c slave. \n\r" );
         goto err;
     }
-    dataBlue = (config[1] << 8) | config[0];
+    dataB = (config[1] << 8) | config[0];
 
     // C
     config[0] = TCS34725_COMMAND_BIT | TCS34725_CDATAL;
@@ -504,16 +507,16 @@ GetData(
     }
     dataC = (config[1] << 8) | config[0];
 
-    DBG_PRINT_TRACE( "dataRed   = %d \n\r", dataRed );
-    DBG_PRINT_TRACE( "dataGreen = %d \n\r", dataGreen );
-    DBG_PRINT_TRACE( "dataBlue  = %d \n\r", dataBlue );
+    DBG_PRINT_TRACE( "dataRed   = %d \n\r", dataR );
+    DBG_PRINT_TRACE( "dataGreen = %d \n\r", dataG );
+    DBG_PRINT_TRACE( "dataBlue  = %d \n\r", dataB );
     DBG_PRINT_TRACE( "dataC     = %d \n\r", dataC );
-    DBG_PRINT_TRACE( "RGB       = 0x%02X%02X%02X \n\r", dataRed, dataGreen, dataBlue );
+    DBG_PRINT_TRACE( "RGB       = 0x%02X%02X%02X \n\r", dataR, dataG, dataB );
 
-    HalCmn_UpdateSenData( &g_dataRed,   dataRed );    // グローバル変数を更新する
-    HalCmn_UpdateSenData( &g_dataGreen, dataGreen );  // グローバル変数を更新する
-    HalCmn_UpdateSenData( &g_dataBlue,  dataBlue );   // グローバル変数を更新する
-    HalCmn_UpdateSenData( &g_dataC,     dataC );      // グローバル変数を更新する
+    HalCmn_UpdateSenData( &g_dataRed,   dataR );  // グローバル変数を更新する
+    HalCmn_UpdateSenData( &g_dataGreen, dataG );  // グローバル変数を更新する
+    HalCmn_UpdateSenData( &g_dataBlue,  dataB );  // グローバル変数を更新する
+    HalCmn_UpdateSenData( &g_dataClear, dataC );  // グローバル変数を更新する
     ret = EN_TRUE;
 
 err:
@@ -555,7 +558,7 @@ err:
     HalCmn_CopySenData( red,   &g_dataRed );
     HalCmn_CopySenData( green, &g_dataGreen );
     HalCmn_CopySenData( blue,  &g_dataBlue );
-    HalCmn_CopySenData( c,     &g_dataC );
+    HalCmn_CopySenData( c,     &g_dataClear );
     return;
 }
 
