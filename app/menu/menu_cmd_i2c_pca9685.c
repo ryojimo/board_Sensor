@@ -24,6 +24,7 @@
 #include "../if_button/if_button.h"
 #include "../if_lcd/if_lcd.h"
 #include "../if_pc/if_pc.h"
+#include "../options/options.h"
 
 #include "menu_base.h"
 #include "menu_input.h"

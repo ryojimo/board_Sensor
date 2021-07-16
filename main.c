@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "a:b:c:e:g:hi:l:m:o:p:qr:s:t:u:vw:x:y:z:";
+    const char      optstring[] = "a:b:c:e:g:hi:l:m:n:o:p:qr:s:t:u:vw:x:y:z:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "si_bmx055_acc",  required_argument, NULL,  'a' },
@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
         { "pic",            required_argument, NULL,  'i' },
         { "led",            required_argument, NULL,  'l' },
         { "menu",           required_argument, NULL,  'm' },
+        { "si_tcs34725",    required_argument, NULL,  'n' },
         { "motorsv",        required_argument, NULL,  'o' },
         { "sa_pm",          required_argument, NULL,  'p' },
         { "sensors",        no_argument,       NULL,  'q' },
@@ -161,6 +162,7 @@ int main(int argc, char *argv[])
         case 'h': OptCmd_Help(); break;
         case 'l': OptCmd_Led( argc, argv ); break;
         case 'm': OptCmd_Menu( argc, argv ); break;
+        case 'n': OptCmd_SiTcs34725( argc, argv ); break;
         case 'o': OptCmd_MotorSV( argc, argv ); break;
         case 'p': OptCmd_SaPm( argc, argv ); break;
         case 'q': OptCmd_Sensors(); break;

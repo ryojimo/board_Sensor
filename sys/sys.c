@@ -101,6 +101,7 @@ Sys_Init(
     HalSensorBMX055Mag_Init();
     HalSensorGP2Y0E03_Init();
     HalSensorLPS25H_Init();
+    HalSensorTCS34725_Init();
     HalSensorTSL2561_Init();
 
     HalTime_Init();
@@ -143,6 +144,7 @@ Sys_Fini(
     HalSensorBMX055Mag_Fini();
     HalSensorGP2Y0E03_Fini();
     HalSensorLPS25H_Fini();
+    HalSensorTCS34725_Fini();
     HalSensorTSL2561_Fini();
 
 //  HalTime モジュールに Fini() 処理はない

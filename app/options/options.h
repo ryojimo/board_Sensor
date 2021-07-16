@@ -92,6 +92,9 @@ void  OptCmd_SiGp2y0e03Menu( void );
 void  OptCmd_SiLps25h( int argc, char *argv[] );    // SENSOR (I2C) LPS25H   ( 気圧・温度 )
 void  OptCmd_SiLps25hMenu( void );
 
+void  OptCmd_SiTcs34725( int argc, char *argv[] );   // SENSOR (I2C) TCS34725  ( 色 )
+void  OptCmd_SiTcs34725Menu( void );
+
 void  OptCmd_SiTsl2561( int argc, char *argv[] );   // SENSOR (I2C) TSL2561  ( 照度 )
 void  OptCmd_SiTsl2561Menu( void );
 

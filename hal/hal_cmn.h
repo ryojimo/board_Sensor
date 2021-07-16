@@ -31,6 +31,7 @@
 #define I2C_SLAVE_BMX055_MAG    (0x13)
 #define I2C_SLAVE_PIC18F14K50   (0x17)
 #define I2C_SLAVE_BMX055_ACC    (0x19)
+#define I2C_SLAVE_TCS34725      (0x29)
 #define I2C_SLAVE_TSL2561       (0x39)
 #define I2C_SLAVE_LCD           (0x3C)
 #define I2C_SLAVE_GP2Y0E03      (0x40)
@@ -111,6 +112,7 @@ typedef struct tagSHalSensor
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 void            HalCmn_UpdateSenData( SHalSensor_t* curData, double newData );
+void            HalCmn_CopySenData( SHalSensor_t* curData, SHalSensor_t* newData );
 
 EHalBool_t      HalCmnGpio_Init( void );
 void            HalCmnGpio_Fini( void );

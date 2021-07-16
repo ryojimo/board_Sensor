@@ -103,6 +103,39 @@ HalCmn_UpdateSenData(
 }
 
 
+/**************************************************************************//*!
+ * @brief     SENSOR 変数をコピーする。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+void
+HalCmn_CopySenData(
+    SHalSensor_t*   curData,    ///< [in] 対象の SENSOR 変数
+    SHalSensor_t*   newData     ///< [in] 新しい値
+){
+    DBG_PRINT_TRACE( "\n\r" );
+    DBG_PRINT_TRACE( "curData->cur = %5.2f \n\r", curData->cur );
+    DBG_PRINT_TRACE( "curData->max = %5.2f \n\r", curData->max );
+    DBG_PRINT_TRACE( "curData->min = %5.2f \n\r", curData->min );
+    DBG_PRINT_TRACE( "newData->cur = %5.2f \n\r", newData->cur );
+    DBG_PRINT_TRACE( "newData->max = %5.2f \n\r", newData->max );
+    DBG_PRINT_TRACE( "newData->min = %5.2f \n\r", newData->min );
+
+
+    curData->cur = newData->cur;
+    curData->ofs = newData->ofs;
+    curData->max = newData->max;
+    curData->min = newData->min;
+    curData->err = newData->err;
+    curData->cur_rate = newData->cur_rate;
+    curData->cur_vol  = newData->cur_vol;
+    return;
+}
+
+
 #ifdef __cplusplus
     }
 #endif
