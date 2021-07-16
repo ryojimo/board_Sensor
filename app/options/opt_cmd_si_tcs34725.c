@@ -32,6 +32,18 @@
 
 
 //********************************************************
+/*! @enum                                                */
+//********************************************************
+typedef enum tagEColor
+{
+    EN_RED   = 0x00,   ///< @var : RED
+    EN_GREEN = 0x01,   ///< @var : GREEN
+    EN_BLUE  = 0x02,   ///< @var : BLUE
+    EN_CLEAR = 0x03    ///< @var : CLEAR
+} EColor_t;
+
+
+//********************************************************
 /* モジュールグローバル変数                              */
 //********************************************************
 // getopt() で使用
@@ -43,7 +55,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       GetData( void );
+static void       GetData( EColor_t which );
 static void       GetJson( void );
 
 
@@ -69,7 +81,10 @@ Help(
     AppIfPc_Printf( "     -j, --json : get the values of json format.                   \n\r" );
     AppIfPc_Printf( "     -m, --menu : menu mode.                                       \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
-    AppIfPc_Printf( "     -d, --data : get the value.                                   \n\r" );
+    AppIfPc_Printf( "     -r, --red   : get the value, Red.                             \n\r" );
+    AppIfPc_Printf( "     -g, --green : get the value, Green.                           \n\r" );
+    AppIfPc_Printf( "     -b, --blue  : get the value, Blue.                            \n\r" );
+    AppIfPc_Printf( "     -c, --clear : get the value, Clear.                           \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                       \n\r" );
@@ -77,8 +92,8 @@ Help(
     AppIfPc_Printf( "     --si_tcs34725  --help \n\r" );
     AppIfPc_Printf( "     -n             -j     \n\r" );
     AppIfPc_Printf( "     --si_tcs34725  --json \n\r" );
-    AppIfPc_Printf( "     -n             -d     \n\r" );
-    AppIfPc_Printf( "     --si_tcs34725  --data \n\r" );
+    AppIfPc_Printf( "     -n             -r     \n\r" );
+    AppIfPc_Printf( "     --si_tcs34725  --red  \n\r" );
     AppIfPc_Printf("\x1b[39m");
     AppIfPc_Printf( "\n\r" );
     return;
@@ -95,25 +110,35 @@ Help(
  *************************************************************************** */
 static void
 GetData(
-    void
+    EColor_t        which   ///< [in] 対象の色
 ){
-#if 0
-    SHalSensor_t*       data;
-#endif
+    SHalSensor_t    dataR;  ///< センサデータの構造体
+    SHalSensor_t    dataG;  ///< センサデータの構造体
+    SHalSensor_t    dataB;  ///< センサデータの構造体
+    SHalSensor_t    dataC;  ///< センサデータの構造体
+
+    SHalSensor_t*   data;   ///< センサデータの構造体へのポインタ
 
     DBG_PRINT_TRACE( "GetData() \n\r" );
 
-#if 0
     // センサデータを取得
-    data = HalSensorGP2Y0E03_Get();
+    HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+
+    switch( which )
+    {
+    case EN_RED   : data = &dataR; break;
+    case EN_GREEN : data = &dataG;  break;
+    case EN_BLUE  : data = &dataB; break;
+    case EN_CLEAR : data = &dataC; break;
+    default       : break;
+    }
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 1 );
-    AppIfLcd_Printf( "%5.2f(cm)", data->cur );
+    AppIfLcd_Printf( "%5.2f", data->cur );
 
     // PC ターミナル表示
     AppIfPc_Printf( "%5.2f \n\r", data->cur );
-#endif
     return;
 }
 
@@ -216,15 +241,18 @@ OptCmd_SiTcs34725(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmd";
+    const char      optstring[] = "hjmrgbc";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
-        { "help", no_argument, NULL,  'h' },
-        { "json", no_argument, NULL,  'j' },
-        { "menu", no_argument, NULL,  'm' },
-        { "data", no_argument, NULL,  'd' },
-        { 0,      0,           NULL,   0  }, // termination
+        { "help",  no_argument, NULL,  'h' },
+        { "json",  no_argument, NULL,  'j' },
+        { "menu",  no_argument, NULL,  'm' },
+        { "red",   no_argument, NULL,  'r' },
+        { "green", no_argument, NULL,  'g' },
+        { "blue",  no_argument, NULL,  'b' },
+        { "clear", no_argument, NULL,  'c' },
+        { 0,       0,           NULL,   0  }, // termination
     };
 
     DBG_PRINT_TRACE( "OptCmd_SiTcs34725() \n\r" );
@@ -248,7 +276,10 @@ OptCmd_SiTcs34725(
         case 'h': Help(); break;
         case 'j': GetJson(); break;
         case 'm': OptCmd_SiTcs34725Menu(); break;
-        case 'd': GetData(); break;
+        case 'r': GetData( EN_RED   ); break;
+        case 'g': GetData( EN_GREEN ); break;
+        case 'b': GetData( EN_BLUE  ); break;
+        case 'c': GetData( EN_CLEAR ); break;
         default: break;
         }
     }

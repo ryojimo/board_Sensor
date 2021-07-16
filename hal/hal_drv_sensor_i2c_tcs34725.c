@@ -3,7 +3,8 @@
  *  @brief          [HAL] SENSOR (I2C) TCS34725 ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
- *  @sa             none.
+ *  @sa             https://kurobekoblog.com/tcs34725_nolib
+ *                  https://github.com/Seeed-Studio/Grove_I2C_Color_Sensor_TCS3472
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
@@ -21,7 +22,7 @@
 #include "hal.h"
 
 
-#define DBG_PRINT
+//#define DBG_PRINT
 #define MY_NAME "HAL"
 #include "../app/log/log.h"
 
@@ -94,11 +95,12 @@ static void         InitParam( void );
 static EHalBool_t   InitReg( void );
 static void         SetOffset( void );
 
-static EHalBool_t   Enable( void );
-static EHalBool_t   Disable( void );
-
+static EHalBool_t   Setup( void );
 static EHalBool_t   SetIntegrationTime( EHalIntegrationTime_t it );
 static EHalBool_t   SetGain( EHalGain_t gain );
+
+static EHalBool_t   Enable( void );
+static EHalBool_t   Disable( void );
 
 static EHalBool_t   GetData( void );
 
@@ -169,8 +171,11 @@ InitReg(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    SetIntegrationTime( TCS34725_INTEGRATIONTIME_24MS );
+    Setup();
+    SetIntegrationTime( TCS34725_INTEGRATIONTIME_700MS );
     SetGain( TCS34725_GAIN_1X );
+    usleep( 24 * 1000 );
+
     return EN_TRUE;
 }
 
@@ -254,7 +259,7 @@ HalSensorTCS34725_Fini(
 
 
 /**************************************************************************//*!
- * @brief     デバイスを有効にする
+ * @brief     デバイスを設定する
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -262,83 +267,31 @@ HalSensorTCS34725_Fini(
  * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
-Enable(
+Setup(
     void  ///< [in] ナシ
 ){
     EHalBool_t          ret = EN_FALSE;
     unsigned char       config[2];
 
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
+    config[0] = TCS34725_COMMAND_BIT | TCS34725_ID;
     ret = HalCmnI2c_Write( &config[0], 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
-        return ret;
+        DBG_PRINT_ERROR( "fail to write TCS34725_ID to i2c slave. \n\r" );
+        goto err;
     }
 
-    config[0] = TCS34725_ENABLE_PON;
-    ret = HalCmnI2c_Write( &config[0], 1 );
+    ret = HalCmnI2c_Read( config, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to write ENABLE_PON to i2c slave. \n\r" );
-        return ret;
+        DBG_PRINT_ERROR( "fail to read dataGreen from i2c slave. \n\r" );
+        goto err;
     }
 
-    usleep( 3 * 1000 );
-
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
-        return ret;
-    }
-
-    config[0] = TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write ENABLE_PON | NABLE_AEN to i2c slave. \n\r" );
-        return ret;
-    }
-
+    DBG_PRINT_TRACE( "ID = 0x%02X \n\r", config[0] );
     ret = EN_TRUE;
-    return ret;
-}
 
-
-/**************************************************************************//*!
- * @brief     デバイスを無効にする
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
- *************************************************************************** */
-static EHalBool_t
-Disable(
-    void  ///< [in] ナシ
-){
-    EHalBool_t          ret = EN_FALSE;
-    unsigned char       config[2];
-
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
-        return ret;
-    }
-
-    config[0] = ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write ~(ENABLE_PON | NABLE_AEN) to i2c slave. \n\r" );
-        return ret;
-    }
-
-    ret = EN_TRUE;
+err:
     return ret;
 }
 
@@ -363,18 +316,20 @@ SetIntegrationTime(
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write ATIME to i2c slave. \n\r" );
-        return ret;
+        goto err;
     }
 
-    config[0] = it;
+    config[0] = it & 0xFF;
     ret = HalCmnI2c_Write( &config[0], 1 );
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write I-TIME to i2c slave. \n\r" );
-        return ret;
+        goto err;
     }
 
     ret = EN_TRUE;
+
+err:
     return ret;
 }
 
@@ -399,18 +354,116 @@ SetGain(
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write CONTROL to i2c slave. \n\r" );
-        return ret;
+        goto err;
     }
 
-    config[0] = gain;
+    config[0] = gain & 0xFF;
     ret = HalCmnI2c_Write( &config[0], 1 );
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to write GAIN to i2c slave. \n\r" );
-        return ret;
+        goto err;
     }
 
     ret = EN_TRUE;
+
+err:
+    return ret;
+}
+
+
+/**************************************************************************//*!
+ * @brief     デバイスを有効にする
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ *************************************************************************** */
+static EHalBool_t
+Enable(
+    void  ///< [in] ナシ
+){
+    EHalBool_t          ret = EN_FALSE;
+    unsigned char       config[2];
+
+#if 0
+    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
+        goto err;
+    }
+
+    config[0] = TCS34725_ENABLE_PON & 0xFF;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ENABLE_PON to i2c slave. \n\r" );
+        goto err;
+    }
+
+    usleep( 300 * 1000 );
+#endif
+
+    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
+        goto err;
+    }
+
+    config[0] = ( TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN ) & 0xFF;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ENABLE_PON | NABLE_AEN to i2c slave. \n\r" );
+        goto err;
+    }
+
+    ret = EN_TRUE;
+    usleep( 24 * 1000 );
+
+err:
+    return ret;
+}
+
+
+/**************************************************************************//*!
+ * @brief     デバイスを無効にする
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ *************************************************************************** */
+static EHalBool_t
+Disable(
+    void  ///< [in] ナシ
+){
+    EHalBool_t          ret = EN_FALSE;
+    unsigned char       config[2];
+
+    config[0] = TCS34725_COMMAND_BIT | TCS34725_ENABLE;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ENABLE to i2c slave. \n\r" );
+        goto err;
+    }
+
+    config[0] = ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN) & 0xFF;
+    ret = HalCmnI2c_Write( &config[0], 1 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write ~(ENABLE_PON | NABLE_AEN) to i2c slave. \n\r" );
+        goto err;
+    }
+
+    ret = EN_TRUE;
+err:
     return ret;
 }
 
@@ -429,18 +482,16 @@ GetData(
 ){
     EHalBool_t          ret = EN_FALSE;
 
-    unsigned char       config[2];
-    int                 dataR = 0;  // 計算結果の一時保管用
-    int                 dataG = 0;  // 計算結果の一時保管用
-    int                 dataB = 0;  // 計算結果の一時保管用
-    int                 dataC = 0;  // 計算結果の一時保管用
+    unsigned char       config[8];
+    unsigned int        dataR = 0;  // 計算結果の一時保管用
+    unsigned int        dataG = 0;  // 計算結果の一時保管用
+    unsigned int        dataB = 0;  // 計算結果の一時保管用
+    unsigned int        dataC = 0;  // 計算結果の一時保管用
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    Enable();
-
     // Red
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_RDATAL;
+    config[0] = 0b10100000 | 0x14;
     ret = HalCmnI2c_Write( &config[0], 1 );
     if( ret == EN_FALSE )
     {
@@ -448,70 +499,21 @@ GetData(
         goto err;
     }
 
-    ret = HalCmnI2c_Read( config, 2 );
+    ret = HalCmnI2c_Read( config, 8 );
     if( ret == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to read dataRed from i2c slave. \n\r" );
         goto err;
     }
-    dataR = (config[1] << 8) | config[0];
-
-    // Green
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_GDATAL;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write GDATAL to i2c slave. \n\r" );
-        goto err;
-    }
-
-    ret = HalCmnI2c_Read( config, 2 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to read dataGreen from i2c slave. \n\r" );
-        goto err;
-    }
-    dataG = (config[1] << 8) | config[0];
-
-    // Blue
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_BDATAL;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write BDATAL to i2c slave. \n\r" );
-        goto err;
-    }
-
-    ret = HalCmnI2c_Read( config, 2 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to read dataBlue from i2c slave. \n\r" );
-        goto err;
-    }
-    dataB = (config[1] << 8) | config[0];
-
-    // C
-    config[0] = TCS34725_COMMAND_BIT | TCS34725_CDATAL;
-    ret = HalCmnI2c_Write( &config[0], 1 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to write CDATAL to i2c slave. \n\r" );
-        goto err;
-    }
-
-    ret = HalCmnI2c_Read( config, 2 );
-    if( ret == EN_FALSE )
-    {
-        DBG_PRINT_ERROR( "fail to read dataC from i2c slave. \n\r" );
-        goto err;
-    }
     dataC = (config[1] << 8) | config[0];
+    dataR = (config[3] << 8) | config[2];
+    dataG = (config[5] << 8) | config[4];
+    dataB = (config[7] << 8) | config[6];
 
-    DBG_PRINT_TRACE( "dataRed   = %d \n\r", dataR );
-    DBG_PRINT_TRACE( "dataGreen = %d \n\r", dataG );
-    DBG_PRINT_TRACE( "dataBlue  = %d \n\r", dataB );
-    DBG_PRINT_TRACE( "dataC     = %d \n\r", dataC );
-    DBG_PRINT_TRACE( "RGB       = 0x%02X%02X%02X \n\r", dataR, dataG, dataB );
+    DBG_PRINT_TRACE( "dataC = %d \n\r", dataC );
+    DBG_PRINT_TRACE( "dataR = %d \n\r", dataR );
+    DBG_PRINT_TRACE( "dataG = %d \n\r", dataG );
+    DBG_PRINT_TRACE( "dataB = %d \n\r", dataB );
 
     HalCmn_UpdateSenData( &g_dataRed,   dataR );  // グローバル変数を更新する
     HalCmn_UpdateSenData( &g_dataGreen, dataG );  // グローバル変数を更新する
@@ -520,6 +522,7 @@ GetData(
     ret = EN_TRUE;
 
 err:
+    usleep( 24 * 1000 );
     Disable();
     return ret;
 }
@@ -547,6 +550,7 @@ HalSensorTCS34725_Get(
     // I2C スレーブデバイスを TCS34725 に変える
     HalCmnI2c_SetSlave( I2C_SLAVE_TCS34725 );
 
+    Enable();
     res = GetData();
     if( res == EN_FALSE )
     {
@@ -555,6 +559,7 @@ HalSensorTCS34725_Get(
     }
 
 err:
+    Disable();
     HalCmn_CopySenData( red,   &g_dataRed );
     HalCmn_CopySenData( green, &g_dataGreen );
     HalCmn_CopySenData( blue,  &g_dataBlue );
