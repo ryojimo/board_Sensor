@@ -18,6 +18,8 @@
 //********************************************************
 /* include                                               */
 //********************************************************
+#include <math.h>
+
 #include "hal_cmn.h"
 #include "hal.h"
 
@@ -102,7 +104,8 @@ static EHalBool_t   SetGain( EHalGain_t gain );
 static EHalBool_t   Enable( void );
 static EHalBool_t   Disable( void );
 
-static EHalBool_t   GetData( void );
+static EHalBool_t   GetRawData( void );
+static double       GetColorTemperature( void );
 
 
 
@@ -199,7 +202,7 @@ SetOffset(
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+    HalSensorTCS34725_GetRawData( &dataR, &dataG, &dataB, &dataC );
     g_dataRed.ofs   = dataR.cur;
     g_dataGreen.ofs = dataG.cur;
     g_dataBlue.ofs  = dataB.cur;
@@ -284,7 +287,7 @@ Setup(
     ret = HalCmnI2c_Read( config, 1 );
     if( ret == EN_FALSE )
     {
-        DBG_PRINT_ERROR( "fail to read dataGreen from i2c slave. \n\r" );
+        DBG_PRINT_ERROR( "fail to read ID from i2c slave. \n\r" );
         goto err;
     }
 
@@ -469,7 +472,7 @@ err:
 
 
 /**************************************************************************//*!
- * @brief     データを取得する。
+ * @brief     Raw データ ( RED, GREEN, BLUE, CLEAR ) の値を取得する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -477,7 +480,7 @@ err:
  * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
-GetData(
+GetRawData(
     void  ///< [in] ナシ
 ){
     EHalBool_t          ret = EN_FALSE;
@@ -529,6 +532,51 @@ err:
 
 
 /**************************************************************************//*!
+ * @brief     色温度を取得する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ *************************************************************************** */
+static double
+GetColorTemperature(
+    void  ///< [in] ナシ
+){
+    double X, Y, Z;      /* RGB to XYZ correlation      */
+    double xc, yc;       /* Chromaticity co-ordinates   */
+    double n;            /* McCamy's formula            */
+    double cct;
+
+    double r = g_dataRed.cur;
+    double g = g_dataGreen.cur;
+    double b = g_dataBlue.cur;
+
+    /* 1. Map RGB values to their XYZ counterparts.    */
+    /* Based on 6500K fluorescent, 3000K fluorescent   */
+    /* and 60W incandescent values for a wide range.   */
+    /* Note: Y = Illuminance or lux                    */
+    X = (-0.14282F * r) + (1.54924F * g) + (-0.95641F * b);
+    Y = (-0.32466F * r) + (1.57837F * g) + (-0.73191F * b);
+    Z = (-0.68202F * r) + (0.77073F * g) + ( 0.56332F * b);
+
+    /* 2. Calculate the chromaticity co-ordinates      */
+    xc = (X) / (X + Y + Z);
+    yc = (Y) / (X + Y + Z);
+
+    /* 3. Use McCamy's formula to determine the CCT    */
+    n = (xc - 0.3320F) / (0.1858F - yc);
+
+    /* Calculate the final CCT */
+//    cct = (449.0F * powf(n, 3)) + (3525.0F * powf(n, 2)) + (6823.3F * n) + 5520.33F;
+    cct = (449.0F * n * n * n) + (3525.0F * n * n) + (6823.3F * n) + 5520.33F;
+
+    /* Return the results in degrees Kelvin */
+    return cct;
+}
+
+
+/**************************************************************************//*!
  * @brief     センサ変数のアドレスを返す。
  * @attention なし。
  * @note      なし。
@@ -537,7 +585,7 @@ err:
  * @return    なし。
  *************************************************************************** */
 void
-HalSensorTCS34725_Get(
+HalSensorTCS34725_GetRawData(
     SHalSensor_t*       red,    ///< [in] RED
     SHalSensor_t*       green,  ///< [in] GREEN
     SHalSensor_t*       blue,   ///< [in] BLUE
@@ -551,7 +599,7 @@ HalSensorTCS34725_Get(
     HalCmnI2c_SetSlave( I2C_SLAVE_TCS34725 );
 
     Enable();
-    res = GetData();
+    res = GetRawData();
     if( res == EN_FALSE )
     {
         DBG_PRINT_ERROR( "fail to get data from i2c slave. \n\r" );
@@ -565,6 +613,41 @@ err:
     HalCmn_CopySenData( blue,  &g_dataBlue );
     HalCmn_CopySenData( c,     &g_dataClear );
     return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     色温度を返す。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+double
+HalSensorTCS34725_GetColorTemperature(
+    void  ///< [in] ナシ
+){
+    EHalBool_t    res = EN_FALSE;
+    double        cct = 0.0;
+
+    DBG_PRINT_TRACE( "\n\r" );
+
+    // I2C スレーブデバイスを TCS34725 に変える
+    HalCmnI2c_SetSlave( I2C_SLAVE_TCS34725 );
+
+    Enable();
+    res = GetRawData();
+    if( res == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to get data from i2c slave. \n\r" );
+        goto err;
+    }
+
+    cct = GetColorTemperature();
+err:
+    Disable();
+    return cct;
 }
 
 

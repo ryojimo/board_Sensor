@@ -265,7 +265,8 @@ SHalSensor_t*   HalSensorLPS25H_Get( EHalSensorLPS25H_t which );
 // SENSOR (I2C) TCS34725 API
 EHalBool_t      HalSensorTCS34725_Init( void );
 void            HalSensorTCS34725_Fini( void );
-void            HalSensorTCS34725_Get( SHalSensor_t* red, SHalSensor_t* green, SHalSensor_t* blue, SHalSensor_t* c );
+void            HalSensorTCS34725_GetRawData( SHalSensor_t* red, SHalSensor_t* green, SHalSensor_t* blue, SHalSensor_t* c );
+double          HalSensorTCS34725_GetColorTemperature( void );
 
 // SENSOR (I2C) TSL2561 API
 EHalBool_t      HalSensorTSL2561_Init( void );

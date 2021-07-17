@@ -55,7 +55,7 @@ extern int  optind, opterr, optopt;
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
 static void       Help( void );
-static void       GetData( EColor_t which );
+static void       GetRawData( EColor_t which );
 static void       GetJson( void );
 
 
@@ -86,6 +86,8 @@ Help(
     AppIfPc_Printf( "     -b, --blue  : get the value, Blue.                            \n\r" );
     AppIfPc_Printf( "     -c, --clear : get the value, Clear.                           \n\r" );
     AppIfPc_Printf( "                                                                   \n\r" );
+    AppIfPc_Printf( "     -t, --temp  : get the value, color temperature.               \n\r" );
+    AppIfPc_Printf( "                                                                   \n\r" );
     AppIfPc_Printf("\x1b[36m");
     AppIfPc_Printf( " Ex)                       \n\r" );
     AppIfPc_Printf( "     -n             -h     \n\r" );
@@ -101,7 +103,7 @@ Help(
 
 
 /**************************************************************************//*!
- * @brief     データを表示する。
+ * @brief     Raw データを表示する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
@@ -109,7 +111,7 @@ Help(
  * @return    なし。
  *************************************************************************** */
 static void
-GetData(
+GetRawData(
     EColor_t        which   ///< [in] 対象の色
 ){
     SHalSensor_t    dataR;  ///< センサデータの構造体
@@ -119,10 +121,10 @@ GetData(
 
     SHalSensor_t*   data;   ///< センサデータの構造体へのポインタ
 
-    DBG_PRINT_TRACE( "GetData() \n\r" );
+    DBG_PRINT_TRACE( "GetRawData() \n\r" );
 
     // センサデータを取得
-    HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+    HalSensorTCS34725_GetRawData( &dataR, &dataG, &dataB, &dataC );
 
     switch( which )
     {
@@ -144,6 +146,35 @@ GetData(
 
 
 /**************************************************************************//*!
+ * @brief     色温度を表示する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+GetColorTemperature(
+    void
+){
+    double          cct = 0.0;  ///< 色温度
+
+    DBG_PRINT_TRACE( "GetColorTemperature() \n\r" );
+
+    // センサデータを取得
+    cct = HalSensorTCS34725_GetColorTemperature();
+
+    // LCD 表示
+    AppIfLcd_CursorSet( 0, 1 );
+    AppIfLcd_Printf( "%5.2f", cct );
+
+    // PC ターミナル表示
+    AppIfPc_Printf( "%5.2f \n\r", cct );
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     JSON 形式でデータを表示する。
  * @attention なし。
  * @note      なし。
@@ -160,20 +191,24 @@ GetJson(
     SHalSensor_t    dataB;  ///< センサデータの構造体
     SHalSensor_t    dataC;  ///< センサデータの構造体
 
+    double          cct = 0.0;  ///< 色温度
+
     DBG_PRINT_TRACE( "GetJson() \n\r" );
 
     // センサデータを取得
-    HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+    HalSensorTCS34725_GetRawData( &dataR, &dataG, &dataB, &dataC );
+    cct =HalSensorTCS34725_GetColorTemperature();
 
     // LCD 表示
     AppIfLcd_CursorSet( 0, 1 );
 
     // PC ターミナル表示
-    AppIfPc_Printf( "{\"sensor\": \"si_tcs34725\", \"value\": {\"r\": %3.2f, \"g\": %3.2f, \"b\": %3.2f, \"c\": %3.2f}}",
+    AppIfPc_Printf( "{\"sensor\": \"si_tcs34725\", \"value\": {\"red\": %3.2f, \"green\": %3.2f, \"blue\": %3.2f, \"clear\": %3.2f, \"temp\": %3.2f}}",
                     dataR.cur,
                     dataG.cur,
                     dataB.cur,
-                    dataC.cur
+                    dataC.cur,
+                    cct
                    );
     AppIfPc_Printf( "\n\r" );
     return;
@@ -208,7 +243,7 @@ OptCmd_SiTcs34725Menu(
     while( EN_FALSE == AppIfBtn_IsEnter() )
     {
         // センサデータを取得
-        HalSensorTCS34725_Get( &dataR, &dataG, &dataB, &dataC );
+        HalSensorTCS34725_GetRawData( &dataR, &dataG, &dataB, &dataC );
 
         // LCD スクロール表示
         memset( buff, '\0', sizeof(buff) );
@@ -241,7 +276,7 @@ OptCmd_SiTcs34725(
     char            *argv[]
 ){
     int             opt = 0;
-    const char      optstring[] = "hjmrgbc";
+    const char      optstring[] = "hjmrgbct";
     int             longindex = 0;
     const struct    option longopts[] = {
       //{ *name,  has_arg,     *flag, val }, // 説明
@@ -252,6 +287,7 @@ OptCmd_SiTcs34725(
         { "green", no_argument, NULL,  'g' },
         { "blue",  no_argument, NULL,  'b' },
         { "clear", no_argument, NULL,  'c' },
+        { "temp",  no_argument, NULL,  't' },
         { 0,       0,           NULL,   0  }, // termination
     };
 
@@ -276,10 +312,11 @@ OptCmd_SiTcs34725(
         case 'h': Help(); break;
         case 'j': GetJson(); break;
         case 'm': OptCmd_SiTcs34725Menu(); break;
-        case 'r': GetData( EN_RED   ); break;
-        case 'g': GetData( EN_GREEN ); break;
-        case 'b': GetData( EN_BLUE  ); break;
-        case 'c': GetData( EN_CLEAR ); break;
+        case 'r': GetRawData( EN_RED   ); break;
+        case 'g': GetRawData( EN_GREEN ); break;
+        case 'b': GetRawData( EN_BLUE  ); break;
+        case 'c': GetRawData( EN_CLEAR ); break;
+        case 't': GetColorTemperature(); break;
         default: break;
         }
     }
